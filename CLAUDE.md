@@ -45,6 +45,10 @@ pnpm check-types
 pnpm test
 pnpm readme:package
 pnpm readme:package:check
+pnpm changeset
+pnpm version-packages
+git tag vX.Y.Z
+git push --follow-tags
 
 # 데모 앱
 pnpm --filter demo dev
@@ -56,6 +60,18 @@ pnpm test
 pnpm test:watch
 pnpm check-types
 ```
+
+## 릴리스 절차
+
+이 저장소는 패키지 단위 changeset 흐름을 기준으로 릴리스한다.
+
+1. 루트에서 `pnpm changeset`으로 변경 요약을 만든다.
+2. 릴리스 시점에 `pnpm version-packages`를 실행해 패키지 버전과 `packages/react-webcam/CHANGELOG.md`를 갱신한다.
+3. 결과를 커밋한다.
+4. `git tag vX.Y.Z`로 패키지 버전과 같은 태그를 만든다.
+5. `git push --follow-tags`로 커밋과 태그를 함께 올린다.
+
+GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-webcam/CHANGELOG.md`에서 해당 버전 섹션을 읽어 릴리스 노트를 만든다.
 
 ## 공개 API와 변경 시 주의점
 

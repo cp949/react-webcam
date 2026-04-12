@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.1
+
+### Patch Changes
+
+- Align release notes and package changelog handling with the package-level changeset workflow.
+
 ## 1.0.0
 
 ### Major Changes

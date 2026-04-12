@@ -18,25 +18,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Extract release notes from CHANGELOG
+      - name: Extract release notes from package changelog
         id: notes
         shell: bash
         run: |
           tag="${GITHUB_REF_NAME}"
           version="${tag#v}"
+          changelog_path="packages/react-webcam/CHANGELOG.md"
           notes_file="$(mktemp)"
 
           awk -v version="$version" '
             $0 ~ "^## " version "([[:space:]]|$)" { in_section=1; next }
             in_section && $0 ~ "^## " { exit }
             in_section { print }
-          ' CHANGELOG.md | sed '/./,$!d' > "$notes_file"
+          ' "$changelog_path" | sed '/./,$!d' > "$notes_file"
 
           if [ ! -s "$notes_file" ]; then
             {
               echo "Release ${tag}"
               echo
-              echo "No matching section was found in CHANGELOG.md."
+              echo "No matching section was found in ${changelog_path}."
             } > "$notes_file"
           fi
 

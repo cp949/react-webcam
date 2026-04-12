@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Default",
+  "compilerOptions": {
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "module": "node16",
+    "moduleResolution": "node16",
+    "types": ["node"],
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "composite": false,
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "inlineSources": false,
+    "isolatedModules": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "preserveWatchOutput": true,
+    "preserveSymlinks": false,
+    "skipLibCheck": true,
+    "strict": true
+  },
+  "include": ["src", "tsup.config.ts"],
+  "exclude": ["node_modules"]
+}

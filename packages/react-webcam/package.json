@@ -1,0 +1,77 @@
+{
+  "name": "@cp949/react-webcam",
+  "version": "1.0.0",
+  "description": "React 19 webcam component with controlled state, ref handle, and playback pause/resume",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup --clean",
+    "dev": "tsup --clean --watch",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "check-types": "tsc --pretty --noEmit && tsc --pretty --noEmit -p tsconfig.test.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepack": "pnpm build",
+    "publish:npm": "npm publish"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^24.9.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitest/ui": "^4.1.4",
+    "happy-dom": "^20.8.9",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "author": "jjfive",
+  "homepage": "https://github.com/cp949/react-webcam#readme",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cp949/react-webcam.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cp949/react-webcam/issues"
+  },
+  "keywords": [
+    "react",
+    "webcam",
+    "camera",
+    "getusermedia",
+    "mediadevices",
+    "video",
+    "typescript",
+    "react-component"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

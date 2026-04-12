@@ -1,6 +1,6 @@
 {
   "name": "@cp949/react-webcam",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "React 19 webcam component with controlled state, ref handle, and playback pause/resume",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

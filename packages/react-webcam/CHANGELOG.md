@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- Add localization guidance for built-in labels and polish the camera menu popup hover styling.
+
 ## 1.0.1
 
 ### Patch Changes

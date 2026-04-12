@@ -105,6 +105,7 @@ export function MenuPopup(props: MenuPopupProps) {
         backgroundColor: "#fff",
         boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
         borderRadius: 4,
+        overflow: "hidden",
         minWidth: 80,
       }}
     >

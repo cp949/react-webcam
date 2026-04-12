@@ -224,9 +224,17 @@ want English or app-specific strings.
 ```tsx
 <Webcam
   visibleFlipButton
+  visibleCameraDirectionButton
+  visibleAspectRatioButton
   visibleSnapshotButton
   labels={{
     flip: "Mirror",
+    cameraDirection: "Front / Rear Camera",
+    facingModeBack: "Rear",
+    facingModeFront: "Front",
+    facingModeDefault: "Default",
+    aspectRatio: "Aspect ratio",
+    aspectRatioAuto: "Auto",
     snapshot: "Take snapshot",
   }}
 />

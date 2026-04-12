@@ -16,6 +16,12 @@ export const DEMO_SECTIONS: DemoSection[] = [
     keywords: ['facingMode', 'aspectRatio', 'fitMode'],
   },
   {
+    id: 'labels',
+    title: 'Labels / Localization',
+    description: '내장 UI 문구 다국어 적용',
+    keywords: ['labels', 'facingModeFront', 'facingModeBack', 'cameraDirection'],
+  },
+  {
     id: 'controlled',
     title: 'Controlled State',
     description: 'controlled vs uncontrolled 비교',

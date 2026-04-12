@@ -2,7 +2,7 @@
   "name": "demo",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3100",
     "build": "next build",
     "start": "next start",
     "check-types": "next typegen && tsc --noEmit",

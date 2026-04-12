@@ -3,6 +3,7 @@
 export type DemoSectionId =
   | 'basic'
   | 'controls'
+  | 'labels'
   | 'controlled'
   | 'device-selection'
   | 'ref-handle'

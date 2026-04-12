@@ -44,6 +44,7 @@ The demo currently includes these sections:
 
 - `Basic Usage`
 - `Common Controls`
+- `Labels / Localization`
 - `Controlled State`
 - `Device Selection`
 - `Pause / Resume`

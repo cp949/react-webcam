@@ -218,9 +218,17 @@ const microphones = await listAudioInputDevices();
 ```tsx
 <Webcam
   visibleFlipButton
+  visibleCameraDirectionButton
+  visibleAspectRatioButton
   visibleSnapshotButton
   labels={{
     flip: "Mirror",
+    cameraDirection: "Front / Rear Camera",
+    facingModeBack: "Rear",
+    facingModeFront: "Front",
+    facingModeDefault: "Default",
+    aspectRatio: "Aspect Ratio",
+    aspectRatioAuto: "Auto",
     snapshot: "Take snapshot",
   }}
 />

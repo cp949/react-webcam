@@ -7,6 +7,7 @@ import { DEFAULT_SECTION_ID } from '../../lib/demo-sections';
 import type { DemoSectionId } from '../../lib/types';
 import BasicUsageSection from '../sections/BasicUsageSection';
 import CommonControlsSection from '../sections/CommonControlsSection';
+import LabelsLocalizationSection from '../sections/LabelsLocalizationSection';
 import ControlledStateSection from '../sections/ControlledStateSection';
 import DeviceSelectionSection from '../sections/DeviceSelectionSection';
 import RefHandleSection from '../sections/RefHandleSection';
@@ -26,6 +27,8 @@ function renderSection(section: DemoSectionId) {
       return <BasicUsageSection />;
     case 'controls':
       return <CommonControlsSection />;
+    case 'labels':
+      return <LabelsLocalizationSection />;
     case 'controlled':
       return <ControlledStateSection />;
     case 'device-selection':

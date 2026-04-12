@@ -43,6 +43,7 @@ pnpm --filter demo dev
 
 - `Basic Usage`
 - `Common Controls`
+- `Labels / Localization`
 - `Controlled State`
 - `Device Selection`
 - `Pause / Resume`

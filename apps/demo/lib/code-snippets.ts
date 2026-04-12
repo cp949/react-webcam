@@ -32,6 +32,46 @@ export default function ControlsExample() {
   );
 }`,
 
+  labels: `import { useState } from 'react';
+import { Webcam } from '@cp949/react-webcam';
+
+export default function LabelsExample() {
+  const [locale, setLocale] = useState<'ko' | 'en'>('ko');
+
+  const labels =
+    locale === 'ko'
+      ? {
+          flip: '미러',
+          snapshot: '스냅샷',
+          cameraDirection: '전면/후면 카메라',
+          facingModeBack: '후면',
+          facingModeFront: '전면',
+          facingModeDefault: '기본',
+          aspectRatio: '크기 비율',
+          aspectRatioAuto: '자동',
+        }
+      : {
+          flip: 'Mirror',
+          snapshot: 'Take snapshot',
+          cameraDirection: 'Front / Rear Camera',
+          facingModeBack: 'Rear',
+          facingModeFront: 'Front',
+          facingModeDefault: 'Default',
+          aspectRatio: 'Aspect ratio',
+          aspectRatioAuto: 'Auto',
+        };
+
+  return (
+    <Webcam
+      labels={labels}
+      visibleFlipButton
+      visibleSnapshotButton
+      visibleCameraDirectionButton
+      visibleAspectRatioButton
+    />
+  );
+}`,
+
   controlled: `import { useState } from 'react';
 import { Webcam } from '@cp949/react-webcam';
 

@@ -53,6 +53,11 @@ describe("package exports smoke test", () => {
 // ---------------------------------------------------------------------------
 
 describe("package metadata – peerDependencies and exports contract", () => {
+  it("prepare script exists so git and source installs can build dist", () => {
+    const pkg = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
+    expect(pkg.scripts?.prepare).toBeTruthy();
+  });
+
   it("react-dom is listed in peerDependencies", () => {
     const pkg = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
     const peerDeps = Object.keys(pkg.peerDependencies ?? {});

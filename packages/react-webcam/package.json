@@ -20,6 +20,7 @@
     "check-types": "tsc --pretty --noEmit && tsc --pretty --noEmit -p tsconfig.test.json",
     "test": "vitest run",
     "test:watch": "vitest",
+    "prepare": "pnpm build",
     "prepack": "pnpm build",
     "publish:npm": "npm publish"
   },

@@ -24,25 +24,25 @@ vi.mock("../src/hooks/useResizeObserver.js", () => ({
 // 공개 API surface와 내부·레거시 export 부재를 함께 확인한다.
 // ---------------------------------------------------------------------------
 
-describe("package exports smoke test", () => {
-  it("exports Webcam component", async () => {
+describe("패키지 export 스모크 테스트", () => {
+  it("Webcam 컴포넌트를 공개 export로 노출한다", async () => {
     const { Webcam: WebcamExport } = await import("../src/index.js");
     // forwardRef 컴포넌트는 typeof === 'object' 이므로 null 여부와 렌더 가능 여부를 확인한다.
     expect(WebcamExport).toBeTruthy();
     expect(typeof WebcamExport === "function" || typeof WebcamExport === "object").toBe(true);
   });
 
-  it("exports listMediaDevices as a public runtime helper", async () => {
+  it("listMediaDevices를 공개 런타임 헬퍼로 노출한다", async () => {
     const pkg = (await import("../src/index.js")) as Record<string, unknown>;
     expect(typeof pkg["listMediaDevices"]).toBe("function");
   });
 
-  it("exports listVideoInputDevices as a public runtime helper", async () => {
+  it("listVideoInputDevices를 공개 런타임 헬퍼로 노출한다", async () => {
     const pkg = (await import("../src/index.js")) as Record<string, unknown>;
     expect(typeof pkg["listVideoInputDevices"]).toBe("function");
   });
 
-  it("exports listAudioInputDevices as a public runtime helper", async () => {
+  it("listAudioInputDevices를 공개 런타임 헬퍼로 노출한다", async () => {
     const pkg = (await import("../src/index.js")) as Record<string, unknown>;
     expect(typeof pkg["listAudioInputDevices"]).toBe("function");
   });
@@ -52,25 +52,30 @@ describe("package exports smoke test", () => {
 // 패키지 메타데이터 — peerDependencies 및 exports 계약
 // ---------------------------------------------------------------------------
 
-describe("package metadata – peerDependencies and exports contract", () => {
-  it("prepare script exists so git and source installs can build dist", () => {
+describe("패키지 메타데이터 계약", () => {
+  it("git 설치와 소스 설치에서도 dist를 만들 수 있도록 prepare 스크립트가 존재한다", () => {
     const pkg = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
     expect(pkg.scripts?.prepare).toBeTruthy();
   });
 
-  it("react-dom is listed in peerDependencies", () => {
+  it("package.json files 목록에 llm.txt를 포함한다", () => {
+    const pkg = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
+    expect(pkg.files ?? []).toContain("llm.txt");
+  });
+
+  it("peerDependencies에 react-dom이 포함되어 있다", () => {
     const pkg = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
     const peerDeps = Object.keys(pkg.peerDependencies ?? {});
     expect(peerDeps).toContain("react-dom");
   });
 
-  it("react is listed in peerDependencies", () => {
+  it("peerDependencies에 react가 포함되어 있다", () => {
     const pkg = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
     const peerDeps = Object.keys(pkg.peerDependencies ?? {});
     expect(peerDeps).toContain("react");
   });
 
-  it('exports["."] has types, require, and import keys', () => {
+  it('exports["."]에는 types, require, import 키가 모두 있다', () => {
     const pkg = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
     const rootExport = pkg.exports?.["."] ?? {};
     expect(Object.keys(rootExport)).toContain("types");
@@ -83,8 +88,8 @@ describe("package metadata – peerDependencies and exports contract", () => {
 // 공개 타입 export 계약 — 소비자가 import할 수 있는 타입이 모두 존재하는지 확인
 // ---------------------------------------------------------------------------
 
-describe("public type exports contract", () => {
-  it("exports WebcamHandle type from index", async () => {
+describe("공개 타입 export 계약", () => {
+  it("index에서 WebcamHandle 타입을 함께 공개한다", async () => {
     // WebcamHandle은 ref 타입이므로 런타임에서는 직접 값으로 확인할 수 없다.
     // Webcam 컴포넌트가 export되면 같은 모듈에서 타입도 export된다고 볼 수 있다.
     // 런타임에서는 named export 목록에 Webcam이 있는지만 확인한다.
@@ -92,7 +97,7 @@ describe("public type exports contract", () => {
     expect(mod).toHaveProperty("Webcam");
   });
 
-  it("exports WebcamProps type (verified via Webcam component export)", async () => {
+  it("Webcam 컴포넌트 export를 통해 WebcamProps 타입 공개 계약을 유지한다", async () => {
     // WebcamProps는 타입 전용 export이므로 런타임 값은 없다.
     // index.ts에서 re-export되는지는 타입 검사에서 확인된다.
     // 여기서는 index 모듈이 정상적으로 로드되는지만 확인한다.
@@ -100,28 +105,28 @@ describe("public type exports contract", () => {
     expect(mod).toBeTruthy();
   });
 
-  it("WebcamOptions type is exported (verified via module load)", async () => {
+  it("모듈 로드가 가능하므로 WebcamOptions 타입 공개 계약도 유지한다", async () => {
     // WebcamOptions는 타입 전용 export — 런타임에 값이 없으므로 모듈 로드로 확인한다.
     const mod = await import("../src/index.js");
     expect(mod).toBeTruthy();
   });
 
-  it("WebcamDetail type is exported (verified via module load)", async () => {
+  it("모듈 로드가 가능하므로 WebcamDetail 타입 공개 계약도 유지한다", async () => {
     const mod = await import("../src/index.js");
     expect(mod).toBeTruthy();
   });
 
-  it("WebcamPhase type is exported (verified via module load)", async () => {
+  it("모듈 로드가 가능하므로 WebcamPhase 타입 공개 계약도 유지한다", async () => {
     const mod = await import("../src/index.js");
     expect(mod).toBeTruthy();
   });
 
-  it("WebcamErrorCode type is exported (verified via module load)", async () => {
+  it("모듈 로드가 가능하므로 WebcamErrorCode 타입 공개 계약도 유지한다", async () => {
     const mod = await import("../src/index.js");
     expect(mod).toBeTruthy();
   });
 
-  it("index exports exactly the expected named runtime values (Webcam only)", async () => {
+  it("index는 예상한 런타임 named export만 노출한다", async () => {
     // 타입 전용 export는 런타임에 값을 남기지 않는다.
     // 런타임 값으로 export되는 것은 Webcam 컴포넌트와 공개 helper뿐이어야 한다.
     const mod = (await import("../src/index.js")) as Record<string, unknown>;
@@ -133,7 +138,7 @@ describe("public type exports contract", () => {
   });
 });
 
-describe("public device listing helpers", () => {
+describe("공개 디바이스 조회 헬퍼", () => {
   const originalMediaDevices = navigator.mediaDevices;
 
   afterEach(() => {
@@ -149,7 +154,7 @@ describe("public device listing helpers", () => {
     });
   });
 
-  it("listMediaDevices returns the full enumerateDevices result", async () => {
+  it("listMediaDevices는 enumerateDevices 결과 전체를 그대로 반환한다", async () => {
     const devices = [
       { deviceId: "cam-1", kind: "videoinput", label: "Front Camera", groupId: "g1" },
       { deviceId: "mic-1", kind: "audioinput", label: "Mic", groupId: "g1" },
@@ -164,7 +169,7 @@ describe("public device listing helpers", () => {
     await expect(listMediaDevices()).resolves.toEqual(devices);
   });
 
-  it("listVideoInputDevices returns only videoinput devices", async () => {
+  it("listVideoInputDevices는 videoinput 장치만 반환한다", async () => {
     const devices = [
       { deviceId: "cam-1", kind: "videoinput", label: "Front Camera", groupId: "g1" },
       { deviceId: "mic-1", kind: "audioinput", label: "Mic", groupId: "g1" },
@@ -179,7 +184,7 @@ describe("public device listing helpers", () => {
     await expect(listVideoInputDevices()).resolves.toEqual([devices[0]]);
   });
 
-  it("listAudioInputDevices returns only audioinput devices", async () => {
+  it("listAudioInputDevices는 audioinput 장치만 반환한다", async () => {
     const devices = [
       { deviceId: "cam-1", kind: "videoinput", label: "Front Camera", groupId: "g1" },
       { deviceId: "mic-1", kind: "audioinput", label: "Mic", groupId: "g1" },

@@ -1,0 +1,255 @@
+# @cp949/react-webcam llm.txt
+
+## Overview
+- Package: @cp949/react-webcam
+- Version: 1.0.2
+- Description: React 19 webcam component with controlled state, ref handle, and playback pause/resume
+- Public surface: a React webcam component, ref handle, device helpers, and webcam state types.
+- Key API symbols: Webcam, WebcamHandle, WebcamDetail, WebcamOptions, WebcamProps, WebcamPhase, WebcamErrorCode, SnapshotOptions, listMediaDevices, listVideoInputDevices, listAudioInputDevices.
+
+## Imports
+
+Import from the package root only. Avoid deep imports into `dist/` or internal scripts.
+
+```ts
+import { Webcam, listMediaDevices, listVideoInputDevices, listAudioInputDevices } from "@cp949/react-webcam";
+```
+
+```ts
+import type { WebcamErrorCode, WebcamDetail, WebcamOptions, WebcamProps, SnapshotOptions, WebcamHandle, WebcamPhase } from "@cp949/react-webcam";
+```
+
+## Key APIs
+
+### `WebcamErrorCode`
+```ts
+type WebcamErrorCode = "permission-denied" | "device-not-found" | "device-in-use" | "constraints-unsatisfied" | "unsupported-browser" | "insecure-context" | "aborted" | "track-ended" | "unknown";
+```
+
+### `WebcamDetail`
+```ts
+type WebcamDetail =
+  | ({
+      videoSize?: {
+        width: number;
+        height: number;
+      };
+      phase: "idle";
+    })
+  | ({
+      videoSize?: {
+        width: number;
+        height: number;
+      };
+      phase: "requesting";
+      constraints: MediaStreamConstraints;
+    })
+  | ({
+      videoSize?: {
+        width: number;
+        height: number;
+      };
+      phase: "live";
+      mediaStream: MediaStream;
+      constraints: MediaStreamConstraints;
+    })
+  | ({
+      videoSize?: {
+        width: number;
+        height: number;
+      };
+      phase: "playback-error";
+      mediaStream: MediaStream;
+      constraints: MediaStreamConstraints;
+      error: Error;
+    })
+  | ({
+      videoSize?: {
+        width: number;
+        height: number;
+      };
+      phase: "denied" | "unavailable" | "unsupported" | "insecure" | "error";
+      errorCode: WebcamErrorCode;
+      error: Error;
+      constraints: MediaStreamConstraints;
+    });
+```
+
+### `WebcamOptions`
+```ts
+type WebcamOptions = {
+    audioEnabled?: boolean;
+    size?: {
+        width?: number;
+        height?: number;
+    } | "element-size";
+    aspectRatio?: number;
+    deviceId?: string;
+    facingMode?: "user" | "environment";
+    deviceSelectionStrategy?: "ideal" | "exact";
+    frameRate?: number;
+    maxFrameRate?: number;
+};
+```
+
+### `WebcamProps`
+```ts
+interface WebcamProps {
+    style?: React.CSSProperties;
+    className?: string;
+    disabled?: boolean;
+    disabledFallback?: React.ReactNode;
+    onStateChange?: (state: WebcamDetail) => void;
+    fitMode?: "unset" | "fill" | "cover" | "contain";
+    flipped?: boolean;
+    onFlippedChange?: (value: boolean) => void;
+    defaultFlipped?: boolean;
+    webcamOptions?: WebcamOptions;
+    onWebcamOptionsChange?: (options: WebcamOptions) => void;
+    defaultWebcamOptions?: WebcamOptions;
+    visibleFlipButton?: boolean;
+    visibleCameraDirectionButton?: boolean;
+    visibleAspectRatioButton?: boolean;
+    visibleSnapshotButton?: boolean;
+    visibleVideoSizeDebug?: boolean;
+    visibleConstraintsDebug?: boolean;
+    labels?: {
+        snapshot?: string;
+        flip?: string;
+        cameraDirection?: string;
+        facingModeBack?: string;
+        facingModeFront?: string;
+        facingModeDefault?: string;
+        aspectRatio?: string;
+        aspectRatioAuto?: string;
+    };
+    children?: React.ReactNode;
+}
+```
+
+### `SnapshotOptions`
+```ts
+type SnapshotOptions = {
+    imageSmoothEnabled?: boolean;
+    canvas?: HTMLCanvasElement;
+    sizeConstraints?: {
+        maxWidth: number;
+    } | {
+        maxHeight: number;
+    };
+};
+```
+
+### `WebcamHandle`
+```ts
+type WebcamHandle = {
+    snapshotToCanvas: (options?: SnapshotOptions) => HTMLCanvasElement | null;
+    getPlayingVideoDeviceId: () => string | undefined;
+    getPlayingAudioDeviceId: () => string | undefined;
+    setFlipped: (value: boolean | ((prev: boolean) => boolean)) => void;
+    setWebcamOptions: (updater: WebcamOptions | undefined | ((prev: WebcamOptions) => WebcamOptions)) => void;
+    pausePlayback: () => void;
+    resumePlayback: () => void;
+};
+```
+
+### `Webcam`
+```ts
+declare const Webcam: React.ForwardRefExoticComponent<WebcamProps & React.RefAttributes<WebcamHandle>>;
+```
+
+### `WebcamPhase`
+```ts
+type WebcamPhase = "idle" | "requesting" | "live" | "playback-error" | "denied" | "unavailable" | "unsupported" | "insecure" | "error";
+```
+
+### `listMediaDevices`
+```ts
+declare function listMediaDevices(): Promise<MediaDeviceInfo[]>;
+```
+
+### `listVideoInputDevices`
+```ts
+declare function listVideoInputDevices(): Promise<MediaDeviceInfo[]>;
+```
+
+### `listAudioInputDevices`
+```ts
+declare function listAudioInputDevices(): Promise<MediaDeviceInfo[]>;
+```
+
+## State Model
+- `WebcamPhase` values come from the bundled declaration: `idle`, `requesting`, `live`, `playback-error`, `denied`, `unavailable`, `unsupported`, `insecure`, `error`.
+- `WebcamErrorCode` values come from the bundled declaration: `permission-denied`, `device-not-found`, `device-in-use`, `constraints-unsatisfied`, `unsupported-browser`, `insecure-context`, `aborted`, `track-ended`, `unknown`.
+- `track-ended` means the media track stopped and the consumer should restart the stream instead of treating it like a permission failure.
+
+## Usage Rules
+- Use disabled as a stream-request gate: the webcam stays mounted, but it must not request camera access yet.
+- snapshotToCanvas() may return null before the webcam is ready, so always null-check before using the canvas.
+- When you need a specific camera, pair deviceId with deviceSelectionStrategy="exact"; use "ideal" when you only want a preference.
+- Autoplay or playback failures should surface as playback-error; resumePlayback() may still fail under autoplay policy and should be treated as a best-effort retry.
+- Track-ended guidance should tell consumers to listen for track-ended and restart the stream when the camera stops.
+- Controlled-mode guidance should explain that webcamOptions plus onWebcamOptionsChange is the fully controlled path, while defaultWebcamOptions is for uncontrolled ownership.
+- pausePlayback() pauses only playback, does not stop the camera hardware, and does not emit onStateChange by itself.
+
+## Constraints
+- React 19 webcam component with controlled state, ref handle, and playback pause/resume
+- This package is browser-only and depends on WebRTC and media-device APIs.
+- Camera access requires a secure context such as HTTPS or localhost.
+- Playback can fail under autoplay policy, surfacing `playback-error` even when the stream is still alive.
+- `pausePlayback()` pauses only the video element; it does not stop the camera hardware or any `MediaStreamTrack`.
+- Avoid anti-patterns like assuming playback-error means permission denial or calling pausePlayback() to stop hardware.
+
+## Anti-Patterns
+- Do not assume `playback-error` means permission denial.
+- Do not call `pausePlayback()` to stop the camera hardware.
+- Do not treat `webcamOptions` as controlled without `onWebcamOptionsChange`.
+- Do not rely on `snapshotToCanvas()` before the webcam is ready.
+- Do not expect `pausePlayback()` to emit `onStateChange`.
+
+## Examples
+
+```tsx
+import { Webcam } from "@cp949/react-webcam";
+
+export function CameraView() {
+  return <Webcam visibleSnapshotButton webcamOptions={{ aspectRatio: 16 / 9 }} />;
+}
+```
+
+```tsx
+import { Webcam, type WebcamDetail } from "@cp949/react-webcam";
+
+function handleStateChange(detail: WebcamDetail) {
+  if (detail.phase === "playback-error") {
+    console.warn(detail.error);
+  }
+}
+
+export function CameraStatus() {
+  return <Webcam disabled={false} onStateChange={handleStateChange} />;
+}
+```
+
+```tsx
+import { useRef } from "react";
+import { Webcam, type WebcamHandle } from "@cp949/react-webcam";
+
+export function SnapshotViaRef() {
+  const webcamRef = useRef<WebcamHandle>(null);
+
+  function handleSnapshot() {
+    const canvas = webcamRef.current?.snapshotToCanvas();
+    if (!canvas) return;
+
+    console.log(canvas.toDataURL());
+  }
+
+  return (
+    <>
+      <Webcam ref={webcamRef} />
+      <button type="button" onClick={handleSnapshot}>Take snapshot</button>
+    </>
+  );
+}
+```

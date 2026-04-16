@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+### Minor Changes
+
+- d8ab064: Add `disabled` and `disabledFallback` support to `Webcam`, including the built-in disabled placeholder UI.
+
 ## 1.0.2
 
 ### Patch Changes

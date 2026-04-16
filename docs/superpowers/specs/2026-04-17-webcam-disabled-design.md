@@ -71,6 +71,12 @@ Recommended visual treatment:
 - centered camera icon
 - subtle framing treatment so it feels intentional rather than empty
 
+Chosen default direction:
+
+- use the `Soft Gradient` background direction
+- use the standard camera icon rather than a quieter outline variant
+- keep the composition text-free and centered
+
 The placeholder should preserve the component box and continue to work with the current layout behavior, aspect-ratio handling, and overlays.
 
 ## Implementation Plan

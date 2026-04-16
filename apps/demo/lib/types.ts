@@ -11,7 +11,8 @@ export type DemoSectionId =
   | 'disabled-state'
   | 'disabled-fallback'
   | 'recipes'
-  | 'pause-resume';
+  | 'pause-resume'
+  | 'visual-debug';
 
 export interface DemoSection {
   id: DemoSectionId;

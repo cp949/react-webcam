@@ -16,19 +16,72 @@ export default function BasicExample() {
 
   controls: `import { useState } from 'react';
 import { Webcam } from '@cp949/react-webcam';
-import type { WebcamOptions } from '@cp949/react-webcam';
+import type { WebcamOptions, WebcamProps } from '@cp949/react-webcam';
 
 export default function ControlsExample() {
   const [options, setOptions] = useState<WebcamOptions>({
     facingMode: 'user',
     aspectRatio: 4 / 3,
   });
+  const [fitMode, setFitMode] = useState<WebcamProps['fitMode']>('cover');
+  const [defaultPreset, setDefaultPreset] = useState<'portrait' | 'square'>('portrait');
+  const [defaultDemoKey, setDefaultDemoKey] = useState(0);
+  const [lockedFacingMode, setLockedFacingMode] = useState<'user' | 'environment'>('user');
+
+  const defaultWebcamOptions =
+    defaultPreset === 'portrait'
+      ? { aspectRatio: 3 / 4, facingMode: 'environment' }
+      : { aspectRatio: 1, facingMode: 'user' };
 
   return (
-    <Webcam
-      webcamOptions={options}
-      onWebcamOptionsChange={setOptions}
-    />
+    <>
+      <Webcam
+        webcamOptions={options}
+        onWebcamOptionsChange={setOptions}
+      />
+
+      {/* aspectRatio 없이 fitMode만 보여주는 전용 예제 */}
+      <div>
+        <button onClick={() => setFitMode('cover')}>cover</button>
+        <button onClick={() => setFitMode('contain')}>contain</button>
+        <button onClick={() => setFitMode('fill')}>fill</button>
+        <button onClick={() => setFitMode('unset')}>unset</button>
+        <Webcam
+          webcamOptions={{ facingMode: options.facingMode }}
+          fitMode={fitMode}
+          style={{ width: '100%', height: 320 }}
+        />
+      </div>
+
+      <div>
+        <button onClick={() => setDefaultPreset('portrait')}>세로 3:4</button>
+        <button onClick={() => setDefaultPreset('square')}>정사각형 1:1</button>
+        <button onClick={() => setDefaultDemoKey((prev) => prev + 1)}>
+          기본값 다시 적용
+        </button>
+        <Webcam
+          key={defaultDemoKey}
+          defaultWebcamOptions={defaultWebcamOptions}
+          visibleAspectRatioButton
+          visibleCameraDirectionButton
+        />
+      </div>
+
+      <div>
+        <button
+          onClick={() =>
+            setLockedFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'))
+          }
+        >
+          부모에서 facingMode 변경
+        </button>
+        <Webcam
+          webcamOptions={{ facingMode: lockedFacingMode, aspectRatio: 16 / 9 }}
+          visibleCameraDirectionButton
+          visibleAspectRatioButton
+        />
+      </div>
+    </>
   );
 }`,
 
@@ -90,6 +143,20 @@ function ControlledExample() {
 // Uncontrolled: 컴포넌트 내부가 상태를 소유
 function UncontrolledExample() {
   return <Webcam defaultFlipped={false} visibleFlipButton />;
+}
+
+// Read-only controlled: 부모가 값은 주지만 변경 콜백은 생략
+function ReadonlyControlledExample() {
+  const [flipped, setFlipped] = useState(true);
+
+  return (
+    <>
+      <Webcam flipped={flipped} visibleFlipButton />
+      <button onClick={() => setFlipped((value) => !value)}>
+        부모에서만 토글
+      </button>
+    </>
+  );
 }`,
 
   'device-selection': `import { useEffect, useMemo, useState } from 'react';
@@ -327,6 +394,40 @@ export default function PauseResumeExample() {
       <button onClick={handleResume}>Resume playback</button>
       <button onClick={handleSnapshot}>Snapshot</button>
       {snapshotUrl && <img src={snapshotUrl} alt="snapshot preview" />}
+    </>
+  );
+}`,
+
+  'visual-debug': `import { Webcam } from '@cp949/react-webcam';
+
+const styles = \`
+  .demo-visual-debug-webcam {
+    border: 3px solid rgba(25, 118, 210, 0.65);
+    box-shadow: 0 0 0 6px rgba(25, 118, 210, 0.12);
+  }
+\`;
+
+export default function VisualDebugExample() {
+  return (
+    <>
+      <style>{styles}</style>
+      <Webcam
+        className="demo-visual-debug-webcam"
+        visibleVideoSizeDebug
+        visibleConstraintsDebug
+        webcamOptions={{ aspectRatio: 16 / 9, facingMode: 'user' }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            top: 12,
+            left: 12,
+            zIndex: 2,
+          }}
+        >
+          Overlay badge child
+        </div>
+      </Webcam>
     </>
   );
 }`,

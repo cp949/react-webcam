@@ -21,6 +21,7 @@ const section = DEMO_SECTIONS.find((s) => s.id === 'controlled')!;
 /** 부모가 상태를 소유하는 Controlled 패턴과 컴포넌트가 자체 관리하는 Uncontrolled 패턴을 비교하는 섹션 */
 export default function ControlledStateSection() {
   const [flipped, setFlipped] = useState(false);
+  const [readonlyFlipped, setReadonlyFlipped] = useState(true);
 
   return (
     <Box>
@@ -52,10 +53,14 @@ export default function ControlledStateSection() {
                 <Typography variant="body2" gutterBottom sx={{ fontWeight: 600 }}>
                   Controlled
                 </Typography>
-                <Typography variant="body2">
-                  부모가 상태를 소유합니다. <code>flipped</code> + <code>onFlippedChange</code>를
-                  함께 전달해야 합니다. 버튼 클릭 시 <code>onFlippedChange</code>가 호출되어 부모
+                <Typography variant="body2" gutterBottom>
+                  일반적인 controlled 패턴은 <code>flipped</code>와 <code>onFlippedChange</code>를
+                  함께 전달하는 방식입니다. 버튼 클릭 시 <code>onFlippedChange</code>가 호출되어 부모
                   state를 갱신합니다.
+                </Typography>
+                <Typography variant="body2">
+                  콜백을 생략하면 읽기 전용 controlled로도 쓸 수 있지만, 내부 토글은 부모가 반영해줘야
+                  바뀝니다.
                 </Typography>
               </Alert>
             </Stack>
@@ -92,6 +97,29 @@ export default function ControlledStateSection() {
             onClick={() => setFlipped((v) => !v)}
           >
             flipped 토글 (부모에서)
+          </Button>
+        </ExampleCard>
+
+        <ExampleCard title="읽기 전용 controlled 예제">
+          <Webcam
+            flipped={readonlyFlipped}
+            visibleFlipButton
+            style={{ maxWidth: '100%', borderRadius: 8 }}
+          />
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            현재 flipped 상태: {String(readonlyFlipped)}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            <code>flipped</code>만 전달하고 <code>onFlippedChange</code>를 생략하면 내부 토글은 반영되지
+            않고, 부모가 바꿔줄 때만 화면이 갱신됩니다.
+          </Typography>
+          <Button
+            variant="outlined"
+            size="small"
+            sx={{ mt: 1 }}
+            onClick={() => setReadonlyFlipped((value) => !value)}
+          >
+            flipped 토글 (부모에서만)
           </Button>
         </ExampleCard>
 

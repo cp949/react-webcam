@@ -14,3 +14,8 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
+
+.demo-visual-debug-webcam {
+  border: 3px solid rgba(25, 118, 210, 0.65);
+  box-shadow: 0 0 0 6px rgba(25, 118, 210, 0.12);
+}

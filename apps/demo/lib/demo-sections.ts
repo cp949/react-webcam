@@ -13,7 +13,7 @@ export const DEMO_SECTIONS: DemoSection[] = [
     id: 'controls',
     title: 'Common Controls',
     description: '자주 쓰는 옵션 실시간 조작',
-    keywords: ['facingMode', 'aspectRatio', 'fitMode'],
+    keywords: ['facingMode', 'aspectRatio', 'fitMode', 'defaultWebcamOptions'],
   },
   {
     id: 'labels',
@@ -68,6 +68,12 @@ export const DEMO_SECTIONS: DemoSection[] = [
     title: 'Pause / Resume',
     description: 'playback-only 명령형 API 시연',
     keywords: ['pausePlayback', 'resumePlayback', 'WebcamHandle', 'playback-error'],
+  },
+  {
+    id: 'visual-debug',
+    title: 'Visual / Debug Props',
+    description: 'children, className, debug UI 확인',
+    keywords: ['children', 'className', 'visibleVideoSizeDebug', 'visibleConstraintsDebug'],
   },
 ];
 

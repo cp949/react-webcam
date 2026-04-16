@@ -16,6 +16,7 @@ import DisabledStateSection from '../sections/DisabledStateSection';
 import DisabledFallbackSection from '../sections/DisabledFallbackSection';
 import RecipesSection from '../sections/RecipesSection';
 import PauseResumeSection from '../sections/PauseResumeSection';
+import VisualDebugPropsSection from '../sections/VisualDebugPropsSection';
 import DemoHeader from './DemoHeader';
 import DemoSidebar from './DemoSidebar';
 
@@ -47,6 +48,8 @@ function renderSection(section: DemoSectionId) {
       return <RecipesSection />;
     case 'pause-resume':
       return <PauseResumeSection />;
+    case 'visual-debug':
+      return <VisualDebugPropsSection />;
     default:
       return (
         <Box sx={{ p: 4 }}>

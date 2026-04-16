@@ -65,11 +65,40 @@ pnpm check-types
 
 이 저장소는 패키지 단위 changeset 흐름을 기준으로 릴리스한다.
 
-1. 루트에서 `pnpm changeset`으로 변경 요약을 만든다.
-2. 릴리스 시점에 `pnpm version-packages`를 실행해 패키지 버전과 `packages/react-webcam/CHANGELOG.md`를 갱신한다.
-3. 결과를 커밋한다.
-4. `git tag vX.Y.Z`로 패키지 버전과 같은 태그를 만든다.
-5. `git push --follow-tags`로 커밋과 태그를 함께 올린다.
+1. 기능 작업을 마친 뒤 루트에서 아래 검증을 모두 통과시킨다.
+   - `pnpm test`
+   - `pnpm check-types`
+   - `pnpm lint`
+   - 필요하면 `pnpm readme:package:check`
+2. 아직 릴리스 메모가 없다면 루트에서 `pnpm changeset`으로 변경 요약을 만든다.
+   - 공개 API 추가는 보통 `minor`
+   - 회귀 수정, 데모 보강, 내부 안정화는 보통 `patch`
+3. 릴리스 시점에 `pnpm version-packages`를 실행해 패키지 버전과 `packages/react-webcam/CHANGELOG.md`를 갱신한다.
+4. 버전 반영 결과를 별도 커밋으로 남긴다.
+   - 예: `chore: release v1.1.1`
+5. 패키지 버전과 같은 Git 태그를 만든다.
+   - 형식은 반드시 `vX.Y.Z`
+   - 예: `git tag -a v1.1.1 -m "v1.1.1"`
+   - `@cp949/...` 형식의 package-scoped 태그는 사용하지 않는다.
+6. 원격에 커밋과 태그를 푸시한다.
+   - `git push origin main`
+   - `git push origin vX.Y.Z`
+7. GitHub에서 `vX.Y.Z` 태그가 올라왔는지 확인하고, 필요하면 npm 배포 절차를 이어서 진행한다.
+
+빠른 체크리스트:
+
+```bash
+pnpm test
+pnpm check-types
+pnpm lint
+pnpm changeset
+pnpm version-packages
+git add .
+git commit -m "chore: release vX.Y.Z"
+git tag -a vX.Y.Z -m "vX.Y.Z"
+git push origin main
+git push origin vX.Y.Z
+```
 
 GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-webcam/CHANGELOG.md`에서 해당 버전 섹션을 읽어 릴리스 노트를 만든다.
 

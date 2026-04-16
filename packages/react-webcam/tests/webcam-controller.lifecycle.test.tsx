@@ -25,7 +25,7 @@ vi.mock("../src/hooks/useResizeObserver.js", () => ({
 // useWebcamController 스트림 생명주기
 // ---------------------------------------------------------------------------
 
-describe("useWebcamController – stream lifecycle", () => {
+describe("useWebcamController 스트림 생명주기", () => {
   let fakeStream: MediaStream;
   let getUserMediaMock: ReturnType<typeof vi.fn>;
   let stopSpy: ReturnType<typeof vi.spyOn>;
@@ -37,7 +37,7 @@ describe("useWebcamController – stream lifecycle", () => {
     stopSpy = vi.spyOn(BrowserMediaDevices, "stopStream");
   });
 
-  it("requests stream when videoElement and constraints are both ready", async () => {
+  it("videoElement와 constraints가 모두 준비되면 스트림을 요청한다", async () => {
     const { result } = renderHook(() => useWebcamController());
 
     const videoEl = document.createElement("video");
@@ -54,7 +54,25 @@ describe("useWebcamController – stream lifecycle", () => {
     expect(result.current.mediaStreamResult.mediaStream).toBe(fakeStream);
   });
 
-  it("stops previous stream and requests new one when webcamOptions change", async () => {
+  it("disabled=true이면 videoElement와 constraints가 준비돼도 스트림을 요청하지 않는다", async () => {
+    const { result } = renderHook(() => useWebcamController({ disabled: true }));
+
+    const videoEl = document.createElement("video");
+    act(() => {
+      result.current.setVideoElement(videoEl);
+      result.current.setWebcamOptions({ audioEnabled: false });
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(getUserMediaMock).not.toHaveBeenCalled();
+    expect(result.current.webcamDetail.phase).toBe("idle");
+    expect(result.current.mediaStreamResult).toEqual({});
+  });
+
+  it("webcamOptions가 바뀌면 이전 스트림을 정리하고 새 스트림을 요청한다", async () => {
     const fakeStream1 = createFakeMediaStream();
     const fakeStream2 = createFakeMediaStream();
     const mock = vi.fn().mockResolvedValueOnce(fakeStream1).mockResolvedValueOnce(fakeStream2);
@@ -92,7 +110,37 @@ describe("useWebcamController – stream lifecycle", () => {
     expect(result.current.mediaStreamResult.mediaStream).toBe(fakeStream2);
   });
 
-  it("stops active stream when hook unmounts", async () => {
+  it("disabled=true로 다시 렌더링하면 활성 스트림을 정리하고 idle로 돌아간다", async () => {
+    const { result, rerender } = renderHook(
+      ({ disabled }) => useWebcamController({ disabled }),
+      { initialProps: { disabled: false } },
+    );
+
+    const videoEl = document.createElement("video");
+    act(() => {
+      result.current.setVideoElement(videoEl);
+      result.current.setWebcamOptions({ audioEnabled: false });
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(result.current.webcamDetail.phase).toBe("live");
+    expect(result.current.mediaStreamResult.mediaStream).toBe(fakeStream);
+
+    rerender({ disabled: true });
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(stopSpy).toHaveBeenCalledWith(fakeStream);
+    expect(result.current.webcamDetail.phase).toBe("idle");
+    expect(result.current.mediaStreamResult).toEqual({});
+  });
+
+  it("훅이 언마운트되면 활성 스트림을 정리한다", async () => {
     const { result, unmount } = renderHook(() => useWebcamController());
 
     const videoEl = document.createElement("video");
@@ -112,7 +160,7 @@ describe("useWebcamController – stream lifecycle", () => {
     expect(stopSpy).toHaveBeenCalledWith(fakeStream);
   });
 
-  it("does not publish stale stream when request is superseded", async () => {
+  it("더 새로운 요청이 생기면 이전 stale 스트림을 publish하지 않는다", async () => {
     let resolveFirst!: (s: MediaStream) => void;
     const staleStream = createFakeMediaStream();
     const freshStream = createFakeMediaStream();
@@ -171,7 +219,7 @@ describe("useWebcamController – stream lifecycle", () => {
     expect(stopSpy).toHaveBeenCalledWith(staleStream);
   });
 
-  it("returns to idle when pending request is abandoned because video element is removed", async () => {
+  it("비디오 요소가 제거되어 대기 중인 요청이 버려지면 idle로 돌아간다", async () => {
     let resolveRequest!: (stream: MediaStream) => void;
     const lateStream = createFakeMediaStream();
 
@@ -227,12 +275,12 @@ describe("useWebcamController – stream lifecycle", () => {
 // 스트림 재시작 상태 전이 순서
 // ---------------------------------------------------------------------------
 
-describe("stream restart state transitions", () => {
+describe("스트림 재시작 상태 전이", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
 
-  it("does not emit idle during restart when facingMode changes", async () => {
+  it("facingMode가 바뀌어 재시작할 때 중간에 idle을 내보내지 않는다", async () => {
     const stream1 = createFakeMediaStream();
     const stream2 = createFakeMediaStream();
     const getUserMediaMock = vi.fn().mockResolvedValueOnce(stream1).mockResolvedValueOnce(stream2);
@@ -293,12 +341,12 @@ describe("stream restart state transitions", () => {
 // 트랙 생명주기 회귀 테스트
 // ---------------------------------------------------------------------------
 
-describe("track lifecycle", () => {
+describe("비디오 트랙 생명주기", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
 
-  it("track ended event transitions state away from live", async () => {
+  it("track ended 이벤트가 발생하면 상태가 live를 벗어난다", async () => {
     const fakeStream = createFakeMediaStream();
     mockGetUserMedia(fakeStream);
 
@@ -333,7 +381,7 @@ describe("track lifecycle", () => {
 // 오디오 트랙 생명주기
 // ---------------------------------------------------------------------------
 
-describe("audio track lifecycle", () => {
+describe("오디오 트랙 생명주기", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -494,12 +542,12 @@ describe("pause 상태에서의 생명주기 경계", () => {
 // 장치 전환 생명주기
 // ---------------------------------------------------------------------------
 
-describe("device switch lifecycle", () => {
+describe("장치 전환 생명주기", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
 
-  it("webcamOptions deviceId 변경 시 이전 stream이 정리된다", async () => {
+  it("webcamOptions의 deviceId가 바뀌면 이전 스트림을 정리한다", async () => {
     const stream1 = createFakeMediaStream();
     const stream2 = createFakeMediaStream();
     const getUserMediaMock = vi.fn().mockResolvedValueOnce(stream1).mockResolvedValueOnce(stream2);
@@ -538,7 +586,7 @@ describe("device switch lifecycle", () => {
     expect(result.current.mediaStreamResult.mediaStream).toBe(stream2);
   });
 
-  it("deviceId cam-a → cam-b → cam-a rapid switch 시 stale 요청이 늦게 resolve되어도 마지막 요청만 publish된다", async () => {
+  it("deviceId를 cam-a → cam-b → cam-a로 빠르게 바꿔도 마지막 요청만 publish된다", async () => {
     let resolveFirst!: (s: MediaStream) => void;
     let resolveSecond!: (s: MediaStream) => void;
 

@@ -36,7 +36,7 @@ function getVideoElement(container: HTMLElement): HTMLVideoElement | null {
 // 스트림 요청, prop 전달, flipped·fitMode 반영, cleanup을 확인한다.
 // ---------------------------------------------------------------------------
 
-describe("Webcam", () => {
+describe("Webcam 공개 계약", () => {
   let fakeStream: MediaStream;
   let getUserMediaMock: ReturnType<typeof vi.fn>;
   let stopSpy: ReturnType<typeof vi.spyOn>;
@@ -48,7 +48,7 @@ describe("Webcam", () => {
     stopSpy = vi.spyOn(BrowserMediaDevices, "stopStream");
   });
 
-  it("requests a media stream when video and computed constraints are ready", async () => {
+  it("비디오 요소와 계산된 제약 조건이 준비되면 미디어 스트림을 요청한다", async () => {
     render(<Webcam webcamOptions={{ audioEnabled: false }} />);
 
     await advanceToStreamLoad();
@@ -57,7 +57,7 @@ describe("Webcam", () => {
     expect(getUserMediaMock).toHaveBeenCalledWith(expect.objectContaining({ audio: false }));
   });
 
-  it("calls onStateChange with live state on success", async () => {
+  it("스트림 연결에 성공하면 onStateChange에 live 상태를 전달한다", async () => {
     const onStateChange = vi.fn();
 
     render(<Webcam webcamOptions={{ audioEnabled: false }} onStateChange={onStateChange} />);
@@ -69,7 +69,7 @@ describe("Webcam", () => {
     expect(liveCalls[0][0]).toMatchObject({ phase: "live", mediaStream: fakeStream });
   });
 
-  it("applies flipped style — flipped=true sets scaleX(-1)", async () => {
+  it("flipped=true이면 비디오에 좌우 반전 스타일을 적용한다", async () => {
     const { container } = render(<Webcam webcamOptions={{ audioEnabled: false }} flipped />);
 
     await act(async () => {
@@ -80,7 +80,7 @@ describe("Webcam", () => {
     expect(video.style.transform).toBe("scaleX(-1)");
   });
 
-  it("applies flipped style — rerender updates transform when flipped prop changes", async () => {
+  it("flipped prop이 바뀌면 다시 렌더링할 때 transform도 함께 갱신한다", async () => {
     const { container, rerender } = render(
       <Webcam webcamOptions={{ audioEnabled: false }} flipped={false} />,
     );
@@ -100,7 +100,7 @@ describe("Webcam", () => {
     expect(getVideoElement(container)!.style.transform).toBe("scaleX(-1)");
   });
 
-  it("applies fitMode as object-fit on the video element", async () => {
+  it("fitMode를 비디오 요소의 object-fit 스타일에 반영한다", async () => {
     const { container } = render(
       <Webcam webcamOptions={{ audioEnabled: false }} fitMode='cover' />,
     );
@@ -113,7 +113,7 @@ describe("Webcam", () => {
     expect(video.style.objectFit).toBe("cover");
   });
 
-  it("rebuilds the media stream when webcamOptions meaningfully change", async () => {
+  it("webcamOptions가 의미 있게 바뀌면 미디어 스트림을 다시 구성한다", async () => {
     const { rerender } = render(
       <Webcam webcamOptions={{ audioEnabled: false, facingMode: "user" }} />,
     );
@@ -127,7 +127,112 @@ describe("Webcam", () => {
     expect(getUserMediaMock).toHaveBeenCalledTimes(2);
   });
 
-  it("cleans up the media stream on unmount", async () => {
+  it("disabled=true로 마운트되면 미디어 스트림을 요청하지 않는다", async () => {
+    render(<Webcam disabled webcamOptions={{ audioEnabled: false }} />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(getUserMediaMock).not.toHaveBeenCalled();
+  });
+
+  it("disabled=true일 때만 disabledFallback을 렌더링한다", async () => {
+    const { rerender, queryByTestId } = render(
+      <Webcam
+        disabled
+        disabledFallback={<div data-testid='disabled-fallback'>Camera is disabled</div>}
+        webcamOptions={{ audioEnabled: false }}
+      />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(queryByTestId("disabled-fallback")).not.toBeNull();
+    expect(getUserMediaMock).not.toHaveBeenCalled();
+
+    rerender(
+      <Webcam
+        disabled={false}
+        disabledFallback={<div data-testid='disabled-fallback'>Camera is disabled</div>}
+        webcamOptions={{ audioEnabled: false }}
+      />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(queryByTestId("disabled-fallback")).toBeNull();
+    expect(getUserMediaMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("disabled=true이고 custom fallback이 없으면 기본 비활성 placeholder를 렌더링한다", async () => {
+    const { queryByTestId } = render(<Webcam disabled webcamOptions={{ audioEnabled: false }} />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(queryByTestId("webcam-disabled-placeholder")).not.toBeNull();
+    expect(getUserMediaMock).not.toHaveBeenCalled();
+  });
+
+  it("disabled가 false로 바뀌면 기본 비활성 placeholder를 제거한다", async () => {
+    const { queryByTestId, rerender } = render(
+      <Webcam disabled webcamOptions={{ audioEnabled: false }} />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(queryByTestId("webcam-disabled-placeholder")).not.toBeNull();
+
+    rerender(<Webcam disabled={false} webcamOptions={{ audioEnabled: false }} />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(queryByTestId("webcam-disabled-placeholder")).toBeNull();
+    expect(getUserMediaMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("custom disabledFallback이 있으면 기본 placeholder 대신 그것만 렌더링한다", async () => {
+    const { queryByTestId } = render(
+      <Webcam
+        disabled
+        disabledFallback={<div data-testid='disabled-fallback'>Camera is disabled</div>}
+        webcamOptions={{ audioEnabled: false }}
+      />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(queryByTestId("disabled-fallback")).not.toBeNull();
+    expect(queryByTestId("webcam-disabled-placeholder")).toBeNull();
+    expect(getUserMediaMock).not.toHaveBeenCalled();
+  });
+
+  it("disabledFallback={null}도 기본 placeholder를 명시적으로 대체한 것으로 본다", async () => {
+    const { queryByTestId } = render(
+      <Webcam disabled disabledFallback={null} webcamOptions={{ audioEnabled: false }} />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(queryByTestId("webcam-disabled-placeholder")).toBeNull();
+    expect(getUserMediaMock).not.toHaveBeenCalled();
+  });
+
+  it("언마운트할 때 미디어 스트림을 정리한다", async () => {
     const { unmount } = render(<Webcam webcamOptions={{ audioEnabled: false }} />);
 
     await advanceToStreamLoad();
@@ -143,24 +248,24 @@ describe("Webcam", () => {
 // className, style, 버튼 노출과 상호작용을 확인한다.
 // ---------------------------------------------------------------------------
 
-describe("Webcam – framework-agnostic public surface", () => {
+describe("Webcam 프레임워크 독립 공개 표면", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockGetUserMedia(createFakeMediaStream());
   });
 
-  it("renders a video element (root renders at all)", () => {
+  it("루트가 렌더링되면 비디오 요소도 함께 렌더링한다", () => {
     const { container } = render(<Webcam />);
     expect(container.querySelector("video")).not.toBeNull();
   });
 
-  it("className is forwarded to the root element", () => {
+  it("className을 루트 요소에 전달한다", () => {
     const { container } = render(<Webcam className='my-custom-class' />);
     const root = container.firstElementChild as HTMLElement;
     expect(root.classList.contains("my-custom-class")).toBe(true);
   });
 
-  it("style is forwarded to the root element as inline style", () => {
+  it("style을 루트 요소의 인라인 스타일로 전달한다", () => {
     const { container } = render(
       <Webcam style={{ backgroundColor: "rgb(255, 0, 0)", borderRadius: "8px" }} />,
     );
@@ -169,7 +274,7 @@ describe("Webcam – framework-agnostic public surface", () => {
     expect(root.style.borderRadius).toBe("8px");
   });
 
-  it("FlipButton renders when visibleFlipButton=true and webcam is loaded", async () => {
+  it("visibleFlipButton=true이고 웹캠이 로드되면 FlipButton을 렌더링한다", async () => {
     render(<Webcam webcamOptions={{ audioEnabled: false }} visibleFlipButton />);
 
     await act(async () => {
@@ -184,7 +289,7 @@ describe("Webcam – framework-agnostic public surface", () => {
     expect(flipBtn).not.toBeNull();
   });
 
-  it("FlipButton click toggles flipped state (button is interactive)", async () => {
+  it("FlipButton을 클릭하면 flipped 상태가 토글된다", async () => {
     const ref = { current: null as WebcamHandle | null };
     const { container } = render(
       <Webcam ref={ref} webcamOptions={{ audioEnabled: false }} visibleFlipButton />,
@@ -211,7 +316,7 @@ describe("Webcam – framework-agnostic public surface", () => {
     expect(container.querySelector("video")!.style.transform).toBe("scaleX(-1)");
   });
 
-  it("FacingModeButton renders when visibleCameraDirectionButton=true and webcam is loaded", async () => {
+  it("visibleCameraDirectionButton=true이고 웹캠이 로드되면 FacingModeButton을 렌더링한다", async () => {
     render(<Webcam webcamOptions={{ audioEnabled: false }} visibleCameraDirectionButton />);
 
     await act(async () => {
@@ -225,7 +330,7 @@ describe("Webcam – framework-agnostic public surface", () => {
     expect(facingBtn).not.toBeNull();
   });
 
-  it("FacingModeButton opens a dropdown when clicked", async () => {
+  it("FacingModeButton을 클릭하면 드롭다운이 열린다", async () => {
     render(<Webcam webcamOptions={{ audioEnabled: false }} visibleCameraDirectionButton />);
 
     await act(async () => {
@@ -247,7 +352,7 @@ describe("Webcam – framework-agnostic public surface", () => {
     expect(menu).not.toBeNull();
   });
 
-  it("FacingModeButton menu item click calls onChange with correct facingMode", async () => {
+  it("FacingModeButton 메뉴 항목을 클릭하면 올바른 facingMode로 onChange를 호출한다", async () => {
     const onChange = vi.fn();
     render(<FacingModeButton onChange={onChange} />);
 
@@ -275,7 +380,7 @@ describe("Webcam – framework-agnostic public surface", () => {
     expect(onChange).toHaveBeenCalledWith("user");
   });
 
-  it('FacingModeButton "기본" resets deviceId so browser default selection can resume', async () => {
+  it('FacingModeButton의 "기본" 항목은 브라우저 기본 선택으로 돌아가도록 deviceId를 초기화한다', async () => {
     const ref = createRef<WebcamHandle>();
     const onWebcamOptionsChange = vi.fn();
 
@@ -321,7 +426,7 @@ describe("Webcam – framework-agnostic public surface", () => {
     );
   });
 
-  it("AspectRatioButton menu item click calls onChange with correct aspectRatio", async () => {
+  it("AspectRatioButton 메뉴 항목을 클릭하면 올바른 aspectRatio로 onChange를 호출한다", async () => {
     const onChange = vi.fn();
     render(<AspectRatioButton onChange={onChange} />);
 
@@ -353,7 +458,7 @@ describe("Webcam – framework-agnostic public surface", () => {
     );
   });
 
-  it("AspectRatioButton renders when visibleAspectRatioButton=true and webcam is loaded", async () => {
+  it("visibleAspectRatioButton=true이고 웹캠이 로드되면 AspectRatioButton을 렌더링한다", async () => {
     render(<Webcam webcamOptions={{ audioEnabled: false }} visibleAspectRatioButton />);
 
     await act(async () => {
@@ -367,7 +472,7 @@ describe("Webcam – framework-agnostic public surface", () => {
     expect(arBtn).not.toBeNull();
   });
 
-  it("AspectRatioButton opens a dropdown when clicked", async () => {
+  it("AspectRatioButton을 클릭하면 드롭다운이 열린다", async () => {
     render(<Webcam webcamOptions={{ audioEnabled: false }} visibleAspectRatioButton />);
 
     await act(async () => {
@@ -390,7 +495,7 @@ describe("Webcam – framework-agnostic public surface", () => {
     expect(menu).not.toBeNull();
   });
 
-  it("SnapshotButton renders when visibleSnapshotButton=true and webcam is loaded", async () => {
+  it("visibleSnapshotButton=true이고 웹캠이 로드되면 SnapshotButton을 렌더링한다", async () => {
     render(<Webcam webcamOptions={{ audioEnabled: false }} visibleSnapshotButton />);
 
     await act(async () => {
@@ -444,13 +549,13 @@ describe("Webcam – framework-agnostic public surface", () => {
 // 버튼 UI 없이도 핵심 웹캠 기능이 동작해야 한다.
 // ---------------------------------------------------------------------------
 
-describe("core webcam works without button UI", () => {
+describe("버튼 UI 없이도 동작하는 핵심 웹캠 기능", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockGetUserMedia(createFakeMediaStream());
   });
 
-  it("Webcam renders and requests stream with no button props set", async () => {
+  it("버튼 관련 prop이 없어도 Webcam은 렌더링되고 스트림을 요청한다", async () => {
     const onStateChange = vi.fn();
     render(<Webcam webcamOptions={{ audioEnabled: false }} onStateChange={onStateChange} />);
 
@@ -465,7 +570,7 @@ describe("core webcam works without button UI", () => {
     expect(document.querySelector(".SnapshotButton-root")).toBeNull();
   });
 
-  it("download-image.ts does not exist in the source tree", () => {
+  it("소스 트리에 download-image.ts 파일이 없어야 한다", () => {
     const filePath = new URL("../src/utils/download-image.ts", import.meta.url);
     expect(existsSync(filePath)).toBe(false);
   });
@@ -476,7 +581,7 @@ describe("core webcam works without button UI", () => {
 // flipped과 webcamOptions prop의 제어/비제어 경계를 검증한다.
 // ---------------------------------------------------------------------------
 
-describe("Webcam – controlled/uncontrolled state ownership", () => {
+describe("Webcam 제어 및 비제어 상태 소유권", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     mockGetUserMedia(createFakeMediaStream());
@@ -486,7 +591,7 @@ describe("Webcam – controlled/uncontrolled state ownership", () => {
   // flipped 제어/비제어 계약
   // -------------------------------------------------------------------------
 
-  it("flipped (controlled, no onFlippedChange) — FlipButton click does NOT change transform", async () => {
+  it("flipped만 제어되고 onFlippedChange가 없으면 FlipButton 클릭으로 transform이 바뀌지 않는다", async () => {
     // read-only controlled: prop이 있지만 onChange가 없으므로 버튼 클릭이 무시돼야 한다.
     const { container } = render(
       <Webcam webcamOptions={{ audioEnabled: false }} flipped={false} visibleFlipButton />,
@@ -513,7 +618,7 @@ describe("Webcam – controlled/uncontrolled state ownership", () => {
     expect(container.querySelector("video")!.style.transform).toBe("none");
   });
 
-  it("flipped + onFlippedChange (fully controlled) — FlipButton click calls onFlippedChange, not state", async () => {
+  it("flipped와 onFlippedChange를 함께 제어하면 FlipButton 클릭 시 상태 대신 onFlippedChange만 호출한다", async () => {
     // 완전 controlled: 클릭 시 onFlippedChange 콜백만 호출돼야 하고 직접 상태를 변경하면 안 된다.
     const onFlippedChange = vi.fn();
     const { container } = render(
@@ -548,7 +653,7 @@ describe("Webcam – controlled/uncontrolled state ownership", () => {
     expect(container.querySelector("video")!.style.transform).toBe("none");
   });
 
-  it("defaultFlipped (uncontrolled) — FlipButton click DOES change transform", async () => {
+  it("defaultFlipped만 쓰는 비제어 모드에서는 FlipButton 클릭으로 transform이 바뀐다", async () => {
     // 비제어 모드: flipped prop 없이 defaultFlipped만 사용 시 내부 상태가 변경돼야 한다.
     const { container } = render(
       <Webcam webcamOptions={{ audioEnabled: false }} defaultFlipped={false} visibleFlipButton />,
@@ -575,7 +680,7 @@ describe("Webcam – controlled/uncontrolled state ownership", () => {
     expect(container.querySelector("video")!.style.transform).toBe("scaleX(-1)");
   });
 
-  it("flipped + defaultFlipped both provided — controlled (flipped) wins", async () => {
+  it("flipped와 defaultFlipped를 함께 주면 제어 prop인 flipped가 우선한다", async () => {
     // 제어 prop이 비제어 초기값보다 우선해야 한다.
     const { container } = render(
       <Webcam webcamOptions={{ audioEnabled: false }} flipped={true} defaultFlipped={false} />,
@@ -594,7 +699,7 @@ describe("Webcam – controlled/uncontrolled state ownership", () => {
   // webcamOptions 제어/비제어 계약
   // -------------------------------------------------------------------------
 
-  it("webcamOptions (controlled, no onWebcamOptionsChange) — ref setWebcamOptions is ignored", async () => {
+  it("제어된 webcamOptions에 onWebcamOptionsChange가 없으면 ref setWebcamOptions 호출을 무시한다", async () => {
     // read-only controlled: ref handle을 통한 setWebcamOptions 호출이 무시돼야 한다.
     const ref = createRef<WebcamHandle>();
     const fakeStream = createFakeMediaStream();
@@ -616,7 +721,7 @@ describe("Webcam – controlled/uncontrolled state ownership", () => {
     expect(getUserMediaMock.mock.calls.length).toBe(callCountBefore);
   });
 
-  it("defaultWebcamOptions (uncontrolled) — ref setWebcamOptions DOES update options", async () => {
+  it("defaultWebcamOptions를 쓰는 비제어 모드에서는 ref setWebcamOptions로 옵션을 바꿀 수 있다", async () => {
     // 비제어 모드: defaultWebcamOptions 사용 시 ref를 통한 갱신이 적용돼야 한다.
     const ref = createRef<WebcamHandle>();
     const onStateChange = vi.fn();
@@ -650,7 +755,7 @@ describe("Webcam – controlled/uncontrolled state ownership", () => {
 // WebcamHandle ref 공개 surface 계약
 // ---------------------------------------------------------------------------
 
-describe("WebcamHandle ref", () => {
+describe("WebcamHandle ref 공개 표면", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -687,7 +792,7 @@ describe("WebcamHandle ref", () => {
 // WebcamHandle – pausePlayback / resumePlayback ref 기반 호출 계약
 // ---------------------------------------------------------------------------
 
-describe("WebcamHandle – pausePlayback / resumePlayback", () => {
+describe("WebcamHandle pausePlayback 및 resumePlayback", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });

@@ -10,12 +10,13 @@ import { useDeepCompareEffect } from "./hooks/useDeepCompareEffect.js";
 import { useResizeObserver } from "./hooks/useResizeObserver.js";
 import { useTimeoutValue } from "./hooks/useTimeoutValue.js";
 import { useWebcamController } from "./hooks/useWebcamController.js";
+import { CameraIcon } from "./icons/CameraIcon.js";
 import type { SnapshotOptions } from "./types/webcam-controller.js";
 import { DEFAULT_WEBCAM_LABELS, type WebcamLabels } from "./types/webcam-labels.js";
 import type { WebcamDetail, WebcamOptions } from "./webcam-types.js";
 
 /**
- * `Webcam` ref handle exposed through the React 19 `ref` prop.
+ * React 19 `ref` prop으로 노출하는 `Webcam` 제어 핸들이다.
  *
  * @example
  * ```tsx
@@ -25,110 +26,117 @@ import type { WebcamDetail, WebcamOptions } from "./webcam-types.js";
  * ```
  */
 export type WebcamHandle = {
-  /** Captures the current frame to a canvas, or returns `null` before ready. */
+  /** 현재 프레임을 캔버스로 캡처한다. 아직 준비 전이면 `null`을 반환한다. */
   snapshotToCanvas: (options?: SnapshotOptions) => HTMLCanvasElement | null;
-  /** Device ID of the currently playing video track. */
+
+  /** 현재 재생 중인 비디오 트랙의 장치 ID다. */
   getPlayingVideoDeviceId: () => string | undefined;
-  /** Device ID of the currently playing audio track. */
+
+  /** 현재 재생 중인 오디오 트랙의 장치 ID다. */
   getPlayingAudioDeviceId: () => string | undefined;
-  /** Sets the mirror state or derives the next value from the previous one. */
+
+  /** 좌우 반전 상태를 설정하거나 이전 값에서 다음 값을 계산한다. */
   setFlipped: (value: boolean | ((prev: boolean) => boolean)) => void;
-  /** Replaces the webcam options or derives them from the previous value. */
+
+  /** 웹캠 옵션을 교체하거나 이전 값에서 다음 값을 계산한다. */
   setWebcamOptions: (
     updater: WebcamOptions | undefined | ((prev: WebcamOptions) => WebcamOptions),
   ) => void;
+
   /**
-   * Pauses the current video element.
+   * 현재 비디오 요소의 재생을 일시 정지한다.
    *
-   * - Calls `video.pause()` only; it does not stop any `MediaStreamTrack`.
-   * - The camera stream stays alive, so `track-ended` detection still works.
-   * - This is a no-op when no video element is attached.
-   * - It does not change `WebcamPhase` or `WebcamDetail`, so
-   *   `onStateChange` is not emitted.
+   * - `video.pause()`만 호출하고 `MediaStreamTrack`은 중지하지 않는다.
+   * - 카메라 스트림은 살아 있으므로 `track-ended` 감지는 계속 동작한다.
+   * - 비디오 요소가 없으면 아무 동작도 하지 않는다.
+   * - `WebcamPhase`나 `WebcamDetail`을 바꾸지 않으므로
+   *   `onStateChange`도 발생시키지 않는다.
    */
   pausePlayback: () => void;
+
   /**
-   * Resumes playback on a paused video element.
+   * 일시 정지된 비디오 요소의 재생을 다시 시작한다.
    *
-   * - Calls `video.play()`; it does not restart any `MediaStreamTrack`.
-   * - This is a no-op when the video element or stream is missing.
-   * - If `play()` fails, the existing `playback-error` flow is used.
-   * - Browsers can still block it under autoplay policy without a user gesture.
+   * - `video.play()`를 호출하며 `MediaStreamTrack`을 다시 시작하지는 않는다.
+   * - 비디오 요소나 스트림이 없으면 아무 동작도 하지 않는다.
+   * - `play()`가 실패하면 기존 `playback-error` 흐름을 사용한다.
+   * - 사용자 제스처가 없으면 브라우저 autoplay 정책에 막힐 수 있다.
    */
   resumePlayback: () => void;
 };
 
+/** `Webcam` 컴포넌트가 노출하는 공개 props다. */
 export interface WebcamProps {
   style?: React.CSSProperties;
 
   className?: string;
 
-  /**
-   * Called whenever the published webcam detail changes.
-   */
+  /** true이면 카메라 요청을 시작하지 않고 비활성 상태로 유지한다. */
+  disabled?: boolean;
+
+  /** disabled일 때 기본 UI 대신 렌더링할 커스텀 fallback이다. */
+  disabledFallback?: React.ReactNode;
+
+  /** 외부에 공개된 webcam detail이 바뀔 때마다 호출한다. */
   onStateChange?: (state: WebcamDetail) => void;
 
   /**
-   * Controls how the video is fitted when its natural size differs from the
-   * parent box. Only used when `aspectRatio` is not set.
+   * 비디오의 원본 크기와 부모 박스 크기가 다를 때 맞춤 방식을 제어한다.
+   * `aspectRatio`가 없을 때만 사용한다.
    */
   fitMode?: "unset" | "fill" | "cover" | "contain";
 
   /**
-   * Controlled mirror state.
-   * Without `onFlippedChange`, this becomes read-only controlled state.
+   * 제어형 좌우 반전 상태다.
+   * `onFlippedChange`가 없으면 읽기 전용 제어 상태가 된다.
    */
   flipped?: boolean;
 
-  /**
-   * Called when mirror changes are requested in controlled mode.
-   */
+  /** 제어 모드에서 좌우 반전 변경이 요청될 때 호출한다. */
   onFlippedChange?: (value: boolean) => void;
 
   /**
-   * Initial mirror state for uncontrolled usage.
-   * Applied once on mount and ignored when `flipped` is provided.
+   * 비제어 모드에서 쓸 초기 좌우 반전 상태다.
+   * 마운트 시 한 번만 적용되며 `flipped`가 있으면 무시한다.
    */
   defaultFlipped?: boolean;
 
   /**
-   * Controlled webcam options.
-   * Without `onWebcamOptionsChange`, this becomes read-only controlled state.
+   * 제어형 웹캠 옵션이다.
+   * `onWebcamOptionsChange`가 없으면 읽기 전용 제어 상태가 된다.
    */
   webcamOptions?: WebcamOptions;
 
-  /**
-   * Called when webcam option changes are requested in controlled mode.
-   */
+  /** 제어 모드에서 웹캠 옵션 변경이 요청될 때 호출한다. */
   onWebcamOptionsChange?: (options: WebcamOptions) => void;
 
   /**
-   * Initial webcam options for uncontrolled usage.
-   * Applied once on mount and ignored when `webcamOptions` is provided.
+   * 비제어 모드에서 쓸 초기 웹캠 옵션이다.
+   * 마운트 시 한 번만 적용되며 `webcamOptions`가 있으면 무시한다.
    */
   defaultWebcamOptions?: WebcamOptions;
 
-  /** Shows the mirror toggle button. Defaults to `false`. */
+  /** 좌우 반전 토글 버튼 표시 여부다. 기본값은 `false`다. */
   visibleFlipButton?: boolean;
 
-  /** Shows the camera direction button. Defaults to `false`. */
+  /** 카메라 방향 버튼 표시 여부다. 기본값은 `false`다. */
   visibleCameraDirectionButton?: boolean;
 
-  /** Shows the aspect ratio button. Defaults to `false`. */
+  /** 화면 비율 버튼 표시 여부다. 기본값은 `false`다. */
   visibleAspectRatioButton?: boolean;
 
-  /** Shows the snapshot button. Defaults to `false`. */
+  /** 스냅샷 버튼 표시 여부다. 기본값은 `false`다. */
   visibleSnapshotButton?: boolean;
 
-  /** Shows the video-size debug UI. Defaults to `false`. */
+  /** 비디오 크기 디버그 UI 표시 여부다. 기본값은 `false`다. */
   visibleVideoSizeDebug?: boolean;
 
-  /** Shows the media-constraints debug UI. Defaults to `false`. */
+  /** 미디어 제약 조건 디버그 UI 표시 여부다. 기본값은 `false`다. */
   visibleConstraintsDebug?: boolean;
 
   /**
-   * Optional built-in UI label overrides.
-   * Any missing field falls back to the default Korean label set.
+   * 내장 UI 라벨을 부분적으로 덮어쓸 때 사용한다.
+   * 빠진 필드는 기본 한국어 라벨을 사용한다.
    */
   labels?: WebcamLabels;
 
@@ -141,11 +149,10 @@ const SIZE_ZERO = {
 };
 
 /**
- * Main webcam component.
- * Layout changes depending on `aspectRatio`, and built-in control buttons can
- * be enabled as needed.
+ * 웹캠 화면과 내장 제어 UI를 함께 제공하는 메인 컴포넌트다.
+ * `aspectRatio`에 따라 레이아웃이 달라지며 필요한 버튼만 선택적으로 켤 수 있다.
  *
- * Use the `ref` prop to access the imperative `WebcamHandle`.
+ * 명령형 제어가 필요하면 `ref` prop으로 `WebcamHandle`에 접근한다.
  *
  * @example
  * ```tsx
@@ -170,6 +177,8 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     style,
     className,
     children,
+    disabled = false,
+    disabledFallback,
     visibleFlipButton = false,
     visibleCameraDirectionButton = false,
     visibleAspectRatioButton = false,
@@ -182,7 +191,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   const labels: Required<WebcamLabels> = { ...DEFAULT_WEBCAM_LABELS, ...props.labels };
 
   // ---- 컨트롤러 ----------------------------------------------------------
-  const ctrl = useWebcamController();
+  const ctrl = useWebcamController({ disabled });
   const {
     flipped,
     webcamOptions,
@@ -196,11 +205,11 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     setWebcamOptions,
   } = ctrl;
 
-  // ---- controlled / uncontrolled 모드 판별 --------------------------------
+  // ---- 제어 및 비제어 모드 판별 -------------------------------------------
   const isFlipControlled = props.flipped !== undefined;
   const isWebcamOptionsControlled = props.webcamOptions !== undefined;
 
-  // ---- imperative handle -------------------------------------------------
+  // ---- 명령형 핸들 구성 ---------------------------------------------------
   // 외부에 공개하는 메서드만 명시적으로 조립한다.
   // controlled 모드에서 setFlipped/setWebcamOptions는 onXxxChange 콜백만 호출한다.
   useImperativeHandle(
@@ -225,9 +234,9 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             if (newValue !== undefined) {
               props.onWebcamOptionsChange(newValue);
             }
-            // If newValue is undefined, ignore (same as no-op in controlled mode)
+            // 제어 모드에서는 undefined 업데이트를 무시한다.
           }
-          // else: no onWebcamOptionsChange, ignore
+          // onWebcamOptionsChange가 없으면 읽기 전용 제어 상태로 취급한다.
         } else {
           ctrl.setWebcamOptions(updater);
         }
@@ -252,7 +261,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     onStateChangeRef.current?.(webcamDetail);
   }, [webcamDetail]);
 
-  // fitMode는 항상 동기화한다.
+  // fitMode는 제어 및 비제어 여부와 관계없이 항상 동기화한다.
   useEffect(() => {
     setFitMode(props.fitMode);
   }, [setFitMode, props.fitMode]);
@@ -266,13 +275,13 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setFlipped, props.flipped, isFlipControlled]);
 
-  // mount-time only: defaultFlipped 초기화 (uncontrolled 모드)
+  // 비제어 모드의 defaultFlipped는 마운트 시 한 번만 초기화한다.
   useEffect(() => {
     if (!isFlipControlled && props.defaultFlipped !== undefined) {
       setFlipped(props.defaultFlipped);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // intentionally empty — mount only
+  }, []); // 의도적으로 비워 두고 마운트 시 한 번만 실행한다.
 
   // webcamOptions: controlled 모드에서는 prop 값을 deep compare로 동기화하고,
   // uncontrolled 모드에서는 마운트 시 defaultWebcamOptions로 초기화한다.
@@ -282,13 +291,13 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     }
   }, [setWebcamOptions, props.webcamOptions, isWebcamOptionsControlled]);
 
-  // mount-time only: defaultWebcamOptions 초기화 (uncontrolled 모드)
+  // 비제어 모드의 defaultWebcamOptions는 마운트 시 한 번만 초기화한다.
   useEffect(() => {
     if (!isWebcamOptionsControlled && props.defaultWebcamOptions !== undefined) {
       setWebcamOptions(props.defaultWebcamOptions);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // intentionally empty — mount only
+  }, []); // 의도적으로 비워 두고 마운트 시 한 번만 실행한다.
 
   // ---- 루트 요소 크기 (aspect-ratio 레이아웃 기준) ----------------------
   // ResizeObserver가 초기화되기 전 rootWidth는 0이므로, 0인 동안 video 요소를 숨긴다.
@@ -311,6 +320,8 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   // ---- 버튼 UI 가시성 ---------------------------------------------------
   const hasOptionButtons =
     visibleFlipButton || visibleCameraDirectionButton || visibleAspectRatioButton;
+  const hasDisabledFallbackProp = Object.prototype.hasOwnProperty.call(props, "disabledFallback");
+  const showDefaultDisabledPlaceholder = disabled && !hasDisabledFallbackProp;
 
   return (
     <div
@@ -350,6 +361,42 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             backgroundColor: "#1e1e1e",
           }}
         />
+      )}
+
+      {disabled && hasDisabledFallbackProp ? disabledFallback : null}
+
+      {showDefaultDisabledPlaceholder && (
+        <div
+          data-testid='webcam-disabled-placeholder'
+          aria-label='webcam disabled placeholder'
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+            background:
+              "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.12), transparent 38%), linear-gradient(135deg, rgba(92, 123, 250, 0.28), rgba(84, 212, 190, 0.16) 52%, rgba(12, 16, 24, 0.78))",
+          }}
+        >
+          <div
+            style={{
+              width: 76,
+              height: 76,
+              borderRadius: "999px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "rgba(255,255,255,0.1)",
+              boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
+              color: "rgba(255,255,255,0.92)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <CameraIcon size={34} />
+          </div>
+        </div>
       )}
 
       {/* ---- 버튼 UI ------------------------------------------------------- */}
@@ -399,7 +446,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
                   if (props.onWebcamOptionsChange) {
                     props.onWebcamOptionsChange(updater(ctrl.webcamOptions));
                   }
-                  // else: ignored (read-only controlled)
+                  // 읽기 전용 제어 상태에서는 내부 변경을 무시한다.
                 } else {
                   setWebcamOptions(updater);
                 }
@@ -421,7 +468,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
                   if (props.onWebcamOptionsChange) {
                     props.onWebcamOptionsChange(updater(ctrl.webcamOptions));
                   }
-                  // else: ignored (read-only controlled)
+                  // 읽기 전용 제어 상태에서는 내부 변경을 무시한다.
                 } else {
                   setWebcamOptions(updater);
                 }
@@ -450,7 +497,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
         />
       )}
 
-      {/* ---- children ------------------------------------------------------ */}
+      {/* ---- 사용자 자식 요소 ---------------------------------------------- */}
       {children}
 
       {/* ---- 스냅샷 미리보기 ----------------------------------------------- */}

@@ -7,11 +7,11 @@
  * - 취소된 요청(stale) 무시
  * - cleanup 시 이전 스트림 stop 및 상태 초기화
  *
- * `useWebcamController`에서 stream lifecycle effect를 격리해
- * orchestrator가 상태 조립에만 집중할 수 있게 한다.
+ * `useWebcamController`에서 스트림 생명주기 effect를 분리해
+ * 상위 훅이 상태 조립에만 집중할 수 있게 한다.
  *
  * videoSize 패칭은 이 훅의 관심사가 아니다.
- * 반환값에 videoSize가 없어도 `patchDetailVideoSize`로 orchestrator에서 조립한다.
+ * 반환값에 videoSize가 없어도 `patchDetailVideoSize`로 상위에서 조립한다.
  */
 import { useEffect, useState } from "react";
 import { ensureError } from "../utils/ensure-error.js";
@@ -25,34 +25,38 @@ export type UseWebcamStreamLifecycleOptions = {
 
   /** getUserMedia에 전달할 제약 조건 — undefined이면 요청하지 않는다 */
   constraints: MediaStreamConstraints | undefined;
+
+  /** true이면 새 스트림 요청을 막고 idle 상태로 수렴시킨다 */
+  disabled?: boolean;
 };
 
 const IDLE_STATE: WebcamDetail = { phase: "idle" };
 
 /**
  * 스트림 수명주기 상태를 반환한다.
- * videoSize는 포함하지 않는다 — orchestrator에서 `patchDetailVideoSize`로 조립한다.
+ * videoSize는 포함하지 않는다. `patchDetailVideoSize`로 상위에서 조립한다.
  */
 export function useWebcamStreamLifecycle({
   videoElement,
   constraints,
+  disabled = false,
 }: UseWebcamStreamLifecycleOptions): WebcamDetail {
   const [streamState, setStreamState] = useState<WebcamDetail>(IDLE_STATE);
 
-  // videoElement 또는 constraints가 없을 때(진짜 분리 시점)만 idle로 전환한다.
-  // 재시작(constraints 변경)에서는 이 effect가 아닌 아래 stream effect가 곧바로 requesting을 설정한다.
+  // videoElement 또는 constraints가 없거나 disabled이면 idle로 전환한다.
+  // 재시작 시에는 아래 effect가 곧바로 requesting을 설정하므로 중간 상태를 여기서 관리한다.
   useEffect(() => {
-    if (!videoElement || !constraints) {
+    if (!videoElement || !constraints || disabled) {
       setStreamState(IDLE_STATE);
     }
-  }, [videoElement, constraints]);
+  }, [videoElement, constraints, disabled]);
 
   // 요소나 제약 조건이 바뀌면 스트림을 다시 요청하고 이전 요청을 정리한다.
-  // 흐름: 요청 시작 → 성공 publish → 실패 error 전환 → 취소된 요청 무시 → cleanup 시 stream stop
-  // cleanup에서 idle을 설정하지 않는다 — 재시작 시 아래 effect가 바로 requesting으로 이어지므로
-  // idle 깜빡임이 없고, 진짜 분리 시점은 위의 effect가 담당한다.
+  // 흐름은 요청 시작 → 성공 publish → 실패 error 전환 → 취소된 요청 무시 → cleanup 시 stream stop 순서다.
+  // cleanup에서 idle을 설정하지 않아야 재시작 중 idle 깜빡임이 생기지 않는다.
+  // 실제 분리 시점의 idle 전환은 위 effect가 담당한다.
   useEffect(() => {
-    if (!videoElement || !constraints) return;
+    if (!videoElement || !constraints || disabled) return;
 
     const ctx = { canceled: false };
     let acquiredStream: MediaStream | undefined;
@@ -149,7 +153,7 @@ export function useWebcamStreamLifecycle({
         BrowserMediaDevices.stopStream(acquiredStream);
       }
     };
-  }, [videoElement, constraints]);
+  }, [videoElement, constraints, disabled]);
 
   return streamState;
 }

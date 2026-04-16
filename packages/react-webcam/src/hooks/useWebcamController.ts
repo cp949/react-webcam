@@ -45,16 +45,24 @@ export type UseWebcamControllerResult = WebcamController & {
 };
 
 // ---------------------------------------------------------------------------
-// Defaults
+// 기본값
 // ---------------------------------------------------------------------------
 
 const DEFAULT_WEBCAM_OPTS: WebcamOptions = { audioEnabled: false };
 
+/** `useWebcamController`가 받는 선택 옵션이다. */
+export type UseWebcamControllerOptions = {
+  /** true이면 스트림 요청을 시작하지 않고 비활성 상태를 유지한다. */
+  disabled?: boolean;
+};
+
+/** 현재 스트림에서 재생 중인 비디오 트랙의 장치 ID를 읽는다. */
 function getVideoTrackDeviceId(stream: MediaStream | undefined): string | undefined {
   if (!stream?.getVideoTracks) return undefined;
   return stream.getVideoTracks()[0]?.getSettings().deviceId;
 }
 
+/** 현재 스트림에서 재생 중인 오디오 트랙의 장치 ID를 읽는다. */
 function getAudioTrackDeviceId(stream: MediaStream | undefined): string | undefined {
   if (!stream?.getAudioTracks) return undefined;
   return stream.getAudioTracks()[0]?.getSettings().deviceId;
@@ -74,7 +82,10 @@ function getAudioTrackDeviceId(stream: MediaStream | undefined): string | undefi
  * - `mediaStreamResult` — webcamDetail에서 도출
  * - `isLoaded` — mediaStreamResult와 videoElement로부터 계산
  */
-export function useWebcamController(): UseWebcamControllerResult {
+export function useWebcamController(
+  options: UseWebcamControllerOptions = {},
+): UseWebcamControllerResult {
+  const { disabled = false } = options;
   // ─── 원천 상태 ─────────────────────────────────────────────────────────────
   const [webcamOptions, setWebcamOptionsState] = useState<WebcamOptions>(DEFAULT_WEBCAM_OPTS);
   const [flipped, setFlippedState] = useState(false);
@@ -92,12 +103,12 @@ export function useWebcamController(): UseWebcamControllerResult {
     { mediaStream: MediaStream; error: Error } | undefined
   >(undefined);
 
-  // ─── element size 관찰 & constraints 계산 ──────────────────────────────────
+  // ─── 요소 크기 관찰 및 constraints 계산 ───────────────────────────────────
   const constraints = useElementMediaConstraints(videoElement, webcamOptions);
 
   // ─── stream request lifecycle ───────────────────────────────────────────────
   // 요청 시작 → 성공/실패 publish → 취소된 요청 무시 → cleanup 시 stream stop
-  const streamState = useWebcamStreamLifecycle({ videoElement, constraints });
+  const streamState = useWebcamStreamLifecycle({ videoElement, constraints, disabled });
 
   // 스트림 상태가 바뀌면(새 요청 시작 등) 이전 재생 오류를 초기화한다.
   useEffect(() => {
@@ -106,7 +117,7 @@ export function useWebcamController(): UseWebcamControllerResult {
     }
   }, [streamState]);
 
-  // ─── derived values ────────────────────────────────────────────────────────
+  // ─── 파생값 조립 ───────────────────────────────────────────────────────────
   // videoSize를 streamState 위에 패칭한 뒤, playbackError가 있으면 playback-error 상태로 전환한다.
   const webcamDetail = useMemo((): WebcamDetail => {
     const base = patchDetailVideoSize(streamState, videoSize);
@@ -133,7 +144,7 @@ export function useWebcamController(): UseWebcamControllerResult {
     [webcamDetail],
   );
 
-  // isLoaded: 실제 재생 가능 상태임을 보장한다.
+  // isLoaded는 실제로 재생 가능한 상태인지 보장한다.
   // - phase가 live여야 한다 (playback-error, 오류 계열 모두 제외)
   // - 비디오 요소가 마운트되어 있어야 한다
   // - 실제 비디오 메타데이터가 확보되어야 한다
@@ -221,7 +232,7 @@ export function useWebcamController(): UseWebcamControllerResult {
             });
           })
           .catch((err: unknown) => {
-            // AbortError는 재생 요청이 중단된 것이므로 무시한다.
+            // AbortError는 재생 요청이 중단된 경우라서 별도 오류로 다루지 않는다.
             if ((err as { name?: string })?.name === "AbortError") return;
             const error = err instanceof Error ? err : new Error(String(err));
             setPlaybackErrorState({ mediaStream: currentStream, error });

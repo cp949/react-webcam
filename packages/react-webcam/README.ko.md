@@ -51,6 +51,72 @@ export function CameraView() {
 </div>
 ```
 
+## 비활성 상태 - `disabled`
+
+웹캠을 마운트한 채로 유지하되, 아직 카메라 접근을 요청하면 안 되는 경우
+`disabled`를 사용할 수 있습니다.
+
+`disabled={true}`이면:
+
+- `getUserMedia()`를 호출하지 않습니다.
+- 컴포넌트는 기존 `idle` 흐름에 머뭅니다.
+- 기본으로 텍스트 없는 soft gradient + 카메라 아이콘 placeholder를 렌더링합니다.
+
+다시 `disabled={false}`가 되면 웹캠은 일반적인 요청 흐름으로 복귀합니다.
+
+### 기본 placeholder
+
+```tsx
+<Webcam disabled />
+```
+
+### 커스텀 비활성 fallback
+
+`disabledFallback`을 전달하면 기본 placeholder를 완전히 대체할 수 있습니다.
+
+```tsx
+<Webcam
+  disabled
+  disabledFallback={
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "grid",
+        placeItems: "center",
+        background: "#111",
+        color: "#fff",
+      }}
+    >
+      Camera is disabled
+    </div>
+  }
+/>
+```
+
+### 비활성 상태 토글
+
+```tsx
+import { useState } from "react";
+import { Webcam } from "@cp949/react-webcam";
+
+export function DisabledExample() {
+  const [disabled, setDisabled] = useState(true);
+
+  return (
+    <>
+      <button type="button" onClick={() => setDisabled((prev) => !prev)}>
+        웹캠 토글
+      </button>
+
+      <div style={{ width: 640, height: "auto" }}>
+        <Webcam disabled={disabled} />
+      </div>
+    </>
+  );
+}
+```
+
 ## 상태 변화 감지 - `onStateChange`
 
 `onStateChange`는 `WebcamDetail`이 변경될 때마다 호출됩니다. `pausePlayback()`은 `WebcamDetail`을 변경하지 않으므로 `onStateChange`를 발생시키지 않습니다. `resumePlayback()`은 성공 시 보통 현재 상태를 유지하거나 `playback-error`를 해제하고, 실패 시 `playback-error`를 발생시킬 수 있습니다.

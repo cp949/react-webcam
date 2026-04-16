@@ -53,6 +53,74 @@ Using `fitMode` to match a fixed parent container:
 </div>
 ```
 
+## Disabled State
+
+Use `disabled` when the webcam should stay mounted but must not request camera
+access yet.
+
+When `disabled={true}`:
+
+- `getUserMedia()` is not called
+- the component stays in the existing `idle` flow
+- a built-in text-free placeholder with a soft gradient and camera icon is
+  rendered by default
+
+When `disabled` becomes `false` again, the webcam resumes its normal request
+flow.
+
+### Default Placeholder
+
+```tsx
+<Webcam disabled />
+```
+
+### Custom Disabled Fallback
+
+Pass `disabledFallback` to replace the built-in placeholder completely.
+
+```tsx
+<Webcam
+  disabled
+  disabledFallback={
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "grid",
+        placeItems: "center",
+        background: "#111",
+        color: "#fff",
+      }}
+    >
+      Camera is disabled
+    </div>
+  }
+/>
+```
+
+### Toggle Disabled State
+
+```tsx
+import { useState } from "react";
+import { Webcam } from "@cp949/react-webcam";
+
+export function DisabledExample() {
+  const [disabled, setDisabled] = useState(true);
+
+  return (
+    <>
+      <button type="button" onClick={() => setDisabled((prev) => !prev)}>
+        Toggle webcam
+      </button>
+
+      <div style={{ width: 640, height: "auto" }}>
+        <Webcam disabled={disabled} />
+      </div>
+    </>
+  );
+}
+```
+
 ## Observe Runtime State With `onStateChange`
 
 `onStateChange` fires whenever `WebcamDetail` changes. `pausePlayback()` does

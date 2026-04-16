@@ -8,6 +8,8 @@ export type DemoSectionId =
   | 'device-selection'
   | 'ref-handle'
   | 'state'
+  | 'disabled-state'
+  | 'disabled-fallback'
   | 'recipes'
   | 'pause-resume';
 

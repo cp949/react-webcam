@@ -46,6 +46,18 @@ export const DEMO_SECTIONS: DemoSection[] = [
     keywords: ['onStateChange', 'WebcamSnapshot', 'status', 'errorCode'],
   },
   {
+    id: 'disabled-state',
+    title: 'Disabled State',
+    description: 'disabled prop으로 카메라 요청을 지연',
+    keywords: ['disabled', 'onStateChange', 'idle', 'requesting'],
+  },
+  {
+    id: 'disabled-fallback',
+    title: 'Disabled Fallback',
+    description: 'custom disabledFallback으로 기본 placeholder 대체',
+    keywords: ['disabledFallback', 'disabled', 'CTA', 'placeholder'],
+  },
+  {
     id: 'recipes',
     title: 'Recipes',
     description: '실전 활용 예제',

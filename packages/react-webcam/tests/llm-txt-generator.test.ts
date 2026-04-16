@@ -205,7 +205,7 @@ describe("llm.txt 생성 계약", () => {
     expect(output).toContain("stream-request gate");
     expect(output).toContain("snapshotToCanvas() may return null");
     expect(output).toContain("deviceId");
-    expect(output).toContain("deviceSelectionStrategy=\"exact\"");
+    expect(output).toContain('deviceSelectionStrategy="exact"');
     expect(output).toContain("playback-error");
     expect(output).toContain("best-effort retry");
     expect(output).toContain("track-ended");
@@ -251,7 +251,10 @@ describe("llm.txt 생성 계약", () => {
 
   it("선언을 미리 추출해도 declarationText에서 바로 읽어도 같은 결과를 만든다", () => {
     const fixture = createFixture();
-    const preExtracted = extractDeclarationsFromDtsText(fixture.declarationText, fixture.keySymbols);
+    const preExtracted = extractDeclarationsFromDtsText(
+      fixture.declarationText,
+      fixture.keySymbols,
+    );
 
     const fromText = renderLlmTxt(fixture);
     const fromDeclarations = renderLlmTxt({

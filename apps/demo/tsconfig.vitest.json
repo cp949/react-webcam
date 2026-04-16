@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "next-env.d.ts",
+    "global.d.ts",
+    ".next/types/**/*.ts",
+    "tests/**/*.test.ts",
+    "tests/**/*.test.tsx",
+    "tests/**/*.spec.ts",
+    "tests/**/*.spec.tsx",
+    "tests/setup.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": []
+}

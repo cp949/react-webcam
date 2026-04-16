@@ -111,10 +111,9 @@ describe("useWebcamController 스트림 생명주기", () => {
   });
 
   it("disabled=true로 다시 렌더링하면 활성 스트림을 정리하고 idle로 돌아간다", async () => {
-    const { result, rerender } = renderHook(
-      ({ disabled }) => useWebcamController({ disabled }),
-      { initialProps: { disabled: false } },
-    );
+    const { result, rerender } = renderHook(({ disabled }) => useWebcamController({ disabled }), {
+      initialProps: { disabled: false },
+    });
 
     const videoEl = document.createElement("video");
     act(() => {

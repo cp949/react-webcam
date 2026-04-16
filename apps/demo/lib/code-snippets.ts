@@ -187,6 +187,72 @@ export default function StateInspectorExample() {
   );
 }`,
 
+  'disabled-state': `import { useState } from 'react';
+import { Webcam } from '@cp949/react-webcam';
+import type { WebcamPhase } from '@cp949/react-webcam';
+
+export default function DisabledStateExample() {
+  const [disabled, setDisabled] = useState(true);
+  const [phase, setPhase] = useState<WebcamPhase>('idle');
+
+  const displayPhase = disabled ? 'idle' : phase;
+
+  return (
+    <>
+      <button type="button" onClick={() => setDisabled((prev) => !prev)}>
+        {disabled ? '카메라 활성화' : '카메라 비활성화'}
+      </button>
+
+      <div style={{ width: '100%', maxWidth: 640, aspectRatio: '4 / 3' }}>
+        <Webcam
+          disabled={disabled}
+          onStateChange={(detail) => setPhase(detail.phase)}
+          style={{ width: '100%', height: '100%', borderRadius: 8 }}
+        />
+      </div>
+
+      <p>disabled: {String(disabled)}</p>
+      <p>phase: {displayPhase}</p>
+    </>
+  );
+}`,
+
+  'disabled-fallback': `import { useState } from 'react';
+import { Webcam } from '@cp949/react-webcam';
+import type { WebcamPhase } from '@cp949/react-webcam';
+
+export default function DisabledFallbackExample() {
+  const [disabled, setDisabled] = useState(true);
+  const [phase, setPhase] = useState<WebcamPhase>('idle');
+
+  return (
+    <Webcam
+      disabled={disabled}
+      onStateChange={(detail) => setPhase(detail.phase)}
+      disabledFallback={
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'grid',
+            placeItems: 'center',
+            background: 'linear-gradient(180deg, #0f172a 0%, #111827 100%)',
+            color: '#fff',
+          }}
+        >
+          <div>
+            <strong>Camera is disabled</strong>
+            <p>disabledFallback으로 기본 placeholder를 완전히 대체합니다.</p>
+            <button type="button" onClick={() => setDisabled(false)}>
+              Enable camera
+            </button>
+          </div>
+        </div>
+      }
+    />
+  );
+}`,
+
   recipes: `import { useRef, useState } from 'react';
 import { Webcam } from '@cp949/react-webcam';
 import type { WebcamHandle, WebcamSnapshot } from '@cp949/react-webcam';

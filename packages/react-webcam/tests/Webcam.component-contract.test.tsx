@@ -180,6 +180,27 @@ describe("Webcam 공개 계약", () => {
     expect(getUserMediaMock).not.toHaveBeenCalled();
   });
 
+  it("disabled=true이면 검정 배경 비디오 레이어를 렌더링하지 않는다", async () => {
+    const { container } = render(<Webcam disabled webcamOptions={{ audioEnabled: false }} />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(container.querySelector("video")).toBeNull();
+  });
+
+  it("disabled=true이면 루트 배경도 placeholder 배경색으로 맞춘다", async () => {
+    const { container } = render(<Webcam disabled webcamOptions={{ audioEnabled: false }} />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.style.backgroundColor).toBe("#f7f8fa");
+  });
+
   it("disabled가 false로 바뀌면 기본 비활성 placeholder를 제거한다", async () => {
     const { queryByTestId, rerender } = render(
       <Webcam disabled webcamOptions={{ audioEnabled: false }} />,
@@ -201,6 +222,47 @@ describe("Webcam 공개 계약", () => {
     expect(getUserMediaMock).toHaveBeenCalledTimes(1);
   });
 
+  it("기본 disabled placeholder 배경색으로 #f7f8fa를 사용한다", async () => {
+    const { getByTestId } = render(<Webcam disabled webcamOptions={{ audioEnabled: false }} />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    const placeholder = getByTestId("webcam-disabled-placeholder");
+    expect(placeholder.style.backgroundColor).toBe("#f7f8fa");
+  });
+
+  it("기본 disabled placeholder에 점선 테두리와 조정된 아이콘 색상을 적용한다", async () => {
+    const { getByTestId } = render(<Webcam disabled webcamOptions={{ audioEnabled: false }} />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    const placeholder = getByTestId("webcam-disabled-placeholder");
+    const iconBadge = placeholder.lastElementChild as HTMLElement | null;
+
+    expect(placeholder.style.borderStyle).toBe("dashed");
+    expect(placeholder.style.borderColor).toBe("#d7dee8");
+    expect(iconBadge).not.toBeNull();
+    expect(iconBadge?.style.backgroundColor).toBe("#eef2f6");
+    expect(iconBadge?.style.color).toBe("#7f8b99");
+  });
+
+  it("기본 disabled placeholder는 루트 borderRadius를 따라가며 모서리를 넘지 않는다", async () => {
+    const { getByTestId } = render(
+      <Webcam disabled webcamOptions={{ audioEnabled: false }} style={{ borderRadius: "16px" }} />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    const placeholder = getByTestId("webcam-disabled-placeholder");
+    expect(placeholder.style.borderRadius).toBe("inherit");
+  });
+
   it("custom disabledFallback이 있으면 기본 placeholder 대신 그것만 렌더링한다", async () => {
     const { queryByTestId } = render(
       <Webcam
@@ -217,6 +279,49 @@ describe("Webcam 공개 계약", () => {
     expect(queryByTestId("disabled-fallback")).not.toBeNull();
     expect(queryByTestId("webcam-disabled-placeholder")).toBeNull();
     expect(getUserMediaMock).not.toHaveBeenCalled();
+  });
+
+  it("custom disabledFallback도 카메라를 덮는 오버레이 래퍼 안에 렌더링한다", async () => {
+    const { getByTestId } = render(
+      <Webcam
+        disabled
+        disabledFallback={<div data-testid='disabled-fallback'>Camera is disabled</div>}
+        webcamOptions={{ audioEnabled: false }}
+      />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    const fallback = getByTestId("disabled-fallback");
+    const overlay = fallback.parentElement;
+
+    expect(overlay).not.toBeNull();
+    expect(overlay?.tagName).toBe("DIV");
+    expect(overlay?.style.position).toBe("absolute");
+    expect(overlay?.style.top).toBe("0px");
+    expect(overlay?.style.right).toBe("0px");
+    expect(overlay?.style.bottom).toBe("0px");
+    expect(overlay?.style.left).toBe("0px");
+  });
+
+  it("custom disabledFallback 오버레이도 루트 borderRadius를 따라간다", async () => {
+    const { getByTestId } = render(
+      <Webcam
+        disabled
+        disabledFallback={<div data-testid='disabled-fallback'>Camera is disabled</div>}
+        webcamOptions={{ audioEnabled: false }}
+        style={{ borderRadius: "16px" }}
+      />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    const overlay = getByTestId("disabled-fallback").parentElement;
+    expect(overlay?.style.borderRadius).toBe("inherit");
   });
 
   it("disabledFallback={null}도 기본 placeholder를 명시적으로 대체한 것으로 본다", async () => {
@@ -272,6 +377,13 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     const root = container.firstElementChild as HTMLElement;
     expect(root.style.backgroundColor).toBe("rgb(255, 0, 0)");
     expect(root.style.borderRadius).toBe("8px");
+  });
+
+  it("borderRadius가 주어지면 루트가 overflow hidden으로 자식 레이어를 clip한다", () => {
+    const { container } = render(<Webcam style={{ borderRadius: "16px" }} />);
+    const root = container.firstElementChild as HTMLElement;
+
+    expect(root.style.overflow).toBe("hidden");
   });
 
   it("visibleFlipButton=true이고 웹캠이 로드되면 FlipButton을 렌더링한다", async () => {

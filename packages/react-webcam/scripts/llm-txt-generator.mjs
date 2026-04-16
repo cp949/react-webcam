@@ -5,7 +5,10 @@ import * as ts from "typescript";
 
 /** 줄바꿈과 후행 공백을 정리해 출력 비교가 안정적으로 유지되게 한다. */
 function normalizeText(value) {
-  return value.replace(/\r\n/g, "\n").replace(/[ \t]+\n/g, "\n").trim();
+  return value
+    .replace(/\r\n/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .trim();
 }
 
 /** 과도한 빈 줄을 눌러 섹션 사이 공백만 남긴다. */
@@ -15,7 +18,7 @@ function collapseBlankLines(value) {
 
 /** 코드 예시와 선언 텍스트를 fenced code block으로 감싼다. */
 function formatCodeBlock(value, language = "ts") {
-  return ["```" + language, value.trimEnd(), "```"].join("\n");
+  return [`\`\`\`${language}`, value.trimEnd(), "```"].join("\n");
 }
 
 /** declaration 노드에서 공개 심볼 이름을 읽는다. */
@@ -221,7 +224,7 @@ const WEB_CAM_LABELS_INLINE = [
   "}",
 ].join("\n");
 
-const WEB_CAM_VIDEO_SIZE_INLINE = [
+const _WEB_CAM_VIDEO_SIZE_INLINE = [
   "{",
   "    videoSize?: {",
   "        width: number;",
@@ -322,7 +325,9 @@ function renderImports(declarations, publicExportNames) {
   const typePublicSymbols = typeSymbols.filter((name) => exportFilter.has(name));
 
   const lines = [];
-  lines.push("Import from the package root only. Avoid deep imports into `dist/` or internal scripts.");
+  lines.push(
+    "Import from the package root only. Avoid deep imports into `dist/` or internal scripts.",
+  );
 
   if (runtimePublicSymbols.length > 0) {
     lines.push(
@@ -382,7 +387,7 @@ function renderUsageExamples(packageName) {
       `import { Webcam, type WebcamDetail } from "${packageName}";`,
       "",
       "function handleStateChange(detail: WebcamDetail) {",
-      "  if (detail.phase === \"playback-error\") {",
+      '  if (detail.phase === "playback-error") {',
       "    console.warn(detail.error);",
       "  }",
       "}",
@@ -412,7 +417,7 @@ function renderUsageExamples(packageName) {
       "  return (",
       "    <>",
       "      <Webcam ref={webcamRef} />",
-      "      <button type=\"button\" onClick={handleSnapshot}>Take snapshot</button>",
+      '      <button type="button" onClick={handleSnapshot}>Take snapshot</button>',
       "    </>",
       "  );",
       "}",
@@ -578,16 +583,16 @@ export function renderLlmTxt(input) {
     renderGuidanceSection(toPlainObject(input.guidance)),
     renderConstraintSection(toPlainObject(input.guidance), description),
     [
-    "## Anti-Patterns",
-    "- Do not assume `playback-error` means permission denial.",
-    "- Do not call `pausePlayback()` to stop the camera hardware.",
-    "- Do not treat `webcamOptions` as controlled without `onWebcamOptionsChange`.",
-    "- Do not rely on `snapshotToCanvas()` before the webcam is ready.",
-    "- Do not expect `pausePlayback()` to emit `onStateChange`.",
-  ].join("\n"),
+      "## Anti-Patterns",
+      "- Do not assume `playback-error` means permission denial.",
+      "- Do not call `pausePlayback()` to stop the camera hardware.",
+      "- Do not treat `webcamOptions` as controlled without `onWebcamOptionsChange`.",
+      "- Do not rely on `snapshotToCanvas()` before the webcam is ready.",
+      "- Do not expect `pausePlayback()` to emit `onStateChange`.",
+    ].join("\n"),
     "## Examples",
     usageExamples,
   ];
 
-  return collapseBlankLines(normalizeText(sections.filter(Boolean).join("\n\n"))).trim() + "\n";
+  return `${collapseBlankLines(normalizeText(sections.filter(Boolean).join("\n\n"))).trim()}\n`;
 }

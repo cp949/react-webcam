@@ -12,6 +12,8 @@ import ControlledStateSection from '../sections/ControlledStateSection';
 import DeviceSelectionSection from '../sections/DeviceSelectionSection';
 import RefHandleSection from '../sections/RefHandleSection';
 import StateInspectorSection from '../sections/StateInspectorSection';
+import DisabledStateSection from '../sections/DisabledStateSection';
+import DisabledFallbackSection from '../sections/DisabledFallbackSection';
 import RecipesSection from '../sections/RecipesSection';
 import PauseResumeSection from '../sections/PauseResumeSection';
 import DemoHeader from './DemoHeader';
@@ -37,6 +39,10 @@ function renderSection(section: DemoSectionId) {
       return <RefHandleSection />;
     case 'state':
       return <StateInspectorSection />;
+    case 'disabled-state':
+      return <DisabledStateSection />;
+    case 'disabled-fallback':
+      return <DisabledFallbackSection />;
     case 'recipes':
       return <RecipesSection />;
     case 'pause-resume':

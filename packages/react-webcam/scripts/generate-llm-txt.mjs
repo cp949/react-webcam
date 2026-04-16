@@ -31,7 +31,7 @@ const GUIDANCE = {
   snapshotToCanvas:
     "snapshotToCanvas() may return null before the webcam is ready, so always null-check before using the canvas.",
   deviceSelection:
-    "When you need a specific camera, pair deviceId with deviceSelectionStrategy=\"exact\"; use \"ideal\" when you only want a preference.",
+    'When you need a specific camera, pair deviceId with deviceSelectionStrategy="exact"; use "ideal" when you only want a preference.',
   playbackError:
     "Autoplay or playback failures should surface as playback-error; resumePlayback() may still fail under autoplay policy and should be treated as a best-effort retry.",
   trackEnded:

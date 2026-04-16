@@ -188,7 +188,10 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   } = props;
 
   // 라벨을 기본값과 병합한다. 미설정 항목은 기본 한국어 값이 사용된다.
-  const labels: Required<WebcamLabels> = { ...DEFAULT_WEBCAM_LABELS, ...props.labels };
+  const labels: Required<WebcamLabels> = {
+    ...DEFAULT_WEBCAM_LABELS,
+    ...props.labels,
+  };
 
   // ---- 컨트롤러 ----------------------------------------------------------
   const ctrl = useWebcamController({ disabled });
@@ -320,8 +323,9 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   // ---- 버튼 UI 가시성 ---------------------------------------------------
   const hasOptionButtons =
     visibleFlipButton || visibleCameraDirectionButton || visibleAspectRatioButton;
-  const hasDisabledFallbackProp = Object.prototype.hasOwnProperty.call(props, "disabledFallback");
+  const hasDisabledFallbackProp = Object.hasOwn(props, "disabledFallback");
   const showDefaultDisabledPlaceholder = disabled && !hasDisabledFallbackProp;
+  const rootBackgroundColor = disabled ? "#f7f8fa" : "#1e1e1e";
 
   return (
     <div
@@ -342,12 +346,13 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#1e1e1e",
+        overflow: "hidden",
+        backgroundColor: rootBackgroundColor,
         ...style,
       }}
     >
       {/* ---- 비디오 -------------------------------------------------------- */}
-      {rootWidth > 0 && (
+      {!disabled && rootWidth > 0 && (
         <video
           ref={setVideoElement}
           className='Webcam-video'
@@ -359,25 +364,44 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             width: videoWidth ?? "100%",
             height: videoHeight ?? "100%",
             backgroundColor: "#1e1e1e",
+            borderRadius: "inherit",
           }}
         />
       )}
 
-      {disabled && hasDisabledFallbackProp ? disabledFallback : null}
+      {disabled && hasDisabledFallbackProp ? (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            borderRadius: "inherit",
+            overflow: "hidden",
+          }}
+        >
+          {disabledFallback}
+        </div>
+      ) : null}
 
       {showDefaultDisabledPlaceholder && (
         <div
           data-testid='webcam-disabled-placeholder'
-          aria-label='webcam disabled placeholder'
           style={{
             position: "absolute",
-            inset: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             pointerEvents: "none",
-            background:
-              "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.12), transparent 38%), linear-gradient(135deg, rgba(92, 123, 250, 0.28), rgba(84, 212, 190, 0.16) 52%, rgba(12, 16, 24, 0.78))",
+            backgroundColor: "#f7f8fa",
+            border: "2px dashed #d7dee8",
+            boxSizing: "border-box",
+            borderRadius: "inherit",
           }}
         >
           <div
@@ -388,10 +412,9 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: "rgba(255,255,255,0.1)",
-              boxShadow: "0 10px 30px rgba(0,0,0,0.18)",
-              color: "rgba(255,255,255,0.92)",
-              backdropFilter: "blur(8px)",
+              backgroundColor: "#eef2f6",
+              boxShadow: "0 8px 20px rgba(118, 132, 150, 0.14)",
+              color: "#7f8b99",
             }}
           >
             <CameraIcon size={34} />

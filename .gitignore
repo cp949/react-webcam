@@ -37,6 +37,7 @@ coverage
 out/
 build
 dist
+packages/react-webcam/llm.txt
 
 
 # Debug

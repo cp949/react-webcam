@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1
+
+### Patch Changes
+
+- Expand the demo coverage for disabled webcam flows, add Vitest coverage for the demo app, and polish the built-in disabled placeholder behavior.
+
 ## 1.1.0
 
 ### Minor Changes

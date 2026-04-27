@@ -337,6 +337,61 @@ describe("Webcam 공개 계약", () => {
     expect(getUserMediaMock).not.toHaveBeenCalled();
   });
 
+  it("스트림 요청이 실패하면 errorFallback을 렌더링하고 오류 detail을 전달한다", async () => {
+    const notFoundError = Object.assign(new Error("camera not found"), { name: "NotFoundError" });
+    getUserMediaMock.mockRejectedValueOnce(notFoundError);
+
+    const { queryByTestId } = render(
+      <Webcam
+        webcamOptions={{ audioEnabled: false }}
+        errorFallback={(detail) => (
+          <div data-testid='error-fallback'>
+            {detail.phase}:{detail.errorCode}
+          </div>
+        )}
+      />,
+    );
+
+    await advanceToStreamLoad();
+
+    expect(queryByTestId("error-fallback")?.textContent).toBe("unavailable:device-not-found");
+  });
+
+  it("disabled=true이면 errorFallback보다 disabledFallback을 우선 렌더링한다", async () => {
+    const { queryByTestId } = render(
+      <Webcam
+        disabled
+        disabledFallback={<div data-testid='disabled-fallback'>Camera is disabled</div>}
+        errorFallback={<div data-testid='error-fallback'>Camera error</div>}
+        webcamOptions={{ audioEnabled: false }}
+      />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(queryByTestId("disabled-fallback")).not.toBeNull();
+    expect(queryByTestId("error-fallback")).toBeNull();
+    expect(getUserMediaMock).not.toHaveBeenCalled();
+  });
+
+  it("playback-error 상태에는 errorFallback을 렌더링하지 않는다", async () => {
+    const playError = new Error("autoplay blocked");
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockRejectedValueOnce(playError);
+
+    const { queryByTestId } = render(
+      <Webcam
+        webcamOptions={{ audioEnabled: false }}
+        errorFallback={<div data-testid='error-fallback'>Camera error</div>}
+      />,
+    );
+
+    await advanceToStreamLoad();
+
+    expect(queryByTestId("error-fallback")).toBeNull();
+  });
+
   it("언마운트할 때 미디어 스트림을 정리한다", async () => {
     const { unmount } = render(<Webcam webcamOptions={{ audioEnabled: false }} />);
 

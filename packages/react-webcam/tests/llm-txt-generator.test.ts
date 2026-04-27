@@ -75,6 +75,7 @@ interface WebcamProps {
   className?: string;
   disabled?: boolean;
   disabledFallback?: React.ReactNode;
+  errorFallback?: React.ReactNode | ((detail: WebcamDetail) => React.ReactNode);
   onStateChange?: (state: WebcamDetail) => void;
   fitMode?: "unset" | "fill" | "cover" | "contain";
   flipped?: boolean;

@@ -36,7 +36,8 @@ vi.mock('@cp949/react-webcam', () => {
   function Webcam(props: {
     disabled?: boolean;
     disabledFallback?: React.ReactNode;
-    onStateChange?: (detail: { phase: string }) => void;
+    errorFallback?: React.ReactNode | ((detail: { phase: string; errorCode: string }) => React.ReactNode);
+    onStateChange?: (detail: { phase: string; errorCode?: string }) => void;
     fitMode?: string;
     className?: string;
     children?: React.ReactNode;
@@ -46,10 +47,17 @@ vi.mock('@cp949/react-webcam', () => {
     defaultWebcamOptions?: Record<string, unknown>;
   }) {
     const [initialDefaultWebcamOptions] = useState(props.defaultWebcamOptions);
+    const shouldMockError = props.webcamOptions?.deviceId === '__missing_camera__';
 
     useEffect(() => {
-      props.onStateChange?.({ phase: props.disabled ? 'idle' : 'live' });
-    }, [props.disabled, props.onStateChange]);
+      props.onStateChange?.(
+        props.disabled
+          ? { phase: 'idle' }
+          : shouldMockError
+            ? { phase: 'unavailable', errorCode: 'device-not-found' }
+            : { phase: 'live' },
+      );
+    }, [props.disabled, props.onStateChange, shouldMockError]);
 
     if (props.disabled) {
       if (Object.hasOwn(props, 'disabledFallback')) {
@@ -61,6 +69,14 @@ vi.mock('@cp949/react-webcam', () => {
       }
 
       return createElement('div', { 'data-testid': 'webcam-disabled-placeholder' });
+    }
+
+    if (shouldMockError && Object.hasOwn(props, 'errorFallback')) {
+      const detail = { phase: 'unavailable', errorCode: 'device-not-found' };
+      const fallback =
+        typeof props.errorFallback === 'function' ? props.errorFallback(detail) : props.errorFallback;
+
+      return createElement('div', { 'data-testid': 'mock-webcam-error-fallback' }, fallback);
     }
 
     return createElement(
@@ -108,9 +124,11 @@ describe('demo disabled sections', () => {
   it('registers disabled demo sections and code snippets', () => {
     expect(DEMO_SECTIONS.some((section) => section.id === 'disabled-state')).toBe(true);
     expect(DEMO_SECTIONS.some((section) => section.id === 'disabled-fallback')).toBe(true);
+    expect(DEMO_SECTIONS.some((section) => section.id === 'error-fallback')).toBe(true);
     expect(DEMO_SECTIONS.some((section) => section.id === 'visual-debug')).toBe(true);
     expect(CODE_SNIPPETS['disabled-state']).toContain('disabled={disabled}');
     expect(CODE_SNIPPETS['disabled-fallback']).toContain('disabledFallback');
+    expect(CODE_SNIPPETS['error-fallback']).toContain('errorFallback');
     expect(CODE_SNIPPETS.controls).toContain('fitMode');
     expect(CODE_SNIPPETS.controls).toContain('defaultWebcamOptions');
     expect(CODE_SNIPPETS.controls).toContain('aspectRatio 없이 fitMode만');
@@ -171,6 +189,26 @@ describe('demo disabled sections', () => {
     fireEvent.click(screen.getAllByText('Disabled Fallback')[0]!);
 
     const viewport = screen.getByTestId('disabled-fallback-viewport');
+    expect(window.getComputedStyle(viewport).aspectRatio).toBe('16 / 9');
+  });
+
+  it('renders the custom error fallback example from the sidebar', () => {
+    render(createElement(DemoShell));
+
+    fireEvent.click(screen.getAllByText('Error Fallback')[0]!);
+
+    expect(screen.getByText('Camera is unavailable')).toBeTruthy();
+    expect(screen.getAllByText('device-not-found').length).toBeGreaterThan(0);
+    expect(screen.getByText('카메라가 없거나 선택한 장치를 사용할 수 없을 때 렌더링됩니다.')).toBeTruthy();
+    expect(screen.getByTestId('mock-webcam-error-fallback')).toBeTruthy();
+  });
+
+  it('keeps the error fallback demo viewport at a fixed aspect ratio', () => {
+    render(createElement(DemoShell));
+
+    fireEvent.click(screen.getAllByText('Error Fallback')[0]!);
+
+    const viewport = screen.getByTestId('error-fallback-viewport');
     expect(window.getComputedStyle(viewport).aspectRatio).toBe('16 / 9');
   });
 

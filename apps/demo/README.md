@@ -24,6 +24,9 @@ pnpm --filter demo check-types  # 타입 체크
 - **Controlled State** — controlled vs uncontrolled 상태 소유권 비교
 - **Ref Handle** — WebcamHandle을 통한 명령형 API (snapshotToCanvas 등)
 - **State Inspector** — onStateChange로 WebcamSnapshot 실시간 관찰
+- **Disabled State** — 카메라 요청을 의도적으로 지연하는 흐름
+- **Disabled Fallback** — disabled 상태의 커스텀 placeholder UI
+- **Error Fallback** — 카메라 요청 실패 상태의 커스텀 fallback UI
 - **Recipes** — 프로필 촬영, 세로 비율, 상태 배지 등 실전 패턴
 - **Pause / Resume** — pausePlayback / resumePlayback playback-only 명령형 API 시연
 

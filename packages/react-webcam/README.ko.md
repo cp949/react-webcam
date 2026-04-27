@@ -94,6 +94,26 @@ export function CameraView() {
 />
 ```
 
+### 커스텀 에러 fallback
+
+`errorFallback`을 전달하면 권한 거부, 카메라 없음, 브라우저 미지원 같은 오류
+상태에서 커스텀 UI를 렌더링할 수 있습니다. 함수로 전달하면 현재
+`WebcamDetail`을 받아 오류 원인별 메시지를 분기할 수 있습니다.
+
+```tsx
+<Webcam
+  errorFallback={(detail) => (
+    <div>
+      {detail.errorCode === "device-not-found"
+        ? "연결된 카메라가 없습니다."
+        : "카메라를 시작할 수 없습니다."}
+    </div>
+  )}
+/>
+```
+
+`playback-error`는 스트림이 살아 있는 재생 오류이므로 `errorFallback` 대상이 아닙니다.
+
 ### 비활성 상태 토글
 
 ```tsx

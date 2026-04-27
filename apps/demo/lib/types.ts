@@ -10,6 +10,7 @@ export type DemoSectionId =
   | 'state'
   | 'disabled-state'
   | 'disabled-fallback'
+  | 'error-fallback'
   | 'recipes'
   | 'pause-resume'
   | 'visual-debug';

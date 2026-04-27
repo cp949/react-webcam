@@ -65,6 +65,11 @@ export type WebcamHandle = {
   resumePlayback: () => void;
 };
 
+type WebcamErrorDetail = Extract<
+  WebcamDetail,
+  { phase: "denied" | "unavailable" | "unsupported" | "insecure" | "error" }
+>;
+
 /** `Webcam` 컴포넌트가 노출하는 공개 props다. */
 export interface WebcamProps {
   style?: React.CSSProperties;
@@ -76,6 +81,9 @@ export interface WebcamProps {
 
   /** disabled일 때 기본 UI 대신 렌더링할 커스텀 fallback이다. */
   disabledFallback?: React.ReactNode;
+
+  /** 카메라 요청 또는 스트림 오류 상태에서 렌더링할 커스텀 fallback이다. */
+  errorFallback?: React.ReactNode | ((detail: WebcamErrorDetail) => React.ReactNode);
 
   /** 외부에 공개된 webcam detail이 바뀔 때마다 호출한다. */
   onStateChange?: (state: WebcamDetail) => void;
@@ -179,6 +187,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     children,
     disabled = false,
     disabledFallback,
+    errorFallback,
     visibleFlipButton = false,
     visibleCameraDirectionButton = false,
     visibleAspectRatioButton = false,
@@ -324,8 +333,22 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   const hasOptionButtons =
     visibleFlipButton || visibleCameraDirectionButton || visibleAspectRatioButton;
   const hasDisabledFallbackProp = Object.hasOwn(props, "disabledFallback");
+  const hasErrorFallbackProp = Object.hasOwn(props, "errorFallback");
   const showDefaultDisabledPlaceholder = disabled && !hasDisabledFallbackProp;
   const rootBackgroundColor = disabled ? "#f7f8fa" : "#1e1e1e";
+  const errorDetail =
+    webcamDetail.phase === "denied" ||
+    webcamDetail.phase === "unavailable" ||
+    webcamDetail.phase === "unsupported" ||
+    webcamDetail.phase === "insecure" ||
+    webcamDetail.phase === "error"
+      ? webcamDetail
+      : undefined;
+  const errorFallbackNode: React.ReactNode = errorDetail
+    ? typeof errorFallback === "function"
+      ? errorFallback(errorDetail)
+      : errorFallback
+    : undefined;
 
   return (
     <div
@@ -382,6 +405,22 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
           }}
         >
           {disabledFallback}
+        </div>
+      ) : null}
+
+      {!disabled && errorDetail && hasErrorFallbackProp ? (
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            borderRadius: "inherit",
+            overflow: "hidden",
+          }}
+        >
+          {errorFallbackNode}
         </div>
       ) : null}
 

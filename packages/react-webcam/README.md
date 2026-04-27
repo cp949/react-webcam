@@ -98,6 +98,28 @@ Pass `disabledFallback` to replace the built-in placeholder completely.
 />
 ```
 
+### Custom Error Fallback
+
+Pass `errorFallback` to render custom UI for error states such as permission
+denial, missing cameras, unsupported browsers, or insecure contexts. When passed
+as a function, it receives the current `WebcamDetail` so you can branch on
+`errorCode`.
+
+```tsx
+<Webcam
+  errorFallback={(detail) => (
+    <div>
+      {detail.errorCode === "device-not-found"
+        ? "No camera is connected."
+        : "Camera could not be started."}
+    </div>
+  )}
+/>
+```
+
+`playback-error` is not covered by `errorFallback` because the stream is still
+alive and only video playback failed.
+
 ### Toggle Disabled State
 
 ```tsx

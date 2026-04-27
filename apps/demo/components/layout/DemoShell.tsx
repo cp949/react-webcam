@@ -14,6 +14,7 @@ import RefHandleSection from '../sections/RefHandleSection';
 import StateInspectorSection from '../sections/StateInspectorSection';
 import DisabledStateSection from '../sections/DisabledStateSection';
 import DisabledFallbackSection from '../sections/DisabledFallbackSection';
+import ErrorFallbackSection from '../sections/ErrorFallbackSection';
 import RecipesSection from '../sections/RecipesSection';
 import PauseResumeSection from '../sections/PauseResumeSection';
 import VisualDebugPropsSection from '../sections/VisualDebugPropsSection';
@@ -44,6 +45,8 @@ function renderSection(section: DemoSectionId) {
       return <DisabledStateSection />;
     case 'disabled-fallback':
       return <DisabledFallbackSection />;
+    case 'error-fallback':
+      return <ErrorFallbackSection />;
     case 'recipes':
       return <RecipesSection />;
     case 'pause-resume':

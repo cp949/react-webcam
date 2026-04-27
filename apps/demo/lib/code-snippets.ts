@@ -320,6 +320,37 @@ export default function DisabledFallbackExample() {
   );
 }`,
 
+  'error-fallback': `import { Webcam } from '@cp949/react-webcam';
+import type { WebcamDetail } from '@cp949/react-webcam';
+
+type WebcamErrorDetail = Extract<
+  WebcamDetail,
+  { phase: 'denied' | 'unavailable' | 'unsupported' | 'insecure' | 'error' }
+>;
+
+export default function ErrorFallbackExample() {
+  return (
+    <Webcam
+      webcamOptions={{
+        audioEnabled: false,
+        deviceId: '__missing_camera__',
+        aspectRatio: 16 / 9,
+      }}
+      errorFallback={(detail: WebcamErrorDetail) => (
+        <div>
+          <strong>
+            {detail.errorCode === 'device-not-found'
+              ? 'Camera is unavailable'
+              : 'Camera could not be started'}
+          </strong>
+          <p>errorCode: {detail.errorCode}</p>
+          <button type="button">Retry</button>
+        </div>
+      )}
+    />
+  );
+}`,
+
   recipes: `import { useRef, useState } from 'react';
 import { Webcam } from '@cp949/react-webcam';
 import type { WebcamHandle, WebcamSnapshot } from '@cp949/react-webcam';

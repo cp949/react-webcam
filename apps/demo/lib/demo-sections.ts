@@ -58,6 +58,12 @@ export const DEMO_SECTIONS: DemoSection[] = [
     keywords: ['disabledFallback', 'disabled', 'CTA', 'placeholder'],
   },
   {
+    id: 'error-fallback',
+    title: 'Error Fallback',
+    description: 'custom errorFallback으로 카메라 실패 UI 대체',
+    keywords: ['errorFallback', 'errorCode', 'device-not-found', 'unavailable'],
+  },
+  {
     id: 'recipes',
     title: 'Recipes',
     description: '실전 활용 예제',

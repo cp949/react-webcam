@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0
+
+### Minor Changes
+
+- Add `errorFallback` to render custom UI for camera error states.
+
 ## 1.1.1
 
 ### Patch Changes

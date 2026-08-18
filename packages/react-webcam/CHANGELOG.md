@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1
+
+### Patch Changes
+
+- f728794: Update development dependencies and resolve pnpm audit advisories for vite and esbuild via pnpm overrides.
+
 ## 1.2.0
 
 ### Minor Changes

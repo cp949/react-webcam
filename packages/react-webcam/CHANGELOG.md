@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0
+
+### Minor Changes
+
+- 8b3d64c: Widen `peerDependencies` to accept React 18 and 19 (`^18.0.0 || ^19.0.0`). No source changes were required — `Webcam` already used `forwardRef`/`useImperativeHandle`, which works identically on both major versions. Verified with a one-off local run of the test suite and type-check against React 18.3.1 / `@types/react` 18.3.31 before reverting dev dependencies back to React 19.
+
+### Patch Changes
+
+- 9fcc23c: Fix the built-in aspect ratio / camera direction dropdown menu getting clipped by the webcam frame's `overflow: hidden` root. The menu now opens right-aligned to its trigger button (`top: 100%`, `right: 0`) instead of relying on the browser's default static position, which used to grow past the right edge when the trigger sits in the top-right toolbar.
+
 ## 1.2.1
 
 ### Patch Changes

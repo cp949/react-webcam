@@ -23,6 +23,14 @@ node_modules
 
 # Testing
 coverage
+test-results/
+playwright-report/
+
+# chrome83-floor 컨테이너 검증 시, HOME이 저장소 루트와 다른 컨테이너
+# 환경에서는 pnpm이 store-dir을 워크스페이스 루트 아래로 잡는다
+# (scripts/run-chrome83-floor.mjs 참고). host git 워킹 트리를 어지럽히지
+# 않도록 무시한다.
+.pnpm-store/
 
 # TypeScript
 *.tsbuildinfo

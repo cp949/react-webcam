@@ -24,7 +24,6 @@
     "test:watch": "vitest",
     "prepare": "pnpm build",
     "prepack": "pnpm build",
-    "publish:npm": "npm publish",
     "release": "release-it"
   },
   "dependencies": {

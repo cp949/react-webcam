@@ -48,7 +48,7 @@ pnpm test
 pnpm readme:package
 pnpm readme:package:check
 pnpm test:chrome83  # Chrome 83 컨테이너 필요, "Chrome 83 floor validation" 절 참고
-pnpm release  # packages/react-webcam에서 release-it 실행: 버전 결정·changelog·커밋·태그·push·npm publish를 한 번에 처리
+pnpm release  # packages/react-webcam에서 release-it 실행(같은 경로의 커밋만 버전/changelog 대상): 버전 결정·changelog·커밋·태그·push·npm publish를 한 번에 처리
 
 # 데모 앱
 pnpm --filter demo dev
@@ -85,20 +85,34 @@ podman run --rm --network host --userns=keep-id \
 
 이 저장소는 `packages/react-webcam`에서 실행하는 release-it 기반으로 릴리스한다.
 버전 증가폭과 `packages/react-webcam/CHANGELOG.md` 항목은 Conventional Commits
-커밋 로그(`feat:`/`fix:`/`refactor:`/...)에서 자동으로 결정된다.
+커밋 로그에서 자동으로 결정되지만, 실제로 버전을 올리고 changelog에 기록되는
+타입은 `feat`(minor), `fix`/`perf`(patch), `BREAKING CHANGE` 푸터(major)뿐이다.
+`refactor`/`docs`/`chore`/`style`/`test`/`build`/`ci`는 버전에 반영되지 않고
+조용히 무시된다. 이 계산은 `packages/react-webcam` 경로의 커밋만 대상으로 하므로
+(`.release-it.json`의 `commitsOpts`/`gitRawCommitsOpts`의 `path` 설정), 모노레포의
+다른 위치(`apps/demo`, `e2e/`, `docker/` 등)에서 발생한 커밋은 이 패키지의 릴리스를
+트리거하지 않는다.
 
+release-it 설정은 `packages/react-webcam/.release-it.json`에 있다.
+`requireBranch: "main"`이 설정되어 있어 main이 아닌 브랜치에서는 실행이 거부된다.
+
+0. 작업 브랜치의 변경 사항을 먼저 `main`에 머지한다. release-it은 main 브랜치가
+   아니면 실행을 거부한다.
 1. main 브랜치에서 아래 검증을 모두 통과시킨다.
-   - `pnpm test`
+   - `pnpm test` (`readme:package:check`를 첫 단계로 이미 실행한다)
    - `pnpm check-types`
    - `pnpm lint`
-   - 필요하면 `pnpm readme:package:check`
    - 필요하면 `pnpm test:chrome83`으로 Chrome 83 컨테이너 실브라우저 스모크를
      실행한다(podman 필요, 결과는 "Chrome 83 통과"로만 기록하고 "Chrome 75
      실행"이라 표기하지 않는다).
 2. 실제로 커밋·태그·push·npm publish가 일어나기 전에 dry-run으로 미리 확인한다.
    ```bash
-   pnpm --filter @cp949/react-webcam run release -- --dry-run
+   pnpm release --dry-run --ci
    ```
+   `--ci`는 비TTY 셸에서 커밋 확인 Y/n 프롬프트가 멈추는 것을 막기 위해 필요하다.
+   main이 아닌 브랜치에서 dry-run만 테스트할 때는 `--no-git.requireBranch`를 추가로
+   붙인다(`pnpm release --dry-run --ci --no-git.requireBranch`). 실제 릴리스는
+   항상 main에서 실행하므로 이 플래그는 필요 없다.
 3. 문제가 없으면 루트에서 릴리스를 실행한다.
    ```bash
    pnpm release
@@ -109,11 +123,20 @@ podman run --rm --network host --userns=keep-id \
    - `vX.Y.Z` annotated 태그 생성 (`@cp949/...` 형식의 package-scoped 태그는 사용하지 않는다)
    - `git push`로 커밋과 태그를 원격에 반영
    - `pnpm publish`로 npm 배포 (release-it 내장 npm 플러그인 대신 pnpm 사용)
-4. GitHub에서 `vX.Y.Z` 태그가 올라왔는지, `release.yml` 워크플로우가 만든 GitHub
+4. npm에 실제로 반영됐는지 확인한다.
+   ```bash
+   npm view @cp949/react-webcam version
+   ```
+   `after:release` 훅(`pnpm publish --no-git-checks`)의 출력은 기본적으로 숨겨져
+   있어(release-it이 verbose 채널로만 내보낸다), `pnpm release`가 겉보기에 성공한
+   것처럼 끝나도 npm publish가 실패했거나 아직 끝나지 않았을 수 있다. 훅 출력을
+   직접 보려면 `-V`(`--verbose`)를 추가한다: `pnpm release -V`.
+   publish가 실패했다면(예: OTP를 비대화형으로 입력할 수 없는 경우) `pnpm release`를
+   다시 실행하지 말고 `packages/react-webcam`에서 `pnpm publish --no-git-checks`만
+   다시 실행한다. 새 커밋이 없는 상태에서 `pnpm release`를 재실행하면 release-it이
+   올릴 새 버전이 없어 의도한 대로 동작하지 않는다.
+5. GitHub에서 `vX.Y.Z` 태그가 올라왔는지, `release.yml` 워크플로우가 만든 GitHub
    Release가 올바른지 확인한다.
-
-release-it 설정은 `packages/react-webcam/.release-it.json`에 있다.
-`requireBranch: "main"`이 설정되어 있어 main이 아닌 브랜치에서는 실행이 거부된다.
 
 GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-webcam/CHANGELOG.md`에서
 해당 버전 섹션을 읽어 릴리스 노트를 만든다.

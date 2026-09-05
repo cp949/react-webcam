@@ -35,6 +35,10 @@ run. Camera access still requires HTTPS or localhost, user permission, and an
 available device. The repository's Next/MUI demo is a separate consumer and is
 not included in this target.
 
+Automated verification has a practical floor of Chrome 83, since Playwright's
+CDP constraints make Chrome 75/76 automation impossible. This automation gate
+runs as a local manual script before release, not in CI.
+
 ## Basic Usage
 
 ```tsx

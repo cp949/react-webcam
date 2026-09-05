@@ -95,8 +95,8 @@ export interface WebcamProps {
   fitMode?: "unset" | "fill" | "cover" | "contain";
 
   /**
-   * 제어형 좌우 반전 상태다.
-   * `onFlippedChange`가 없으면 읽기 전용 제어 상태가 된다.
+   * 제어형 좌우 반전 값이다.
+   * `onFlippedChange`와 함께 사용해 부모가 상태를 갱신한다.
    */
   flipped?: boolean;
 
@@ -110,8 +110,8 @@ export interface WebcamProps {
   defaultFlipped?: boolean;
 
   /**
-   * 제어형 웹캠 옵션이다.
-   * `onWebcamOptionsChange`가 없으면 읽기 전용 제어 상태가 된다.
+   * 제어형 웹캠 옵션 값이다.
+   * `onWebcamOptionsChange`와 함께 사용해 부모가 상태를 갱신한다.
    */
   webcamOptions?: WebcamOptions;
 
@@ -248,7 +248,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             }
             // 제어 모드에서는 undefined 업데이트를 무시한다.
           }
-          // onWebcamOptionsChange가 없으면 읽기 전용 제어 상태로 취급한다.
+          // 변경 콜백이 없으면 제어형 값의 내부 변경 요청을 반영하지 않는다.
         } else {
           ctrl.setWebcamOptions(updater);
         }
@@ -508,7 +508,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
                   if (props.onWebcamOptionsChange) {
                     props.onWebcamOptionsChange(updater(ctrl.webcamOptions));
                   }
-                  // 읽기 전용 제어 상태에서는 내부 변경을 무시한다.
+                  // 변경 콜백이 없으면 제어형 값의 내부 변경 요청을 반영하지 않는다.
                 } else {
                   setWebcamOptions(updater);
                 }
@@ -530,7 +530,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
                   if (props.onWebcamOptionsChange) {
                     props.onWebcamOptionsChange(updater(ctrl.webcamOptions));
                   }
-                  // 읽기 전용 제어 상태에서는 내부 변경을 무시한다.
+                  // 변경 콜백이 없으면 제어형 값의 내부 변경 요청을 반영하지 않는다.
                 } else {
                   setWebcamOptions(updater);
                 }

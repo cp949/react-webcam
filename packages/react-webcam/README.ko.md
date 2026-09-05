@@ -6,7 +6,7 @@
 
 React 18/19를 지원하는 웹캠 컴포넌트 라이브러리입니다.
 
-- controlled / uncontrolled 상태 소유권을 지원합니다.
+- Controlled / Uncontrolled 상태 소유권을 지원합니다.
 - `WebcamHandle` ref로 snapshot, 옵션 변경, playback pause/resume을 제어할 수 있습니다.
 - `onStateChange`로 권한 거부, autoplay 차단, 장치 unavailable 같은 런타임 상태를 다룰 수 있습니다.
 
@@ -15,28 +15,20 @@ React 18/19를 지원하는 웹캠 컴포넌트 라이브러리입니다.
 ## 설치
 
 ```bash
-pnpm add @cp949/react-webcam
-# npm install @cp949/react-webcam
+npm install @cp949/react-webcam
 ```
 
 **React 18과 19를 지원합니다.** React 17 이하는 지원하지 않습니다.
 
 ```bash
-pnpm add react@^18 react-dom@^18
+npm install react@^18 react-dom@^18
 # 또는
-pnpm add react@^19 react-dom@^19
+npm install react@^19 react-dom@^19
 ```
 
 ## 브라우저 호환성 목표
 
-pack된 라이브러리 산출물과 소비자 번들의 목표 하한은 Chrome Desktop 75입니다.
-이는 호환성 목표이며 Chrome 75 브라우저 직접 실행 기록은 아닙니다. 카메라 접근에는
-HTTPS 또는 localhost, 사용자 권한, 사용 가능한 장치가 필요합니다. 저장소의 Next/MUI
-demo는 별도 소비자이므로 이 목표에 포함하지 않습니다.
-
-자동화 검증의 실제 하한은 Chrome 83입니다(Playwright의 CDP 제약으로 Chrome 75/76
-자동화가 불가능하기 때문입니다). 이 자동화 게이트는 CI가 아니라 릴리스 전 로컬 수동
-스크립트로 실행됩니다.
+pack된 라이브러리 산출물과 소비자 번들은 Chrome Desktop 75에서 동작을 확인했습니다.
 
 ## 기본 사용법
 
@@ -79,12 +71,12 @@ export function CameraView() {
 | `errorFallback`                 | `React.ReactNode \| ((detail: WebcamErrorDetail) => React.ReactNode)`  | —                | `denied` / `unavailable` / `unsupported` / `insecure` / `error` 상태의 커스텀 UI입니다. `playback-error`는 포함하지 않습니다. |
 | `onStateChange`                 | `(state: WebcamDetail) => void`                                        | —                | `WebcamDetail`이 바뀔 때마다 호출됩니다(뒤의 상태 변화 감지 절 참고).                           |
 | `fitMode`                       | `"unset" \| "fill" \| "cover" \| "contain"`                            | `"unset"`        | `webcamOptions.aspectRatio`가 없을 때 비디오를 박스에 맞추는 방식입니다.                        |
-| `flipped`                       | `boolean`                                                               | —                | 제어형 좌우 반전 상태입니다. `onFlippedChange`가 없으면 읽기 전용입니다(뒤의 `flipped` 절 참고). |
-| `onFlippedChange`               | `(value: boolean) => void`                                             | —                | 제어 모드에서 반전 변경이 요청될 때 호출됩니다.                                                 |
-| `defaultFlipped`                | `boolean`                                                               | `false`          | 비제어 모드의 초기 반전 상태입니다. 마운트 시 한 번만 적용됩니다.                               |
-| `webcamOptions`                 | `WebcamOptions`                                                         | —                | 제어형 카메라 옵션(`facingMode`, `aspectRatio`, `audioEnabled`, `deviceId`, `size` 등)입니다. `onWebcamOptionsChange`가 없으면 읽기 전용입니다(뒤의 `webcamOptions` 절 참고). |
-| `onWebcamOptionsChange`         | `(options: WebcamOptions) => void`                                     | —                | 제어 모드에서 옵션 변경이 요청될 때 호출됩니다.                                                 |
-| `defaultWebcamOptions`          | `WebcamOptions`                                                         | —                | 비제어 모드의 초기 카메라 옵션입니다. 마운트 시 한 번만 적용됩니다.                             |
+| `flipped`                       | `boolean`                                                               | —                | Controlled 모드의 좌우 반전 값입니다. `onFlippedChange`와 함께 사용하여 부모가 상태를 갱신합니다(뒤의 `flipped` 절 참고). |
+| `onFlippedChange`               | `(value: boolean) => void`                                             | —                | `flipped`와 함께 사용합니다. 반전 변경이 요청될 때 호출됩니다.                                 |
+| `defaultFlipped`                | `boolean`                                                               | `false`          | Uncontrolled 모드의 초기 반전 상태입니다. 마운트 시 한 번만 적용됩니다.                         |
+| `webcamOptions`                 | `WebcamOptions`                                                         | —                | Controlled 모드의 카메라 옵션(`facingMode`, `aspectRatio`, `audioEnabled`, `deviceId`, `size` 등)입니다. `onWebcamOptionsChange`와 함께 사용하여 부모가 상태를 갱신합니다(뒤의 `webcamOptions` 절 참고). |
+| `onWebcamOptionsChange`         | `(options: WebcamOptions) => void`                                     | —                | `webcamOptions`와 함께 사용합니다. 옵션 변경이 요청될 때 호출됩니다.                           |
+| `defaultWebcamOptions`          | `WebcamOptions`                                                         | —                | Uncontrolled 모드의 초기 카메라 옵션입니다. 마운트 시 한 번만 적용됩니다.                       |
 | `visibleFlipButton`             | `boolean`                                                               | `false`          | 내장 좌우 반전 버튼 표시 여부입니다.                                                            |
 | `visibleCameraDirectionButton`  | `boolean`                                                               | `false`          | 내장 전/후면 카메라 버튼 표시 여부입니다.                                                       |
 | `visibleAspectRatioButton`      | `boolean`                                                               | `false`          | 내장 화면 비율 버튼 표시 여부입니다.                                                            |
@@ -323,7 +315,8 @@ export function CameraWithSnapshot() {
 
 ## 디바이스 목록 조회
 
-렌더링 전에 시스템의 입력 디바이스 목록이 필요하면 공개 유틸 함수를 사용할 수 있습니다.
+사용 가능한 장치 목록은 `Webcam` 컴포넌트에서 제공하지 않습니다.
+라이브러리가 제공하는 유틸리티로 조회하며, 사용 방법은 다음과 같습니다.
 
 ```tsx
 import {
@@ -332,12 +325,20 @@ import {
   listVideoInputDevices,
 } from "@cp949/react-webcam";
 
-const allDevices = await listMediaDevices();
-const cameras = await listVideoInputDevices();
-const microphones = await listAudioInputDevices();
+const allDevices: MediaDeviceInfo[] = await listMediaDevices();
+const cameras: MediaDeviceInfo[] = await listVideoInputDevices();
+const microphones: MediaDeviceInfo[] = await listAudioInputDevices();
 ```
 
 반환 타입은 브라우저 기본 `MediaDeviceInfo[]`입니다.
+
+목록의 첫 번째 디바이스를 `Webcam`에 전달하려면 `deviceId`를 `webcamOptions`에 넣습니다.
+
+```tsx
+const selectedDeviceId = allDevices[0]?.deviceId;
+
+<Webcam webcamOptions={{ deviceId: selectedDeviceId }} />;
+```
 
 ## 라벨과 로컬라이제이션
 
@@ -365,16 +366,16 @@ const microphones = await listAudioInputDevices();
 
 ## 상태 소유권 - Controlled / Uncontrolled
 
-`flipped`와 `webcamOptions`는 React의 표준 controlled/uncontrolled 패턴을 따릅니다.
+`flipped`와 `webcamOptions`는 React의 표준 Controlled/Uncontrolled 패턴을 따릅니다.
 
 ### `flipped` 소유권
 
 | 사용 방법                     | 동작                                                                                   |
 | ----------------------------- | -------------------------------------------------------------------------------------- |
-| `flipped` + `onFlippedChange` | 완전 controlled. 버튼/ref 변경 시 `onFlippedChange`만 호출하고 내부 상태는 바꾸지 않음 |
-| `flipped`                     | read-only controlled. 버튼/ref 변경이 무시됨                                           |
-| `defaultFlipped`              | uncontrolled. 마운트 시 초기값 지정, 이후 내부 상태를 라이브러리가 관리                |
-| 둘 다 미지정                  | uncontrolled, 초기값 `false`                                                           |
+| `flipped` + `onFlippedChange` | Controlled 모드. 버튼/ref 변경 시 `onFlippedChange`만 호출하고 내부 상태는 바꾸지 않음 |
+| `flipped`                     | 변경 콜백 없는 Controlled 모드. 버튼/ref 변경 요청이 반영되지 않음                   |
+| `defaultFlipped`              | Uncontrolled 모드. 마운트 시 초기값 지정, 이후 내부 상태를 라이브러리가 관리           |
+| 둘 다 미지정                  | Uncontrolled 모드, 초기값 `false`                                                      |
 
 ```tsx
 import { useState } from "react";
@@ -393,16 +394,16 @@ export function FlipOwnershipExample() {
 }
 ```
 
-첫 번째 `Webcam`은 상위 컴포넌트가 반전 상태를 소유하는 controlled 예제이고, 두 번째 `Webcam`은 초기값만 넘기고 이후 상태를 내부에서 관리하는 uncontrolled 예제입니다.
+첫 번째 `Webcam`은 상위 컴포넌트가 반전 상태를 소유하는 Controlled 모드 예제이고, 두 번째 `Webcam`은 초기값만 넘기고 이후 상태를 내부에서 관리하는 Uncontrolled 모드 예제입니다.
 
 ### `webcamOptions` 소유권
 
 | 사용 방법                                 | 동작                      |
 | ----------------------------------------- | ------------------------- |
-| `webcamOptions` + `onWebcamOptionsChange` | 완전 controlled           |
-| `webcamOptions`                           | read-only controlled      |
-| `defaultWebcamOptions`                    | uncontrolled              |
-| 둘 다 미지정                              | uncontrolled, 기본값 사용 |
+| `webcamOptions` + `onWebcamOptionsChange` | Controlled 모드           |
+| `webcamOptions`                           | 변경 콜백 없는 Controlled 모드. 내부 변경 요청이 반영되지 않음 |
+| `defaultWebcamOptions`                    | Uncontrolled 모드         |
+| 둘 다 미지정                              | Uncontrolled 모드, 기본값 사용 |
 
 ```tsx
 import { useState } from "react";
@@ -433,7 +434,7 @@ export function WebcamOptionsOwnershipExample() {
 }
 ```
 
-첫 번째는 카메라 방향과 비율 변경 결과를 상위 상태에 반영하는 controlled 예제이고, 두 번째는 초기 옵션만 지정한 뒤 내부 상태에 맡기는 uncontrolled 예제입니다.
+첫 번째는 카메라 방향과 비율 변경 결과를 상위 상태에 반영하는 Controlled 모드 예제이고, 두 번째는 초기 옵션만 지정한 뒤 내부 상태에 맡기는 Uncontrolled 모드 예제입니다.
 
 ## 런타임 제약
 

@@ -22,8 +22,6 @@
 ## 배포 패키지 설치
 
 ```bash
-pnpm add @cp949/react-webcam
-# 또는
 npm install @cp949/react-webcam
 ```
 

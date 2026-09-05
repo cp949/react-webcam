@@ -23,8 +23,6 @@ This repository has two main parts.
 ## Install The Published Package
 
 ```bash
-pnpm add @cp949/react-webcam
-# or
 npm install @cp949/react-webcam
 ```
 

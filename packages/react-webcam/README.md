@@ -17,17 +17,16 @@ For repository-level workflow and development commands, see the root README.
 ## Install
 
 ```bash
-pnpm add @cp949/react-webcam
-# npm install @cp949/react-webcam
+npm install @cp949/react-webcam
 ```
 
 **This package supports React 18 and 19.** React 17 and below are not
 supported.
 
 ```bash
-pnpm add react@^18 react-dom@^18
+npm install react@^18 react-dom@^18
 # or
-pnpm add react@^19 react-dom@^19
+npm install react@^19 react-dom@^19
 ```
 
 ## Browser Compatibility Target
@@ -83,11 +82,11 @@ below) in addition to the props listed here.
 | `errorFallback`                | `React.ReactNode \| ((detail: WebcamErrorDetail) => React.ReactNode)` | —                | Custom UI for the `denied` / `unavailable` / `unsupported` / `insecure` / `error` phases. Does not cover `playback-error`. |
 | `onStateChange`                | `(state: WebcamDetail) => void`                                       | —                | Called whenever `WebcamDetail` changes (see Observe Runtime State below).                            |
 | `fitMode`                      | `"unset" \| "fill" \| "cover" \| "contain"`                           | `"unset"`        | How the video fills its box when `webcamOptions.aspectRatio` is not set.                             |
-| `flipped`                      | `boolean`                                                             | —                | Controlled horizontal flip state. Read-only without `onFlippedChange` (see `flipped` below).         |
-| `onFlippedChange`              | `(value: boolean) => void`                                            | —                | Called when a controlled flip change is requested.                                                  |
+| `flipped`                      | `boolean`                                                             | —                | Horizontal flip value for controlled mode. Use with `onFlippedChange` so the parent updates the state (see `flipped` below). |
+| `onFlippedChange`              | `(value: boolean) => void`                                            | —                | Use with `flipped`. Called when a flip change is requested.                                        |
 | `defaultFlipped`               | `boolean`                                                             | `false`          | Initial flip state for uncontrolled mode. Applied once on mount.                                    |
-| `webcamOptions`                | `WebcamOptions`                                                       | —                | Controlled camera options (`facingMode`, `aspectRatio`, `audioEnabled`, `deviceId`, `size`, ...). Read-only without `onWebcamOptionsChange` (see `webcamOptions` below). |
-| `onWebcamOptionsChange`        | `(options: WebcamOptions) => void`                                    | —                | Called when a controlled option change is requested.                                                |
+| `webcamOptions`                | `WebcamOptions`                                                       | —                | Camera options for controlled mode (`facingMode`, `aspectRatio`, `audioEnabled`, `deviceId`, `size`, ...). Use with `onWebcamOptionsChange` so the parent updates the state (see `webcamOptions` below). |
+| `onWebcamOptionsChange`        | `(options: WebcamOptions) => void`                                    | —                | Use with `webcamOptions`. Called when an option change is requested.                               |
 | `defaultWebcamOptions`         | `WebcamOptions`                                                       | —                | Initial camera options for uncontrolled mode. Applied once on mount.                                |
 | `visibleFlipButton`            | `boolean`                                                             | `false`          | Shows the built-in flip toggle button.                                                              |
 | `visibleCameraDirectionButton` | `boolean`                                                             | `false`          | Shows the built-in front/rear camera button.                                                        |
@@ -355,6 +354,15 @@ const microphones = await listAudioInputDevices();
 
 The return type is the browser-native `MediaDeviceInfo[]`.
 
+To pass the first device in the list to `Webcam`, put its `deviceId` in
+`webcamOptions`.
+
+```tsx
+const selectedDeviceId = allDevices[0]?.deviceId;
+
+<Webcam webcamOptions={{ deviceId: selectedDeviceId }} />;
+```
+
 ## Labels And Localization
 
 The built-in button labels default to Korean. Pass the `labels` prop when you
@@ -389,7 +397,7 @@ patterns.
 | Pattern                       | Behavior                                                                          |
 | ----------------------------- | --------------------------------------------------------------------------------- |
 | `flipped` + `onFlippedChange` | Fully controlled. Buttons and ref updates call `onFlippedChange` only             |
-| `flipped`                     | Read-only controlled. Button and ref changes are ignored                          |
+| `flipped`                     | Controlled without a change callback. Button and ref change requests are ignored |
 | `defaultFlipped`              | Uncontrolled. Initial value only, then internal state is managed by the component |
 | Neither prop                  | Uncontrolled, default initial value `false`                                       |
 
@@ -415,7 +423,7 @@ export function FlipOwnershipExample() {
 | Pattern                                   | Behavior                   |
 | ----------------------------------------- | -------------------------- |
 | `webcamOptions` + `onWebcamOptionsChange` | Fully controlled           |
-| `webcamOptions`                           | Read-only controlled       |
+| `webcamOptions`                           | Controlled without a change callback. Internal change requests are ignored |
 | `defaultWebcamOptions`                    | Uncontrolled               |
 | Neither prop                              | Uncontrolled with defaults |
 

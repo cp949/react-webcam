@@ -13,9 +13,9 @@
     "llm.txt"
   ],
   "scripts": {
-    "build": "tsup --clean && node ./scripts/generate-llm-txt.mjs && pnpm audit:chrome75",
+    "build": "tsdown --clean --minify && node ./scripts/generate-llm-txt.mjs && pnpm audit:chrome75",
     "audit:chrome75": "node ./scripts/chrome75-package-audit.mjs",
-    "dev": "tsup --clean --watch",
+    "dev": "tsdown --clean --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -39,7 +39,7 @@
     "happy-dom": "^20.11.2",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.23.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.11"
   },

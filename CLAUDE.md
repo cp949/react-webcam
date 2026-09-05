@@ -182,7 +182,7 @@ GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-we
 - TypeScript strict 모드
 - Biome으로 린트와 포매팅 수행
 - import 경로에 `.js` 확장자 사용
-- 라이브러리 출력은 tsup으로 빌드
+- 라이브러리 출력은 tsdown으로 빌드
 - 주석과 UI 라벨은 한국어 유지가 기본 원칙이다
 - 작은따옴표, 세미콜론, 2칸 들여쓰기를 따른다
 

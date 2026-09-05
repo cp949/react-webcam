@@ -1,4 +1,4 @@
-/** clsx와 호환되는 내부 클래스 이름 조합기다. */
+/** An internal class name combiner compatible with clsx's common inputs. */
 
 type ClassNameDictionary = Record<string, unknown>;
 
@@ -48,7 +48,7 @@ function classNameFrom(value: ClassNameValue): string {
   return className;
 }
 
-/** truthy 클래스 값만 원래 순서대로 공백으로 연결한다. */
+/** Joins truthy class values with spaces in their original order. */
 export function classNames(...values: ClassNameValue[]): string {
   let className = "";
 

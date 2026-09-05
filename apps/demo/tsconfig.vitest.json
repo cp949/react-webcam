@@ -9,7 +9,7 @@
     "tests/**/*.spec.ts",
     "tests/**/*.spec.tsx",
     "tests/setup.ts",
-    "vitest.config.ts"
+    "vitest.config.mts"
   ],
   "exclude": []
 }

@@ -1,8 +1,8 @@
 /** 좌우 반전 토글 버튼 컴포넌트다. */
 
-import clsx from "clsx";
 import type React from "react";
 import { FlipCameraIcon } from "../icons/FlipCameraIcon.js";
+import { classNames } from "../utils/class-names.js";
 import { IconButton } from "./primitives/IconButton.js";
 
 /** 좌우 반전 버튼이 받는 props다. */
@@ -31,7 +31,7 @@ export function FlipButton(props: FlipButtonProps) {
   const { className, flipped = false, onChange, style, label = "미러" } = props;
   return (
     <span
-      className={clsx("FlipButton-root", className)}
+      className={classNames("FlipButton-root", className)}
       style={{ color: flipped ? "#ff7600" : "#fff", ...style }}
     >
       <IconButton

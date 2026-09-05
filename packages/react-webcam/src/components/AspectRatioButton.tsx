@@ -1,9 +1,9 @@
 /** 화면 비율 선택 버튼 컴포넌트다. */
 
-import clsx from "clsx";
 import React from "react";
 import type { AspectRatioOption } from "../aspect-ratio-option.js";
 import { AspectRatioIcon } from "../icons/AspectRatioIcon.js";
+import { classNames } from "../utils/class-names.js";
 import { roundTo3Decimals } from "../utils/round-to-3-decimals.js";
 import { IconButton } from "./primitives/IconButton.js";
 import { MenuPopup } from "./primitives/MenuPopup.js";
@@ -60,7 +60,7 @@ export function AspectRatioButton(props: AspectRatioButtonProps) {
 
   return (
     <div
-      className={clsx("AspectRatioButton-root", className)}
+      className={classNames("AspectRatioButton-root", className)}
       style={{ position: "relative", ...style }}
     >
       <IconButton

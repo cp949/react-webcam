@@ -1,8 +1,8 @@
 /** 카메라 방향 선택 버튼 컴포넌트다. */
 
-import clsx from "clsx";
 import React from "react";
 import { CameraSwitchIcon } from "../icons/CameraSwitchIcon.js";
+import { classNames } from "../utils/class-names.js";
 import { IconButton } from "./primitives/IconButton.js";
 import { MenuPopup } from "./primitives/MenuPopup.js";
 
@@ -66,7 +66,7 @@ export function FacingModeButton(props: FacingModeButtonProps) {
 
   return (
     <div
-      className={clsx("FacingModeButton-root", className)}
+      className={classNames("FacingModeButton-root", className)}
       style={{ position: "relative", ...style }}
     >
       <IconButton

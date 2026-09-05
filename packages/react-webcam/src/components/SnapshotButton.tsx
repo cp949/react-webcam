@@ -1,8 +1,8 @@
 /** 스냅샷 촬영 버튼 컴포넌트다. */
 
-import clsx from "clsx";
 import React from "react";
 import { CameraIcon } from "../icons/CameraIcon.js";
+import { classNames } from "../utils/class-names.js";
 import { IconButton } from "./primitives/IconButton.js";
 
 /** 스냅샷 버튼이 받는 표시 옵션과 클릭 핸들러다. */
@@ -33,7 +33,7 @@ export function SnapshotButton(props: SnapshotButtonProps) {
   const [hovered, setHovered] = React.useState(false);
   return (
     <span
-      className={clsx("SnapshotButton-root", className)}
+      className={classNames("SnapshotButton-root", className)}
       style={{ color: hovered ? "#1976d2" : "#fff", ...style }}
     >
       <IconButton

@@ -1,6 +1,5 @@
 "use client";
 
-import clsx from "clsx";
 import React, { useEffect, useImperativeHandle, useRef } from "react";
 import { AspectRatioButton } from "./components/AspectRatioButton.js";
 import { FacingModeButton } from "./components/FacingModeButton.js";
@@ -11,6 +10,7 @@ import { useResizeObserver } from "./hooks/useResizeObserver.js";
 import { useTimeoutValue } from "./hooks/useTimeoutValue.js";
 import { useWebcamController } from "./hooks/useWebcamController.js";
 import { CameraIcon } from "./icons/CameraIcon.js";
+import { classNames } from "./utils/class-names.js";
 import type { SnapshotOptions } from "./types/webcam-controller.js";
 import { DEFAULT_WEBCAM_LABELS, type WebcamLabels } from "./types/webcam-labels.js";
 import type { WebcamDetail, WebcamOptions } from "./webcam-types.js";
@@ -353,7 +353,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   return (
     <div
       ref={rootRef}
-      className={clsx("Webcam-root", className, {
+      className={classNames("Webcam-root", className, {
         x_fullHeight: !isFixedHeight,
         x_fixedHeight: isFixedHeight,
       })}

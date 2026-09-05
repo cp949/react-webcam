@@ -332,8 +332,8 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   // ---- 버튼 UI 가시성 ---------------------------------------------------
   const hasOptionButtons =
     visibleFlipButton || visibleCameraDirectionButton || visibleAspectRatioButton;
-  const hasDisabledFallbackProp = Object.hasOwn(props, "disabledFallback");
-  const hasErrorFallbackProp = Object.hasOwn(props, "errorFallback");
+  const hasDisabledFallbackProp = Object.prototype.hasOwnProperty.call(props, "disabledFallback");
+  const hasErrorFallbackProp = Object.prototype.hasOwnProperty.call(props, "errorFallback");
   const showDefaultDisabledPlaceholder = disabled && !hasDisabledFallbackProp;
   const rootBackgroundColor = disabled ? "#f7f8fa" : "#1e1e1e";
   const errorDetail =

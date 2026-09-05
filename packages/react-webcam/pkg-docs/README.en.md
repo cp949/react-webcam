@@ -23,6 +23,14 @@ pnpm add @cp949/react-webcam
 pnpm add react@^19 react-dom@^19
 ```
 
+## Browser Compatibility Target
+
+The packed library artifact and a consumer bundle target Chrome Desktop 75.
+This is a compatibility target, not a record of a direct Chrome 75 browser
+run. Camera access still requires HTTPS or localhost, user permission, and an
+available device. The repository's Next/MUI demo is a separate consumer and is
+not included in this target.
+
 ## Basic Usage
 
 ```tsx

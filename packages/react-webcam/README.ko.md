@@ -25,6 +25,13 @@ pnpm add @cp949/react-webcam
 pnpm add react@^19 react-dom@^19
 ```
 
+## 브라우저 호환성 목표
+
+pack된 라이브러리 산출물과 소비자 번들의 목표 하한은 Chrome Desktop 75입니다.
+이는 호환성 목표이며 Chrome 75 브라우저 직접 실행 기록은 아닙니다. 카메라 접근에는
+HTTPS 또는 localhost, 사용자 권한, 사용 가능한 장치가 필요합니다. 저장소의 Next/MUI
+demo는 별도 소비자이므로 이 목표에 포함하지 않습니다.
+
 ## 기본 사용법
 
 ```tsx

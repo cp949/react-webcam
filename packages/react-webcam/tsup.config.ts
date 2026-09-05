@@ -16,7 +16,12 @@ export default defineConfig((options) => {
     entry: {
       index: "src/index.ts",
     },
-    target: "es2022",
+    target: "chrome75",
+    esbuildOptions(options) {
+      // Chrome 75가 public class field를 지원해도, package audit의 ES2019 parser
+      // 계약을 지키도록 constructor assignment로 낮춘다.
+      options.supported = { "class-field": false, "class-static-field": false };
+    },
     splitting: true,
     sourcemap: true,
     clean: false,

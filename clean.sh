@@ -29,6 +29,7 @@ readonly FIND_EXPR=(
     -o -name blob-report
     -o -path '*/playwright/.cache'
     -o -name chrome83-dist
+    -o -name .pnpm-store
   \)
   -prune
   -print0

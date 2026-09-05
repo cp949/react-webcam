@@ -20,6 +20,8 @@
 - `packages/react-webcam`: 배포 대상 라이브러리 패키지
 - `apps/demo`: 라이브러리 사용 예제와 브라우저 동작 검증용 Next.js 앱
 - `packages/typescript-config`: 워크스페이스 공용 tsconfig
+- `e2e/chrome83-floor`: Chrome 83 실브라우저 스모크용 harness와 Playwright 스펙
+- `docker/chrome83`: Chrome 83 floor validation용 컨테이너 이미지
 - `scripts/generate-package-readme.mjs`: 패키지 README 생성 스크립트
 
 ## 문서 원본과 수정 규칙
@@ -45,6 +47,7 @@ pnpm check-types
 pnpm test
 pnpm readme:package
 pnpm readme:package:check
+pnpm test:chrome83  # Chrome 83 컨테이너 필요, "Chrome 83 floor validation" 절 참고
 pnpm changeset
 pnpm version-packages
 git tag vX.Y.Z
@@ -61,6 +64,26 @@ pnpm test:watch
 pnpm check-types
 ```
 
+## Chrome 83 floor validation
+
+`pnpm test:chrome83`는 host에서 바로 완결되지 않는다. `scripts/run-chrome83-floor.mjs`는
+Chrome 83이 설치된 `docker/chrome83` 컨테이너 안에서 실행되는 것을 전제한다.
+
+```bash
+podman build -t react-webcam-chrome83 docker/chrome83
+podman run --rm --network host --userns=keep-id \
+  -v "$(pwd)":/repo \
+  react-webcam-chrome83 \
+  node scripts/run-chrome83-floor.mjs
+```
+
+컨테이너는 `HOME`을 격리해도 pnpm store 일부(`.pnpm-store/`)가 저장소 루트에 남는다
+(`.gitignore` 처리, `clean.sh`가 정리한다). 컨테이너 실행 직후에는 host에서
+`pnpm install`을 한 번 더 실행해 host의 pnpm store 상태를 복구한다.
+
+결과는 항상 "Chrome 83 통과"로만 기록한다. "Chrome 75 실행"이라 표기하지 않는다
+(`docs/adr/0001-chrome75-target-vs-chrome83-automation-floor.md`).
+
 ## 릴리스 절차
 
 이 저장소는 패키지 단위 changeset 흐름을 기준으로 릴리스한다.
@@ -70,6 +93,9 @@ pnpm check-types
    - `pnpm check-types`
    - `pnpm lint`
    - 필요하면 `pnpm readme:package:check`
+   - 필요하면 `pnpm test:chrome83`으로 Chrome 83 컨테이너 실브라우저 스모크를
+     실행한다(podman 필요, 결과는 "Chrome 83 통과"로만 기록하고 "Chrome 75
+     실행"이라 표기하지 않는다).
 2. 아직 릴리스 메모가 없다면 루트에서 `pnpm changeset`으로 변경 요약을 만든다.
    - 공개 API 추가는 보통 `minor`
    - 회귀 수정, 데모 보강, 내부 안정화는 보통 `patch`

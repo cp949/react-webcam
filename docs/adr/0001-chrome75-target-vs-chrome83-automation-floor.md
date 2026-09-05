@@ -25,8 +25,9 @@ Chrome Desktop 75를 `@cp949/react-webcam`의 공식 호환성 목표(패키지 
 
 ## Consequences
 
-- Chrome 83 컨테이너 + Playwright 자동화 게이트를 도입할 때는 CI가 아니라 릴리스 전
-  로컬 수동 스크립트로 둔다. `scrolla`와 `inspecta` 모두 이 게이트를 CI에 연결하지
-  않는다.
+- Chrome 83 컨테이너 + Playwright 자동화 게이트를 `docker/chrome83/Dockerfile`,
+  `playwright.config.ts`, `pnpm test:chrome83`으로 구현했다. CI가 아니라 릴리스
+  전 로컬 수동 스크립트로 실행한다. `scrolla`와 `inspecta` 모두 이 게이트를
+  CI에 연결하지 않는다.
 - README/pkg-docs의 "브라우저 호환성 목표" 절에 이 자동화 하한과 실행 방식을 함께
   명시한다.

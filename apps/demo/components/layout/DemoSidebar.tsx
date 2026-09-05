@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import { DEMO_SECTIONS } from '../../lib/demo-sections';
-import type { DemoSectionId } from '../../lib/types';
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import { DEMO_SECTIONS } from "../../lib/demo-sections";
+import type { DemoSectionId } from "../../lib/types";
 
 /** 데모 앱 사이드바 props */
 interface DemoSidebarProps {
@@ -33,15 +33,15 @@ function SidebarContent({
   selectedSection,
   onSectionChange,
   drawerWidth,
-}: Pick<DemoSidebarProps, 'selectedSection' | 'onSectionChange' | 'drawerWidth'>) {
+}: Pick<DemoSidebarProps, "selectedSection" | "onSectionChange" | "drawerWidth">) {
   return (
-    <Box sx={{ width: drawerWidth, overflow: 'auto' }}>
+    <Box sx={{ width: drawerWidth, overflow: "auto" }}>
       {/* 사이드바 제목 */}
       <Toolbar>
         <Typography
-          variant="subtitle1"
+          variant='subtitle1'
           noWrap
-          sx={{ color: 'primary.main', fontWeight: 700, fontFamily: 'monospace' }}
+          sx={{ color: "primary.main", fontWeight: 700, fontFamily: "monospace" }}
         >
           Demo
         </Typography>
@@ -55,24 +55,24 @@ function SidebarContent({
             selected={selectedSection === section.id}
             onClick={() => onSectionChange(section.id)}
             sx={{
-              '&.Mui-selected': {
-                backgroundColor: 'primary.50',
-                borderLeft: '3px solid',
-                borderLeftColor: 'primary.main',
+              "&.Mui-selected": {
+                backgroundColor: "primary.50",
+                borderLeft: "3px solid",
+                borderLeftColor: "primary.main",
               },
-              '&.Mui-selected:hover': {
-                backgroundColor: 'primary.100',
+              "&.Mui-selected:hover": {
+                backgroundColor: "primary.100",
               },
             }}
           >
             <ListItemText
               primary={
-                <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                <Typography variant='body2' sx={{ fontWeight: 700 }}>
                   {section.title}
                 </Typography>
               }
               secondary={
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant='caption' color='text.secondary'>
                   {section.description}
                 </Typography>
               }
@@ -98,14 +98,14 @@ export default function DemoSidebar({
     <>
       {/* 모바일: temporary drawer */}
       <Drawer
-        variant="temporary"
+        variant='temporary'
         open={open}
         onClose={onClose}
         ModalProps={{ keepMounted: true }}
         disableScrollLock
         sx={{
-          display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          display: { xs: "block", md: "none" },
+          "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth },
         }}
       >
         <SidebarContent {...contentProps} />
@@ -113,10 +113,10 @@ export default function DemoSidebar({
 
       {/* 데스크톱: permanent drawer */}
       <Drawer
-        variant="permanent"
+        variant='permanent'
         sx={{
-          display: { xs: 'none', md: 'block' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          display: { xs: "none", md: "block" },
+          "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth },
         }}
         open
       >

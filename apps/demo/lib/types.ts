@@ -1,19 +1,19 @@
 // 데모 앱의 핵심 타입 정의
 
 export type DemoSectionId =
-  | 'basic'
-  | 'controls'
-  | 'labels'
-  | 'controlled'
-  | 'device-selection'
-  | 'ref-handle'
-  | 'state'
-  | 'disabled-state'
-  | 'disabled-fallback'
-  | 'error-fallback'
-  | 'recipes'
-  | 'pause-resume'
-  | 'visual-debug';
+  | "basic"
+  | "controls"
+  | "labels"
+  | "controlled"
+  | "device-selection"
+  | "ref-handle"
+  | "state"
+  | "disabled-state"
+  | "disabled-fallback"
+  | "error-fallback"
+  | "recipes"
+  | "pause-resume"
+  | "visual-debug";
 
 export interface DemoSection {
   id: DemoSectionId;

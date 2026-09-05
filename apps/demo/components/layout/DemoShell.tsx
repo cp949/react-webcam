@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import { useState } from 'react';
-import { DEFAULT_SECTION_ID } from '../../lib/demo-sections';
-import type { DemoSectionId } from '../../lib/types';
-import BasicUsageSection from '../sections/BasicUsageSection';
-import CommonControlsSection from '../sections/CommonControlsSection';
-import LabelsLocalizationSection from '../sections/LabelsLocalizationSection';
-import ControlledStateSection from '../sections/ControlledStateSection';
-import DeviceSelectionSection from '../sections/DeviceSelectionSection';
-import RefHandleSection from '../sections/RefHandleSection';
-import StateInspectorSection from '../sections/StateInspectorSection';
-import DisabledStateSection from '../sections/DisabledStateSection';
-import DisabledFallbackSection from '../sections/DisabledFallbackSection';
-import ErrorFallbackSection from '../sections/ErrorFallbackSection';
-import RecipesSection from '../sections/RecipesSection';
-import PauseResumeSection from '../sections/PauseResumeSection';
-import VisualDebugPropsSection from '../sections/VisualDebugPropsSection';
-import DemoHeader from './DemoHeader';
-import DemoSidebar from './DemoSidebar';
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import { useState } from "react";
+import { DEFAULT_SECTION_ID } from "../../lib/demo-sections";
+import type { DemoSectionId } from "../../lib/types";
+import BasicUsageSection from "../sections/BasicUsageSection";
+import CommonControlsSection from "../sections/CommonControlsSection";
+import LabelsLocalizationSection from "../sections/LabelsLocalizationSection";
+import ControlledStateSection from "../sections/ControlledStateSection";
+import DeviceSelectionSection from "../sections/DeviceSelectionSection";
+import RefHandleSection from "../sections/RefHandleSection";
+import StateInspectorSection from "../sections/StateInspectorSection";
+import DisabledStateSection from "../sections/DisabledStateSection";
+import DisabledFallbackSection from "../sections/DisabledFallbackSection";
+import ErrorFallbackSection from "../sections/ErrorFallbackSection";
+import RecipesSection from "../sections/RecipesSection";
+import PauseResumeSection from "../sections/PauseResumeSection";
+import VisualDebugPropsSection from "../sections/VisualDebugPropsSection";
+import DemoHeader from "./DemoHeader";
+import DemoSidebar from "./DemoSidebar";
 
 // 사이드바 너비 상수
 const DRAWER_WIDTH = 260;
@@ -27,36 +27,36 @@ const DRAWER_WIDTH = 260;
 /** 선택된 섹션 ID에 해당하는 섹션 컴포넌트를 반환 */
 function renderSection(section: DemoSectionId) {
   switch (section) {
-    case 'basic':
+    case "basic":
       return <BasicUsageSection />;
-    case 'controls':
+    case "controls":
       return <CommonControlsSection />;
-    case 'labels':
+    case "labels":
       return <LabelsLocalizationSection />;
-    case 'controlled':
+    case "controlled":
       return <ControlledStateSection />;
-    case 'device-selection':
+    case "device-selection":
       return <DeviceSelectionSection />;
-    case 'ref-handle':
+    case "ref-handle":
       return <RefHandleSection />;
-    case 'state':
+    case "state":
       return <StateInspectorSection />;
-    case 'disabled-state':
+    case "disabled-state":
       return <DisabledStateSection />;
-    case 'disabled-fallback':
+    case "disabled-fallback":
       return <DisabledFallbackSection />;
-    case 'error-fallback':
+    case "error-fallback":
       return <ErrorFallbackSection />;
-    case 'recipes':
+    case "recipes":
       return <RecipesSection />;
-    case 'pause-resume':
+    case "pause-resume":
       return <PauseResumeSection />;
-    case 'visual-debug':
+    case "visual-debug":
       return <VisualDebugPropsSection />;
     default:
       return (
         <Box sx={{ p: 4 }}>
-          <Typography color="text.secondary">준비 중인 섹션입니다.</Typography>
+          <Typography color='text.secondary'>준비 중인 섹션입니다.</Typography>
         </Box>
       );
   }
@@ -68,7 +68,7 @@ export default function DemoShell() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: "flex" }}>
       {/* 헤더 */}
       <DemoHeader onMenuOpen={() => setMobileOpen(true)} drawerWidth={DRAWER_WIDTH} />
 
@@ -86,16 +86,16 @@ export default function DemoShell() {
 
       {/* 메인 콘텐츠 영역 */}
       <Box
-        component="main"
+        component='main'
         sx={{
           flexGrow: 1,
           p: { xs: 2, md: 3 },
-          mt: { xs: '56px', sm: '64px' }, // AppBar 높이만큼 (모바일 56px, 데스크톱 64px)
+          mt: { xs: "56px", sm: "64px" }, // AppBar 높이만큼 (모바일 56px, 데스크톱 64px)
           ml: { md: `${DRAWER_WIDTH}px` }, // 데스크톱에서 사이드바 너비만큼
-          minHeight: '100vh',
+          minHeight: "100vh",
         }}
       >
-        <Box sx={{ width: '100%', maxWidth: 1000, mx: 'auto' }}>
+        <Box sx={{ width: "100%", maxWidth: 1000, mx: "auto" }}>
           {renderSection(selectedSection)}
         </Box>
       </Box>

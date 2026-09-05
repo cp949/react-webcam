@@ -1,36 +1,36 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Webcam,
   listMediaDevices,
   listAudioInputDevices,
   listVideoInputDevices,
-} from '@cp949/react-webcam';
-import type { WebcamHandle, WebcamDetail } from '@cp949/react-webcam';
-import Alert from '@mui/material/Alert';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import CardHeader from '@mui/material/CardHeader';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import { CODE_SNIPPETS } from '../../lib/code-snippets';
-import { DEMO_SECTIONS } from '../../lib/demo-sections';
-import { CodeBlockCard } from '../shared/CodeBlockCard';
-import { ExampleCard } from '../shared/ExampleCard';
-import { SectionIntroCard } from '../shared/SectionIntroCard';
-import { StateLogCard } from '../shared/StateLogCard';
+} from "@cp949/react-webcam";
+import type { WebcamHandle, WebcamDetail } from "@cp949/react-webcam";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardHeader from "@mui/material/CardHeader";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { CODE_SNIPPETS } from "../../lib/code-snippets";
+import { DEMO_SECTIONS } from "../../lib/demo-sections";
+import { CodeBlockCard } from "../shared/CodeBlockCard";
+import { ExampleCard } from "../shared/ExampleCard";
+import { SectionIntroCard } from "../shared/SectionIntroCard";
+import { StateLogCard } from "../shared/StateLogCard";
 
-const section = DEMO_SECTIONS.find((item) => item.id === 'device-selection')!;
+const section = DEMO_SECTIONS.find((item) => item.id === "device-selection")!;
 
 /** 미디어 디바이스 목록 조회와 특정 비디오 디바이스 선택 방법을 시연하는 섹션 */
 export default function DeviceSelectionSection() {
@@ -38,7 +38,7 @@ export default function DeviceSelectionSection() {
   const [allDevices, setAllDevices] = useState<MediaDeviceInfo[]>([]);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
-  const [selectedVideoDeviceId, setSelectedVideoDeviceId] = useState('');
+  const [selectedVideoDeviceId, setSelectedVideoDeviceId] = useState("");
   const [snapshot, setSnapshot] = useState<WebcamDetail | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -61,7 +61,7 @@ export default function DeviceSelectionSection() {
         if (current && videos.some((device) => device.deviceId === current)) {
           return current;
         }
-        return videos[0]?.deviceId ?? '';
+        return videos[0]?.deviceId ?? "";
       });
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : String(error));
@@ -92,8 +92,8 @@ export default function DeviceSelectionSection() {
       />
 
       <Alert severity='info' variant='outlined'>
-        디바이스 label은 브라우저 권한 상태에 따라 비어 있을 수 있습니다. 새로고침 후에도
-        비어 있으면 카메라 권한을 먼저 허용해 보세요.
+        디바이스 label은 브라우저 권한 상태에 따라 비어 있을 수 있습니다. 새로고침 후에도 비어
+        있으면 카메라 권한을 먼저 허용해 보세요.
       </Alert>
 
       <Card variant='outlined'>
@@ -101,12 +101,12 @@ export default function DeviceSelectionSection() {
           title='디바이스 목록 조회'
           action={
             <Button size='small' onClick={() => void loadDevices()} disabled={loading}>
-              {loading ? '불러오는 중...' : '디바이스 새로고침'}
+              {loading ? "불러오는 중..." : "디바이스 새로고침"}
             </Button>
           }
         />
         <CardContent>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+          <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
             <FormControl fullWidth>
               <InputLabel id='video-device-select-label'>비디오 입력</InputLabel>
               <Select
@@ -134,7 +134,9 @@ export default function DeviceSelectionSection() {
               <CardHeader title='오디오 입력 목록' />
               <CardContent sx={{ pt: 0 }}>
                 {audioDevices.length === 0 ? (
-                  <Typography color='text.secondary'>오디오 입력 장치를 찾지 못했습니다.</Typography>
+                  <Typography color='text.secondary'>
+                    오디오 입력 장치를 찾지 못했습니다.
+                  </Typography>
                 ) : (
                   <List dense disablePadding>
                     {audioDevices.map((device, index) => (
@@ -167,11 +169,11 @@ export default function DeviceSelectionSection() {
             onStateChange={setSnapshot}
             visibleFlipButton
             visibleCameraDirectionButton
-            style={{ maxWidth: '100%', borderRadius: 8 }}
+            style={{ maxWidth: "100%", borderRadius: 8 }}
           />
         </Box>
         <Typography variant='body2' color='text.secondary' sx={{ mt: 1.5 }}>
-          현재 재생 중인 비디오 deviceId: {webcamRef.current?.getPlayingVideoDeviceId() ?? '(없음)'}
+          현재 재생 중인 비디오 deviceId: {webcamRef.current?.getPlayingVideoDeviceId() ?? "(없음)"}
         </Typography>
       </ExampleCard>
 
@@ -207,7 +209,7 @@ export default function DeviceSelectionSection() {
         }}
       />
 
-      <CodeBlockCard code={CODE_SNIPPETS['device-selection']} />
+      <CodeBlockCard code={CODE_SNIPPETS["device-selection"]} />
     </Stack>
   );
 }

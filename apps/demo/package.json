@@ -8,7 +8,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check-types": "next typegen && tsc --noEmit && tsc --noEmit -p tsconfig.vitest.json",
-    "lint": "pnpm exec biome lint ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@cp949/react-webcam": "workspace:*",

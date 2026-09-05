@@ -1,6 +1,6 @@
 // 각 섹션의 핵심 TSX 코드 예시
 
-import type { DemoSectionId } from './types';
+import type { DemoSectionId } from "./types";
 
 export const CODE_SNIPPETS: Record<DemoSectionId, string> = {
   basic: `import { Webcam } from '@cp949/react-webcam';
@@ -159,7 +159,7 @@ function ReadonlyControlledExample() {
   );
 }`,
 
-  'device-selection': `import { useEffect, useMemo, useState } from 'react';
+  "device-selection": `import { useEffect, useMemo, useState } from 'react';
 import {
   Webcam,
   listMediaDevices,
@@ -213,7 +213,7 @@ export default function DeviceSelectionExample() {
   );
 }`,
 
-  'ref-handle': `import { useRef } from 'react';
+  "ref-handle": `import { useRef } from 'react';
 import { Webcam } from '@cp949/react-webcam';
 import type { WebcamHandle } from '@cp949/react-webcam';
 
@@ -254,7 +254,7 @@ export default function StateInspectorExample() {
   );
 }`,
 
-  'disabled-state': `import { useState } from 'react';
+  "disabled-state": `import { useState } from 'react';
 import { Webcam } from '@cp949/react-webcam';
 import type { WebcamPhase } from '@cp949/react-webcam';
 
@@ -284,7 +284,7 @@ export default function DisabledStateExample() {
   );
 }`,
 
-  'disabled-fallback': `import { useState } from 'react';
+  "disabled-fallback": `import { useState } from 'react';
 import { Webcam } from '@cp949/react-webcam';
 import type { WebcamPhase } from '@cp949/react-webcam';
 
@@ -320,7 +320,7 @@ export default function DisabledFallbackExample() {
   );
 }`,
 
-  'error-fallback': `import { Webcam } from '@cp949/react-webcam';
+  "error-fallback": `import { Webcam } from '@cp949/react-webcam';
 import type { WebcamDetail } from '@cp949/react-webcam';
 
 type WebcamErrorDetail = Extract<
@@ -389,7 +389,7 @@ export default function ProfileCaptureRecipe() {
   );
 }`,
 
-  'pause-resume': `import { useRef, useState } from 'react';
+  "pause-resume": `import { useRef, useState } from 'react';
 import { Webcam } from '@cp949/react-webcam';
 import type { WebcamHandle } from '@cp949/react-webcam';
 
@@ -429,7 +429,7 @@ export default function PauseResumeExample() {
   );
 }`,
 
-  'visual-debug': `import { Webcam } from '@cp949/react-webcam';
+  "visual-debug": `import { Webcam } from '@cp949/react-webcam';
 
 const styles = \`
   .demo-visual-debug-webcam {

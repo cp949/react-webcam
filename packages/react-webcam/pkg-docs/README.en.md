@@ -45,7 +45,7 @@ Using `fitMode` to match a fixed parent container:
 
 ```tsx
 <div style={{ width: 640, height: 480 }}>
-  <Webcam fitMode="cover" webcamOptions={{ audioEnabled: true }} />
+  <Webcam fitMode='cover' webcamOptions={{ audioEnabled: true }} />
 </div>
 ```
 
@@ -127,7 +127,7 @@ export function DisabledExample() {
 
   return (
     <>
-      <button type="button" onClick={() => setDisabled((prev) => !prev)}>
+      <button type='button' onClick={() => setDisabled((prev) => !prev)}>
         Toggle webcam
       </button>
 
@@ -182,10 +182,7 @@ export function CameraView() {
 
   return (
     <div style={{ width: 640, height: "auto" }}>
-      <Webcam
-        webcamOptions={{ aspectRatio: 16 / 9 }}
-        onStateChange={handleStateChange}
-      />
+      <Webcam webcamOptions={{ aspectRatio: 16 / 9 }} onStateChange={handleStateChange} />
     </div>
   );
 }
@@ -247,11 +244,15 @@ export function CameraWithSnapshot() {
     const imageDataUrl = canvas.toDataURL("image/png");
     console.log(imageDataUrl);
 
-    canvas.toBlob((blob) => {
-      if (blob) {
-        // upload(blob);
-      }
-    }, "image/jpeg", 0.9);
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          // upload(blob);
+        }
+      },
+      "image/jpeg",
+      0.9,
+    );
   }
 
   return (
@@ -259,7 +260,7 @@ export function CameraWithSnapshot() {
       <div style={{ width: 640, height: "auto" }}>
         <Webcam ref={webcamRef} webcamOptions={{ aspectRatio: 16 / 9 }} />
       </div>
-      <button type="button" onClick={handleSnapshot}>
+      <button type='button' onClick={handleSnapshot}>
         Take snapshot
       </button>
     </div>
@@ -269,15 +270,15 @@ export function CameraWithSnapshot() {
 
 ### `WebcamHandle` API
 
-| Method | Description |
-| --- | --- |
+| Method                       | Description                                                              |
+| ---------------------------- | ------------------------------------------------------------------------ |
 | `snapshotToCanvas(options?)` | Returns the current frame as `HTMLCanvasElement`, or `null` before ready |
-| `getPlayingVideoDeviceId()` | Returns the current video track device ID |
-| `getPlayingAudioDeviceId()` | Returns the current audio track device ID |
-| `setFlipped(value)` | Updates the horizontal flip state |
-| `setWebcamOptions(updater)` | Updates webcam options |
-| `pausePlayback()` | Pauses only video playback, while keeping the camera stream alive |
-| `resumePlayback()` | Resumes paused video playback |
+| `getPlayingVideoDeviceId()`  | Returns the current video track device ID                                |
+| `getPlayingAudioDeviceId()`  | Returns the current audio track device ID                                |
+| `setFlipped(value)`          | Updates the horizontal flip state                                        |
+| `setWebcamOptions(updater)`  | Updates webcam options                                                   |
+| `pausePlayback()`            | Pauses only video playback, while keeping the camera stream alive        |
+| `resumePlayback()`           | Resumes paused video playback                                            |
 
 > `pausePlayback()` and `resumePlayback()` only call `video.pause()` and
 > `video.play()`. They do not stop the camera hardware or stop any
@@ -337,12 +338,12 @@ patterns.
 
 ### `flipped`
 
-| Pattern | Behavior |
-| --- | --- |
-| `flipped` + `onFlippedChange` | Fully controlled. Buttons and ref updates call `onFlippedChange` only |
-| `flipped` | Read-only controlled. Button and ref changes are ignored |
-| `defaultFlipped` | Uncontrolled. Initial value only, then internal state is managed by the component |
-| Neither prop | Uncontrolled, default initial value `false` |
+| Pattern                       | Behavior                                                                          |
+| ----------------------------- | --------------------------------------------------------------------------------- |
+| `flipped` + `onFlippedChange` | Fully controlled. Buttons and ref updates call `onFlippedChange` only             |
+| `flipped`                     | Read-only controlled. Button and ref changes are ignored                          |
+| `defaultFlipped`              | Uncontrolled. Initial value only, then internal state is managed by the component |
+| Neither prop                  | Uncontrolled, default initial value `false`                                       |
 
 ```tsx
 import { useState } from "react";
@@ -353,16 +354,9 @@ export function FlipOwnershipExample() {
 
   return (
     <>
-      <Webcam
-        flipped={flipped}
-        onFlippedChange={setFlipped}
-        visibleFlipButton
-      />
+      <Webcam flipped={flipped} onFlippedChange={setFlipped} visibleFlipButton />
 
-      <Webcam
-        defaultFlipped
-        visibleFlipButton
-      />
+      <Webcam defaultFlipped visibleFlipButton />
     </>
   );
 }
@@ -370,12 +364,12 @@ export function FlipOwnershipExample() {
 
 ### `webcamOptions`
 
-| Pattern | Behavior |
-| --- | --- |
-| `webcamOptions` + `onWebcamOptionsChange` | Fully controlled |
-| `webcamOptions` | Read-only controlled |
-| `defaultWebcamOptions` | Uncontrolled |
-| Neither prop | Uncontrolled with defaults |
+| Pattern                                   | Behavior                   |
+| ----------------------------------------- | -------------------------- |
+| `webcamOptions` + `onWebcamOptionsChange` | Fully controlled           |
+| `webcamOptions`                           | Read-only controlled       |
+| `defaultWebcamOptions`                    | Uncontrolled               |
+| Neither prop                              | Uncontrolled with defaults |
 
 ```tsx
 import { useState } from "react";

@@ -8,8 +8,11 @@ import { pathToFileURL } from "node:url";
 const DEFAULT_PACKAGE_JSON = "packages/react-webcam/package.json";
 
 function runGit(cwd, args) {
-  return execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] })
-    .trim();
+  return execFileSync("git", args, {
+    cwd,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  }).trim();
 }
 
 export function getReleaseTagName(version) {

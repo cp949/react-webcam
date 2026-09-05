@@ -534,8 +534,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     // `전면` 메뉴 항목을 클릭한다.
     const menuItems = document.querySelectorAll('[role="menuitem"]');
     const userItem = Array.from(menuItems).find((el) => el.textContent?.includes("전면")) as
-      | HTMLElement
-      | undefined;
+      HTMLElement | undefined;
     expect(userItem).not.toBeUndefined();
 
     await act(async () => {
@@ -576,8 +575,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
 
     const menuItems = document.querySelectorAll('[role="menuitem"]');
     const defaultItem = Array.from(menuItems).find((el) => el.textContent?.includes("기본")) as
-      | HTMLElement
-      | undefined;
+      HTMLElement | undefined;
     expect(defaultItem).not.toBeUndefined();
 
     await act(async () => {
@@ -610,8 +608,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     // `4:3` 메뉴 항목을 클릭한다.
     const menuItems = document.querySelectorAll('[role="menuitem"]');
     const item43 = Array.from(menuItems).find((el) => el.textContent?.includes("4:3")) as
-      | HTMLElement
-      | undefined;
+      HTMLElement | undefined;
     expect(item43).not.toBeUndefined();
 
     await act(async () => {

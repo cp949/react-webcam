@@ -43,7 +43,7 @@ export function CameraView() {
 
 ```tsx
 <div style={{ width: 640, height: 480 }}>
-  <Webcam fitMode="cover" webcamOptions={{ audioEnabled: true }} />
+  <Webcam fitMode='cover' webcamOptions={{ audioEnabled: true }} />
 </div>
 ```
 
@@ -121,7 +121,7 @@ export function DisabledExample() {
 
   return (
     <>
-      <button type="button" onClick={() => setDisabled((prev) => !prev)}>
+      <button type='button' onClick={() => setDisabled((prev) => !prev)}>
         웹캠 토글
       </button>
 
@@ -173,10 +173,7 @@ export function CameraView() {
 
   return (
     <div style={{ width: 640, height: "auto" }}>
-      <Webcam
-        webcamOptions={{ aspectRatio: 16 / 9 }}
-        onStateChange={handleStateChange}
-      />
+      <Webcam webcamOptions={{ aspectRatio: 16 / 9 }} onStateChange={handleStateChange} />
     </div>
   );
 }
@@ -237,11 +234,15 @@ export function CameraWithSnapshot() {
     const imageDataUrl = canvas.toDataURL("image/png");
     console.log(imageDataUrl);
 
-    canvas.toBlob((blob) => {
-      if (blob) {
-        // upload(blob);
-      }
-    }, "image/jpeg", 0.9);
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          // upload(blob);
+        }
+      },
+      "image/jpeg",
+      0.9,
+    );
   }
 
   return (
@@ -249,7 +250,7 @@ export function CameraWithSnapshot() {
       <div style={{ width: 640, height: "auto" }}>
         <Webcam ref={webcamRef} webcamOptions={{ aspectRatio: 16 / 9 }} />
       </div>
-      <button type="button" onClick={handleSnapshot}>
+      <button type='button' onClick={handleSnapshot}>
         스냅샷 찍기
       </button>
     </div>
@@ -259,15 +260,15 @@ export function CameraWithSnapshot() {
 
 ### `WebcamHandle` API
 
-| 메서드 | 설명 |
-| --- | --- |
+| 메서드                       | 설명                                                         |
+| ---------------------------- | ------------------------------------------------------------ |
 | `snapshotToCanvas(options?)` | 현재 프레임을 `HTMLCanvasElement`로 반환. 준비 전이면 `null` |
-| `getPlayingVideoDeviceId()` | 재생 중인 비디오 트랙의 디바이스 ID |
-| `getPlayingAudioDeviceId()` | 재생 중인 오디오 트랙의 디바이스 ID |
-| `setFlipped(value)` | 좌우 반전 상태 변경 |
-| `setWebcamOptions(updater)` | 카메라 옵션 갱신 |
-| `pausePlayback()` | video 재생을 일시 정지한다. 카메라 스트림은 유지된다 |
-| `resumePlayback()` | 일시 정지된 video 재생을 재개한다 |
+| `getPlayingVideoDeviceId()`  | 재생 중인 비디오 트랙의 디바이스 ID                          |
+| `getPlayingAudioDeviceId()`  | 재생 중인 오디오 트랙의 디바이스 ID                          |
+| `setFlipped(value)`          | 좌우 반전 상태 변경                                          |
+| `setWebcamOptions(updater)`  | 카메라 옵션 갱신                                             |
+| `pausePlayback()`            | video 재생을 일시 정지한다. 카메라 스트림은 유지된다         |
+| `resumePlayback()`           | 일시 정지된 video 재생을 재개한다                            |
 
 > `pausePlayback()`과 `resumePlayback()`은 `video.pause()` / `video.play()`만 호출합니다. 카메라 하드웨어를 끄거나 `MediaStreamTrack`을 stop하지 않습니다. 카메라 LED는 계속 켜져 있으며, track-ended 이벤트 감지도 계속 작동합니다. `pausePlayback()`은 `onStateChange`를 발생시키지 않지만, `resumePlayback()`은 실패 시 `playback-error`를 publish할 수 있습니다.
 
@@ -322,12 +323,12 @@ const microphones = await listAudioInputDevices();
 
 ### `flipped` 소유권
 
-| 사용 방법 | 동작 |
-| --- | --- |
+| 사용 방법                     | 동작                                                                                   |
+| ----------------------------- | -------------------------------------------------------------------------------------- |
 | `flipped` + `onFlippedChange` | 완전 controlled. 버튼/ref 변경 시 `onFlippedChange`만 호출하고 내부 상태는 바꾸지 않음 |
-| `flipped` | read-only controlled. 버튼/ref 변경이 무시됨 |
-| `defaultFlipped` | uncontrolled. 마운트 시 초기값 지정, 이후 내부 상태를 라이브러리가 관리 |
-| 둘 다 미지정 | uncontrolled, 초기값 `false` |
+| `flipped`                     | read-only controlled. 버튼/ref 변경이 무시됨                                           |
+| `defaultFlipped`              | uncontrolled. 마운트 시 초기값 지정, 이후 내부 상태를 라이브러리가 관리                |
+| 둘 다 미지정                  | uncontrolled, 초기값 `false`                                                           |
 
 ```tsx
 import { useState } from "react";
@@ -338,16 +339,9 @@ export function FlipOwnershipExample() {
 
   return (
     <>
-      <Webcam
-        flipped={flipped}
-        onFlippedChange={setFlipped}
-        visibleFlipButton
-      />
+      <Webcam flipped={flipped} onFlippedChange={setFlipped} visibleFlipButton />
 
-      <Webcam
-        defaultFlipped
-        visibleFlipButton
-      />
+      <Webcam defaultFlipped visibleFlipButton />
     </>
   );
 }
@@ -357,12 +351,12 @@ export function FlipOwnershipExample() {
 
 ### `webcamOptions` 소유권
 
-| 사용 방법 | 동작 |
-| --- | --- |
-| `webcamOptions` + `onWebcamOptionsChange` | 완전 controlled |
-| `webcamOptions` | read-only controlled |
-| `defaultWebcamOptions` | uncontrolled |
-| 둘 다 미지정 | uncontrolled, 기본값 사용 |
+| 사용 방법                                 | 동작                      |
+| ----------------------------------------- | ------------------------- |
+| `webcamOptions` + `onWebcamOptionsChange` | 완전 controlled           |
+| `webcamOptions`                           | read-only controlled      |
+| `defaultWebcamOptions`                    | uncontrolled              |
+| 둘 다 미지정                              | uncontrolled, 기본값 사용 |
 
 ```tsx
 import { useState } from "react";

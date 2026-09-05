@@ -19,18 +19,14 @@ interface SectionIntroCardProps {
 }
 
 /** 섹션 상단에 제목, 설명, 핵심 API 키워드 Chip을 표시하는 카드 */
-export function SectionIntroCard({
-  title,
-  description,
-  keywords,
-}: SectionIntroCardProps) {
+export function SectionIntroCard({ title, description, keywords }: SectionIntroCardProps) {
   return (
-    <Card variant="outlined">
+    <Card variant='outlined'>
       <CardContent>
-        <Typography variant="h5" gutterBottom>
+        <Typography variant='h5' gutterBottom>
           {title}
         </Typography>
-        <Typography color="text.secondary" sx={{ mb: 2 }}>
+        <Typography color='text.secondary' sx={{ mb: 2 }}>
           {description}
         </Typography>
         <Box
@@ -41,17 +37,11 @@ export function SectionIntroCard({
             flexWrap: "wrap",
           }}
         >
-          <Typography variant="body2" sx={{ mr: 0.5 }}>
+          <Typography variant='body2' sx={{ mr: 0.5 }}>
             핵심 API:
           </Typography>
           {keywords.map((keyword) => (
-            <Chip
-              key={keyword}
-              label={keyword}
-              size="small"
-              variant="outlined"
-              color="primary"
-            />
+            <Chip key={keyword} label={keyword} size='small' variant='outlined' color='primary' />
           ))}
         </Box>
       </CardContent>

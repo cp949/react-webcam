@@ -16,7 +16,7 @@ import { DEFAULT_WEBCAM_LABELS, type WebcamLabels } from "./types/webcam-labels.
 import type { WebcamDetail, WebcamOptions } from "./webcam-types.js";
 
 /**
- * React 19 `ref` prop으로 노출하는 `Webcam` 제어 핸들이다.
+ * `ref`로 노출하는 `Webcam` 제어 핸들이다.
  *
  * @example
  * ```tsx

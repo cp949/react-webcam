@@ -4,7 +4,7 @@
 
 # @cp949/react-webcam
 
-React 19 webcam component library.
+React 18/19 webcam component library.
 
 - Supports controlled and uncontrolled ownership for component state.
 - Exposes `WebcamHandle` for snapshots, option updates, and playback
@@ -21,9 +21,12 @@ pnpm add @cp949/react-webcam
 # npm install @cp949/react-webcam
 ```
 
-**This package is React 19 only.** React 18 and below are not supported.
+**This package supports React 18 and 19.** React 17 and below are not
+supported.
 
 ```bash
+pnpm add react@^18 react-dom@^18
+# or
 pnpm add react@^19 react-dom@^19
 ```
 
@@ -64,6 +67,35 @@ Using `fitMode` to match a fixed parent container:
   <Webcam fitMode='cover' webcamOptions={{ audioEnabled: true }} />
 </div>
 ```
+
+## Props
+
+`Webcam` also accepts a `ref` to a `WebcamHandle` (see the Ref Handle section
+below) in addition to the props listed here.
+
+| Prop                           | Type                                                                  | Default          | Description                                                                                          |
+| ------------------------------- | ---------------------------------------------------------------------- | ------------------ | -------------------------------------------------------------------------------------------------- |
+| `style`                        | `React.CSSProperties`                                                 | —                | Inline style for the root element.                                                                  |
+| `className`                    | `string`                                                              | —                | Class name for the root element.                                                                    |
+| `children`                     | `React.ReactNode`                                                     | —                | Rendered inside the root element, overlaid on the video.                                            |
+| `disabled`                     | `boolean`                                                             | `false`          | Keeps the component mounted without requesting camera access (see Disabled State below).            |
+| `disabledFallback`             | `React.ReactNode`                                                     | —                | Custom UI rendered instead of the built-in placeholder while `disabled`.                             |
+| `errorFallback`                | `React.ReactNode \| ((detail: WebcamErrorDetail) => React.ReactNode)` | —                | Custom UI for the `denied` / `unavailable` / `unsupported` / `insecure` / `error` phases. Does not cover `playback-error`. |
+| `onStateChange`                | `(state: WebcamDetail) => void`                                       | —                | Called whenever `WebcamDetail` changes (see Observe Runtime State below).                            |
+| `fitMode`                      | `"unset" \| "fill" \| "cover" \| "contain"`                           | `"unset"`        | How the video fills its box when `webcamOptions.aspectRatio` is not set.                             |
+| `flipped`                      | `boolean`                                                             | —                | Controlled horizontal flip state. Read-only without `onFlippedChange` (see `flipped` below).         |
+| `onFlippedChange`              | `(value: boolean) => void`                                            | —                | Called when a controlled flip change is requested.                                                  |
+| `defaultFlipped`               | `boolean`                                                             | `false`          | Initial flip state for uncontrolled mode. Applied once on mount.                                    |
+| `webcamOptions`                | `WebcamOptions`                                                       | —                | Controlled camera options (`facingMode`, `aspectRatio`, `audioEnabled`, `deviceId`, `size`, ...). Read-only without `onWebcamOptionsChange` (see `webcamOptions` below). |
+| `onWebcamOptionsChange`        | `(options: WebcamOptions) => void`                                    | —                | Called when a controlled option change is requested.                                                |
+| `defaultWebcamOptions`         | `WebcamOptions`                                                       | —                | Initial camera options for uncontrolled mode. Applied once on mount.                                |
+| `visibleFlipButton`            | `boolean`                                                             | `false`          | Shows the built-in flip toggle button.                                                              |
+| `visibleCameraDirectionButton` | `boolean`                                                             | `false`          | Shows the built-in front/rear camera button.                                                        |
+| `visibleAspectRatioButton`     | `boolean`                                                             | `false`          | Shows the built-in aspect ratio button.                                                              |
+| `visibleSnapshotButton`        | `boolean`                                                             | `false`          | Shows the built-in snapshot button.                                                                  |
+| `visibleVideoSizeDebug`        | `boolean`                                                             | `false`          | Shows a debug overlay with the video element size.                                                  |
+| `visibleConstraintsDebug`      | `boolean`                                                             | `false`          | Shows a debug overlay with the active `MediaStreamConstraints`.                                     |
+| `labels`                       | `WebcamLabels`                                                        | Korean defaults  | Overrides for built-in button labels (see Labels And Localization below).                            |
 
 ## Disabled State
 

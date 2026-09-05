@@ -4,7 +4,7 @@
 
 ## 프로젝트 한줄 요약
 
-이 저장소는 React 19 전용 npm 패키지 `@cp949/react-webcam`과, 그 공개 API를 실제 브라우저 흐름에서 검증하는 Next.js 데모 앱을 함께 관리하는 pnpm 모노레포이다.
+이 저장소는 React 18/19를 지원하는 npm 패키지 `@cp949/react-webcam`과, 그 공개 API를 실제 브라우저 흐름에서 검증하는 Next.js 데모 앱을 함께 관리하는 pnpm 모노레포이다.
 
 ## 먼저 읽을 것
 
@@ -132,7 +132,7 @@ GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-we
 
 - 외부 소비자가 의존하는 공개 API는 `packages/react-webcam/src/index.ts`만 기준으로 본다.
 - 새 기능을 추가하더라도 내부 훅이나 유틸을 무심코 export하지 않는다.
-- `package.json`의 `peerDependencies`는 React 19 / React DOM 19 기준이다.
+- `package.json`의 `peerDependencies`는 React 18/19 / React DOM 18/19를 모두 지원한다(`^18.0.0 || ^19.0.0`).
 - 기본 라벨은 한국어이며, 영어나 서비스별 문자열은 `labels` prop으로 덮어쓴다.
 
 ## 핵심 아키텍처

@@ -1,5 +1,5 @@
 /**
- * React 19 StrictMode와 빠른 rerender 상황에서의 회귀를 검증하는 테스트 파일이다.
+ * StrictMode와 빠른 rerender 상황에서의 회귀를 검증하는 테스트 파일이다.
  */
 import { act, renderHook } from "@testing-library/react";
 import React from "react";
@@ -8,11 +8,11 @@ import { useWebcamController } from "../src/hooks/useWebcamController.js";
 import { createFakeMediaStream, mockGetUserMedia } from "./test-utils.js";
 
 // ---------------------------------------------------------------------------
-// React 19 StrictMode·rerender 프레임워크 회귀 테스트
+// StrictMode·rerender 프레임워크 회귀 테스트
 // double-mount, debounce, cleanup 동작을 확인한다.
 // ---------------------------------------------------------------------------
 
-describe("React 19 StrictMode / rerender", () => {
+describe("StrictMode / rerender", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });

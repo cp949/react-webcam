@@ -2,8 +2,8 @@
 
 [한국어](./README.ko.md)
 
-Monorepo for `@cp949/react-webcam`, a React 19 webcam component package, plus a
-Next.js demo app used to exercise the public API in real browser flows.
+Monorepo for `@cp949/react-webcam`, a React 18/19 webcam component package,
+plus a Next.js demo app used to exercise the public API in real browser flows.
 
 ## Overview
 

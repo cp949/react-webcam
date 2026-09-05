@@ -1,6 +1,6 @@
 # @cp949/react-webcam
 
-React 19 전용 웹캠 컴포넌트 라이브러리입니다.
+React 18/19를 지원하는 웹캠 컴포넌트 라이브러리입니다.
 
 - controlled / uncontrolled 상태 소유권을 지원합니다.
 - `WebcamHandle` ref로 snapshot, 옵션 변경, playback pause/resume을 제어할 수 있습니다.
@@ -15,9 +15,11 @@ pnpm add @cp949/react-webcam
 # npm install @cp949/react-webcam
 ```
 
-**React 19 전용 패키지입니다.** React 18 이하는 지원하지 않습니다.
+**React 18과 19를 지원합니다.** React 17 이하는 지원하지 않습니다.
 
 ```bash
+pnpm add react@^18 react-dom@^18
+# 또는
 pnpm add react@^19 react-dom@^19
 ```
 
@@ -57,6 +59,35 @@ export function CameraView() {
   <Webcam fitMode='cover' webcamOptions={{ audioEnabled: true }} />
 </div>
 ```
+
+## Props
+
+`Webcam`은 아래 표의 props 외에 `ref`로 `WebcamHandle`도 받을 수 있습니다(자세한
+내용은 뒤의 ref handle 절 참고).
+
+| Prop                            | 타입                                                                   | 기본값           | 설명                                                                                          |
+| ------------------------------- | ---------------------------------------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------- |
+| `style`                         | `React.CSSProperties`                                                  | —                | 루트 엘리먼트에 적용할 인라인 스타일입니다.                                                     |
+| `className`                     | `string`                                                                | —                | 루트 엘리먼트에 적용할 클래스명입니다.                                                          |
+| `children`                      | `React.ReactNode`                                                      | —                | 루트 엘리먼트 내부, 비디오 위에 렌더링됩니다.                                                   |
+| `disabled`                      | `boolean`                                                               | `false`          | 카메라 요청 없이 컴포넌트를 비활성 상태로 유지합니다(뒤의 비활성 상태 절 참고).                 |
+| `disabledFallback`              | `React.ReactNode`                                                      | —                | `disabled`일 때 기본 placeholder 대신 렌더링할 커스텀 UI입니다.                                 |
+| `errorFallback`                 | `React.ReactNode \| ((detail: WebcamErrorDetail) => React.ReactNode)`  | —                | `denied` / `unavailable` / `unsupported` / `insecure` / `error` 상태의 커스텀 UI입니다. `playback-error`는 포함하지 않습니다. |
+| `onStateChange`                 | `(state: WebcamDetail) => void`                                        | —                | `WebcamDetail`이 바뀔 때마다 호출됩니다(뒤의 상태 변화 감지 절 참고).                           |
+| `fitMode`                       | `"unset" \| "fill" \| "cover" \| "contain"`                            | `"unset"`        | `webcamOptions.aspectRatio`가 없을 때 비디오를 박스에 맞추는 방식입니다.                        |
+| `flipped`                       | `boolean`                                                               | —                | 제어형 좌우 반전 상태입니다. `onFlippedChange`가 없으면 읽기 전용입니다(뒤의 `flipped` 절 참고). |
+| `onFlippedChange`               | `(value: boolean) => void`                                             | —                | 제어 모드에서 반전 변경이 요청될 때 호출됩니다.                                                 |
+| `defaultFlipped`                | `boolean`                                                               | `false`          | 비제어 모드의 초기 반전 상태입니다. 마운트 시 한 번만 적용됩니다.                               |
+| `webcamOptions`                 | `WebcamOptions`                                                         | —                | 제어형 카메라 옵션(`facingMode`, `aspectRatio`, `audioEnabled`, `deviceId`, `size` 등)입니다. `onWebcamOptionsChange`가 없으면 읽기 전용입니다(뒤의 `webcamOptions` 절 참고). |
+| `onWebcamOptionsChange`         | `(options: WebcamOptions) => void`                                     | —                | 제어 모드에서 옵션 변경이 요청될 때 호출됩니다.                                                 |
+| `defaultWebcamOptions`          | `WebcamOptions`                                                         | —                | 비제어 모드의 초기 카메라 옵션입니다. 마운트 시 한 번만 적용됩니다.                             |
+| `visibleFlipButton`             | `boolean`                                                               | `false`          | 내장 좌우 반전 버튼 표시 여부입니다.                                                            |
+| `visibleCameraDirectionButton`  | `boolean`                                                               | `false`          | 내장 전/후면 카메라 버튼 표시 여부입니다.                                                       |
+| `visibleAspectRatioButton`      | `boolean`                                                               | `false`          | 내장 화면 비율 버튼 표시 여부입니다.                                                            |
+| `visibleSnapshotButton`         | `boolean`                                                               | `false`          | 내장 스냅샷 버튼 표시 여부입니다.                                                               |
+| `visibleVideoSizeDebug`         | `boolean`                                                               | `false`          | 비디오 요소 크기를 보여주는 디버그 오버레이입니다.                                              |
+| `visibleConstraintsDebug`       | `boolean`                                                               | `false`          | 현재 적용된 `MediaStreamConstraints`를 보여주는 디버그 오버레이입니다.                          |
+| `labels`                        | `WebcamLabels`                                                          | 한국어 기본값    | 내장 버튼 라벨을 부분적으로 덮어씁니다(뒤의 라벨과 로컬라이제이션 절 참고).                     |
 
 ## 비활성 상태 - `disabled`
 

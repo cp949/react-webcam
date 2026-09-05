@@ -48,10 +48,7 @@ pnpm test
 pnpm readme:package
 pnpm readme:package:check
 pnpm test:chrome83  # Chrome 83 컨테이너 필요, "Chrome 83 floor validation" 절 참고
-pnpm changeset
-pnpm version-packages
-git tag vX.Y.Z
-git push --follow-tags
+pnpm release  # packages/react-webcam에서 release-it 실행: 버전 결정·changelog·커밋·태그·push·npm publish를 한 번에 처리
 
 # 데모 앱
 pnpm --filter demo dev
@@ -86,9 +83,11 @@ podman run --rm --network host --userns=keep-id \
 
 ## 릴리스 절차
 
-이 저장소는 패키지 단위 changeset 흐름을 기준으로 릴리스한다.
+이 저장소는 `packages/react-webcam`에서 실행하는 release-it 기반으로 릴리스한다.
+버전 증가폭과 `packages/react-webcam/CHANGELOG.md` 항목은 Conventional Commits
+커밋 로그(`feat:`/`fix:`/`refactor:`/...)에서 자동으로 결정된다.
 
-1. 기능 작업을 마친 뒤 루트에서 아래 검증을 모두 통과시킨다.
+1. main 브랜치에서 아래 검증을 모두 통과시킨다.
    - `pnpm test`
    - `pnpm check-types`
    - `pnpm lint`
@@ -96,37 +95,28 @@ podman run --rm --network host --userns=keep-id \
    - 필요하면 `pnpm test:chrome83`으로 Chrome 83 컨테이너 실브라우저 스모크를
      실행한다(podman 필요, 결과는 "Chrome 83 통과"로만 기록하고 "Chrome 75
      실행"이라 표기하지 않는다).
-2. 아직 릴리스 메모가 없다면 루트에서 `pnpm changeset`으로 변경 요약을 만든다.
-   - 공개 API 추가는 보통 `minor`
-   - 회귀 수정, 데모 보강, 내부 안정화는 보통 `patch`
-3. 릴리스 시점에 `pnpm version-packages`를 실행해 패키지 버전과 `packages/react-webcam/CHANGELOG.md`를 갱신한다.
-4. 버전 반영 결과를 별도 커밋으로 남긴다.
-   - 예: `chore: release v1.1.1`
-5. 패키지 버전과 같은 Git 태그를 만든다.
-   - 형식은 반드시 `vX.Y.Z`
-   - 예: `git tag -a v1.1.1 -m "v1.1.1"`
-   - `@cp949/...` 형식의 package-scoped 태그는 사용하지 않는다.
-6. 원격에 커밋과 태그를 푸시한다.
-   - `git push origin main`
-   - `git push origin vX.Y.Z`
-7. GitHub에서 `vX.Y.Z` 태그가 올라왔는지 확인하고, 필요하면 npm 배포 절차를 이어서 진행한다.
+2. 실제로 커밋·태그·push·npm publish가 일어나기 전에 dry-run으로 미리 확인한다.
+   ```bash
+   pnpm --filter @cp949/react-webcam run release -- --dry-run
+   ```
+3. 문제가 없으면 루트에서 릴리스를 실행한다.
+   ```bash
+   pnpm release
+   ```
+   이 명령은 `packages/react-webcam`에서 `release-it`을 실행해 다음을 한 번에 처리한다.
+   - Conventional Commits 기반 버전 결정과 `CHANGELOG.md` 갱신
+   - `chore: release vX.Y.Z` 커밋 생성
+   - `vX.Y.Z` annotated 태그 생성 (`@cp949/...` 형식의 package-scoped 태그는 사용하지 않는다)
+   - `git push`로 커밋과 태그를 원격에 반영
+   - `pnpm publish`로 npm 배포 (release-it 내장 npm 플러그인 대신 pnpm 사용)
+4. GitHub에서 `vX.Y.Z` 태그가 올라왔는지, `release.yml` 워크플로우가 만든 GitHub
+   Release가 올바른지 확인한다.
 
-빠른 체크리스트:
+release-it 설정은 `packages/react-webcam/.release-it.json`에 있다.
+`requireBranch: "main"`이 설정되어 있어 main이 아닌 브랜치에서는 실행이 거부된다.
 
-```bash
-pnpm test
-pnpm check-types
-pnpm lint
-pnpm changeset
-pnpm version-packages
-git add .
-git commit -m "chore: release vX.Y.Z"
-git tag -a vX.Y.Z -m "vX.Y.Z"
-git push origin main
-git push origin vX.Y.Z
-```
-
-GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-webcam/CHANGELOG.md`에서 해당 버전 섹션을 읽어 릴리스 노트를 만든다.
+GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-webcam/CHANGELOG.md`에서
+해당 버전 섹션을 읽어 릴리스 노트를 만든다.
 
 ## 공개 API와 변경 시 주의점
 

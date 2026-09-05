@@ -49,6 +49,11 @@ build
 dist
 packages/react-webcam/llm.txt
 
+# Next.js 16의 `next dev`가 apps/demo에 매번 재생성하는 에이전트 안내 파일.
+# node_modules/next/dist/server/lib/generate-agent-files.js 참고.
+apps/demo/AGENTS.md
+apps/demo/CLAUDE.md
+
 
 # Debug
 npm-debug.log*

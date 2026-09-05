@@ -55,6 +55,16 @@ describe("AspectRatioButton – DOM interactions", () => {
     expect(label).toBeTruthy();
   });
 
+  it("메뉴는 버튼 오른쪽 끝에 맞춰 왼쪽으로 열려 오른쪽 경계를 넘지 않는다", async () => {
+    const { container } = render(<AspectRatioButton onChange={() => {}} />);
+    const btn = container.querySelector("button")!;
+    await act(async () => {
+      btn.click();
+    });
+    const menu = container.querySelector('[role="menu"]') as HTMLElement;
+    expect(menu.style.right).toBe("0px");
+  });
+
   it("closes the menu when focus moves outside", async () => {
     const { container } = render(
       <>
@@ -123,6 +133,16 @@ describe("FacingModeButton – DOM interactions", () => {
     });
     const items = container.querySelectorAll('[role="menuitem"]');
     expect(items.length).toBeGreaterThan(0);
+  });
+
+  it("메뉴는 버튼 오른쪽 끝에 맞춰 왼쪽으로 열려 오른쪽 경계를 넘지 않는다", async () => {
+    const { container } = render(<FacingModeButton onChange={() => {}} />);
+    const btn = container.querySelector("button")!;
+    await act(async () => {
+      btn.click();
+    });
+    const menu = container.querySelector('[role="menu"]') as HTMLElement;
+    expect(menu.style.right).toBe("0px");
   });
 
   it('selecting 전면 calls onChange with "user" and closes the menu', async () => {

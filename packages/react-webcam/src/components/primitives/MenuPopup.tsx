@@ -99,6 +99,8 @@ export function MenuPopup(props: MenuPopupProps) {
       className={className}
       style={{
         position: "absolute",
+        top: "100%",
+        right: 0,
         zIndex: 1300,
         margin: 0,
         padding: "4px 0",

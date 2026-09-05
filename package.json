@@ -14,11 +14,13 @@
     "test": "pnpm readme:package:check && node --test scripts/tag-release.test.mjs && turbo run test",
     "check-types": "turbo run check-types",
     "readme:package": "node scripts/generate-package-readme.mjs",
-    "readme:package:check": "node scripts/generate-package-readme.mjs --check"
+    "readme:package:check": "node scripts/generate-package-readme.mjs --check",
+    "test:chrome83": "node scripts/run-chrome83-floor.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.0",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.62.1",
     "eslint": "10.9.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",

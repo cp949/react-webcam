@@ -16,8 +16,8 @@
 
 ## 권장 환경
 
-- Node.js 18 이상
-- pnpm 10 이상
+- Node.js 24.18.0 이상
+- pnpm 12.4.1 (`packageManager`로 고정, Corepack 사용)
 
 ## 배포 패키지 설치
 

@@ -17,8 +17,8 @@ This repository has two main parts.
 
 ## Recommended Environment
 
-- Node.js 18+
-- pnpm 10+
+- Node.js 24.18.0+
+- pnpm 12.4.1 (pinned by `packageManager`; use Corepack)
 
 ## Install The Published Package
 

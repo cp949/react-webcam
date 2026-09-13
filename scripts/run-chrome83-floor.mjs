@@ -3,10 +3,9 @@ import { spawnSync } from "node:child_process";
 function run(command, args) {
   const result = spawnSync(command, args, {
     stdio: "inherit",
-    // 컨테이너 안은 TTY가 없어, pnpm 11의 자동 의존성 상태 검사가 node_modules
-    // 재생성 확인을 받지 못해 ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY로
-    // 중단된다(실측). CI=true로 확인 프롬프트를 건너뛴다 — 이 저장소의 다른
-    // pnpm 11 마이그레이션 문서에서도 같은 패턴을 사용한다.
+    // 컨테이너 안은 TTY가 없어, pnpm이 node_modules 재생성 확인을 받을 수 없으면
+    // ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY로 중단된다(실측). CI=true로
+    // 확인 프롬프트를 건너뛴다.
     //
     // podman --userns=keep-id 컨테이너는 /etc/passwd에 호스트 uid를 매핑하며
     // HOME을 컨테이너 WORKDIR(/repo, 즉 bind mount된 저장소 루트)로 설정한다.
@@ -14,10 +13,9 @@ function run(command, args) {
     // 저장소 작업 트리 안에 .local/.cache를 실제로 써서 host git 워킹 트리를
     // 오염시키고 host의 pnpm storeDir 포인터까지 깨뜨린다(실측). 컨테이너 전용
     // 임시 HOME(/tmp, 컨테이너가 --rm이라 실행 후 사라짐)으로 고정해
-    // .local/.cache 오염은 막는다. 다만 pnpm 11은 fresh HOME + workspace root
-    // cwd 조건에서 store-dir 기본값을 <워크스페이스 루트>/.pnpm-store로
-    // 잡으므로 이것까지 완전히 막지는 못한다(실측) — 남는 .pnpm-store는
-    // .gitignore로 무해화하고 clean.sh로 정리한다.
+    // .local/.cache 오염은 막는다. 다만 fresh HOME + workspace root cwd
+    // 조건에서는 store-dir 기본값이 <워크스페이스 루트>/.pnpm-store가 될 수
+    // 있다(실측). 남는 .pnpm-store는 .gitignore로 무해화하고 clean.sh로 정리한다.
     env: { ...process.env, CHROME83_WEBSERVER: "1", CI: "true", HOME: "/tmp" },
   });
   if (result.error) throw result.error;

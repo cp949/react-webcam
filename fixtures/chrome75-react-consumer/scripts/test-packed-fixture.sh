@@ -6,6 +6,8 @@ repository_dir=$(cd "$fixture_dir/../.." && pwd -P)
 package_dir="$repository_dir/packages/react-webcam"
 temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/react-webcam-chrome75-packed-XXXXXX")
 
+cd "$repository_dir"
+
 cleanup() {
   rm -rf "$temp_dir"
 }
@@ -15,7 +17,7 @@ cp -R "$fixture_dir/." "$temp_dir"
 rm -rf "$temp_dir/node_modules" "$temp_dir/.artifacts"
 mkdir "$temp_dir/.artifacts"
 
-pnpm --dir "$package_dir" pack --pack-destination "$temp_dir/.artifacts"
+corepack pnpm --dir "$package_dir" pack --pack-destination "$temp_dir/.artifacts"
 tarball=$(find "$temp_dir/.artifacts" -maxdepth 1 -name '*.tgz' -print -quit)
 test -n "$tarball"
 mv "$tarball" "$temp_dir/.artifacts/react-webcam.tgz"
@@ -29,6 +31,6 @@ manifest.devDependencies["@cp949/react-webcam"] = "file:.artifacts/react-webcam.
 await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 NODE
 
-pnpm --dir "$temp_dir" install --offline --ignore-scripts
-CHROME75_PACKED_FIXTURE=1 pnpm --dir "$temp_dir" build
-pnpm --dir "$temp_dir" test:contract
+corepack pnpm --dir "$temp_dir" install --ignore-scripts
+CHROME75_PACKED_FIXTURE=1 corepack pnpm --dir "$temp_dir" build
+corepack pnpm --dir "$temp_dir" test:contract

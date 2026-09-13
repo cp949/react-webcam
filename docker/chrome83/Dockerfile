@@ -13,8 +13,8 @@
 # 버전)을 그대로 재사용한다.
 FROM debian:buster-slim
 
-ARG NODE_VERSION=24.15.0
-ARG PNPM_VERSION=11.25.0
+ARG NODE_VERSION=24.18.0
+ARG PNPM_VERSION=12.4.1
 
 RUN set -eux; \
     # 20200712T145349Z(83.0.4103.116-3)를 쓴다 — 같은 버전의 더 이른 리비전

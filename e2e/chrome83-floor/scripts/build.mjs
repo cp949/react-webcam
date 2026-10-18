@@ -22,9 +22,18 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const here = dirname(new URL(import.meta.url).pathname);
   const harnessDir = resolve(here, "..", "harness");
   const outDir = resolve(here, "..", "dist");
-  await bundleChrome83FloorHarness({
-    entry: resolve(harnessDir, "main.tsx"),
-    output: resolve(outDir, "bundle.js"),
-  });
-  await cp(resolve(harnessDir, "index.html"), resolve(outDir, "index.html"));
+  // 페이지별로 번들을 따로 만든다: index.html(Webcam 컴포넌트), hook.html(useWebcam).
+  const bundles = [
+    { entry: "main.tsx", output: "bundle.js" },
+    { entry: "hook.tsx", output: "hook.js" },
+  ];
+  for (const { entry, output } of bundles) {
+    await bundleChrome83FloorHarness({
+      entry: resolve(harnessDir, entry),
+      output: resolve(outDir, output),
+    });
+  }
+  for (const page of ["index.html", "hook.html", "iframe-host.html"]) {
+    await cp(resolve(harnessDir, page), resolve(outDir, page));
+  }
 }

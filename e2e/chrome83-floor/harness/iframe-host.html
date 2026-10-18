@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>chrome83-floor iframe host</title>
+  </head>
+  <body>
+    <script>
+      // ?allow=camera 여부와 ?src= 값으로 iframe을 만든다. src는 host와 다른 origin이어야 정책이 적용된다.
+      var query = new URLSearchParams(location.search);
+      var frame = document.createElement("iframe");
+      if (query.get("allow")) frame.allow = query.get("allow");
+      frame.src = query.get("src");
+      document.body.appendChild(frame);
+    </script>
+  </body>
+</html>

@@ -8,7 +8,8 @@ const PORT = 4501;
 const MIME = { ".html": "text/html", ".js": "text/javascript" };
 
 const server = createServer(async (req, res) => {
-  const path = req.url === "/" ? "/index.html" : req.url;
+  const { pathname } = new URL(req.url, "http://127.0.0.1");
+  const path = pathname === "/" ? "/index.html" : pathname;
   const filePath = join(distDir, path);
   try {
     await stat(filePath);

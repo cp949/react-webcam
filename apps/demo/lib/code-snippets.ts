@@ -336,7 +336,7 @@ export default function ErrorFallbackExample() {
         deviceId: '__missing_camera__',
         aspectRatio: 16 / 9,
       }}
-      errorFallback={(detail: WebcamErrorDetail) => (
+      errorFallback={(detail: WebcamErrorDetail, { retry }) => (
         <div>
           <strong>
             {detail.errorCode === 'device-not-found'
@@ -344,7 +344,9 @@ export default function ErrorFallbackExample() {
               : 'Camera could not be started'}
           </strong>
           <p>errorCode: {detail.errorCode}</p>
-          <button type="button">Retry</button>
+          <button type="button" onClick={retry}>
+            Retry
+          </button>
         </div>
       )}
     />

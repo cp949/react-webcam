@@ -27,12 +27,18 @@ function normalizeColor(color: string) {
     .join("")}`;
 }
 
+const mockRetry = vi.fn();
+
 vi.mock("@cp949/react-webcam", () => {
   function Webcam(props: {
     disabled?: boolean;
     disabledFallback?: React.ReactNode;
     errorFallback?:
-      React.ReactNode | ((detail: { phase: string; errorCode: string }) => React.ReactNode);
+      | React.ReactNode
+      | ((
+          detail: { phase: string; errorCode: string },
+          helpers: { retry: () => void },
+        ) => React.ReactNode);
     onStateChange?: (detail: { phase: string; errorCode?: string }) => void;
     fitMode?: string;
     className?: string;
@@ -71,7 +77,7 @@ vi.mock("@cp949/react-webcam", () => {
       const detail = { phase: "unavailable", errorCode: "device-not-found" };
       const fallback =
         typeof props.errorFallback === "function"
-          ? props.errorFallback(detail)
+          ? props.errorFallback(detail, { retry: mockRetry })
           : props.errorFallback;
 
       return createElement("div", { "data-testid": "mock-webcam-error-fallback" }, fallback);
@@ -213,6 +219,19 @@ describe("demo disabled sections", () => {
       screen.getByText("카메라가 없거나 선택한 장치를 사용할 수 없을 때 렌더링됩니다."),
     ).toBeTruthy();
     expect(screen.getByTestId("mock-webcam-error-fallback")).toBeTruthy();
+  });
+
+  it("calls retry and counts attempts when the error fallback Retry button is clicked", () => {
+    mockRetry.mockClear();
+    render(createElement(DemoShell));
+
+    fireEvent.click(screen.getAllByText("Error Fallback")[0]!);
+
+    expect(screen.getByText("재시도 0회")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+
+    expect(mockRetry).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("재시도 1회")).toBeTruthy();
   });
 
   it("keeps the error fallback demo viewport at a fixed aspect ratio", () => {

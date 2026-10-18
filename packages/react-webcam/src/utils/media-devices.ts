@@ -17,7 +17,7 @@
 import type { WebcamErrorCode } from "../webcam-types.js";
 
 /**
- * `BrowserMediaDevices.requestUserMedia`가 던지는 typed 에러다.
+ * `requestUserMedia`가 던지는 typed 에러다.
  * 브라우저 예외를 그대로 노출하는 대신 라이브러리 내부 에러 코드를 함께 담는다.
  */
 export class WebcamRequestError extends Error {
@@ -112,68 +112,66 @@ function assertMediaPolicy(constraints: MediaStreamConstraints) {
   }
 }
 
-export class BrowserMediaDevices {
-  /**
-   * 지정한 제약 조건으로 사용자 미디어 스트림을 요청한다.
-   *
-   * 브라우저 지원 여부와 보안 컨텍스트를 먼저 확인하고,
-   * 조건을 충족하지 못하면 `WebcamRequestError`를 던진다.
-   * getUserMedia 자체가 실패하면 DOMException을 그대로 전파한다
-   * (호출측에서 `mapDomExceptionToErrorCode`로 변환한다).
-   */
-  static requestUserMedia = async (constraints: MediaStreamConstraints): Promise<MediaStream> => {
-    assertSecureContext();
-    const mediaDevices = getBrowserMediaDevices();
-    if (!mediaDevices.getUserMedia) {
-      throw new WebcamRequestError(
-        "unsupported-browser",
-        "navigator.mediaDevices.getUserMedia is not supported in this browser",
-      );
-    }
-    assertMediaPolicy(constraints);
-    return await mediaDevices.getUserMedia(constraints);
-  };
+/**
+ * 지정한 제약 조건으로 사용자 미디어 스트림을 요청한다.
+ *
+ * 브라우저 지원 여부와 보안 컨텍스트를 먼저 확인하고,
+ * 조건을 충족하지 못하면 `WebcamRequestError`를 던진다.
+ * getUserMedia 자체가 실패하면 DOMException을 그대로 전파한다
+ * (호출측에서 `mapDomExceptionToErrorCode`로 변환한다).
+ */
+export async function requestUserMedia(constraints: MediaStreamConstraints): Promise<MediaStream> {
+  assertSecureContext();
+  const mediaDevices = getBrowserMediaDevices();
+  if (!mediaDevices.getUserMedia) {
+    throw new WebcamRequestError(
+      "unsupported-browser",
+      "navigator.mediaDevices.getUserMedia is not supported in this browser",
+    );
+  }
+  assertMediaPolicy(constraints);
+  return await mediaDevices.getUserMedia(constraints);
+}
 
-  /** 전달된 스트림의 모든 트랙을 중지한다. */
-  static stopStream = (stream: MediaStream | undefined | null) => {
-    if (!stream) return;
-    if (stream.getTracks) {
-      stream.getTracks().forEach((track) => {
-        track.stop();
-      });
-    }
-  };
+/** 전달된 스트림의 모든 트랙을 중지한다. */
+export function stopStream(stream: MediaStream | undefined | null) {
+  if (!stream) return;
+  if (stream.getTracks) {
+    stream.getTracks().forEach((track) => {
+      track.stop();
+    });
+  }
+}
 
-  /** 전체 디바이스 또는 지정한 종류의 입력 디바이스 목록을 조회한다. */
-  static listDevices = async (kind?: "videoinput" | "audioinput"): Promise<MediaDeviceInfo[]> => {
-    assertSecureContext();
-    const mediaDevices = getBrowserMediaDevices();
-    if (!mediaDevices.enumerateDevices) {
-      throw new WebcamRequestError(
-        "unsupported-browser",
-        "navigator.mediaDevices.enumerateDevices is not supported in this browser",
-      );
-    }
-    const devices = await mediaDevices.enumerateDevices();
-    if (!kind) {
-      return devices;
-    }
-    return devices.filter((it) => it.kind === kind);
-  };
+/** 전체 디바이스 또는 지정한 종류의 입력 디바이스 목록을 조회한다. */
+export async function listDevices(kind?: "videoinput" | "audioinput"): Promise<MediaDeviceInfo[]> {
+  assertSecureContext();
+  const mediaDevices = getBrowserMediaDevices();
+  if (!mediaDevices.enumerateDevices) {
+    throw new WebcamRequestError(
+      "unsupported-browser",
+      "navigator.mediaDevices.enumerateDevices is not supported in this browser",
+    );
+  }
+  const devices = await mediaDevices.enumerateDevices();
+  if (!kind) {
+    return devices;
+  }
+  return devices.filter((it) => it.kind === kind);
+}
 
-  /** 사용 가능한 비디오 입력 디바이스 목록을 조회한다. */
-  static listVideoDevices = async (): Promise<MediaDeviceInfo[]> => {
-    return this.listDevices("videoinput");
-  };
+/** 사용 가능한 비디오 입력 디바이스 목록을 조회한다. */
+export async function listVideoDevices(): Promise<MediaDeviceInfo[]> {
+  return listDevices("videoinput");
+}
 
-  /** 사용 가능한 오디오 입력 디바이스 목록을 조회한다. */
-  static listAudioDevices = async (): Promise<MediaDeviceInfo[]> => {
-    return this.listDevices("audioinput");
-  };
+/** 사용 가능한 오디오 입력 디바이스 목록을 조회한다. */
+export async function listAudioDevices(): Promise<MediaDeviceInfo[]> {
+  return listDevices("audioinput");
+}
 
-  /** 디바이스 ID로 비디오 입력 디바이스를 찾는다. */
-  static findVideoInputById = async (deviceId: string): Promise<MediaDeviceInfo | undefined> => {
-    const devices = await this.listDevices("videoinput");
-    return devices.find((it) => it.kind === "videoinput" && it.deviceId === deviceId);
-  };
+/** 디바이스 ID로 비디오 입력 디바이스를 찾는다. */
+export async function findVideoInputById(deviceId: string): Promise<MediaDeviceInfo | undefined> {
+  const devices = await listDevices("videoinput");
+  return devices.find((it) => it.kind === "videoinput" && it.deviceId === deviceId);
 }

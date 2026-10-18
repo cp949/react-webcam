@@ -8,7 +8,7 @@ import { createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AspectRatioButton } from "../src/components/AspectRatioButton.js";
 import { FacingModeButton } from "../src/components/FacingModeButton.js";
-import { BrowserMediaDevices } from "../src/utils/media-devices.js";
+import { stopStream } from "../src/utils/media-devices.js";
 import type { WebcamHandle } from "../src/Webcam.js";
 import { Webcam } from "../src/Webcam.js";
 import { createFakeMediaStream, mockGetUserMedia } from "./test-utils.js";
@@ -26,6 +26,15 @@ vi.mock("../src/hooks/useResizeObserver.js", () => ({
     ] as const,
 }));
 
+// ---------------------------------------------------------------------------
+// stopStream 호출을 관찰할 수 있도록 실제 구현을 감싼 목으로 교체한다.
+// ESM named export는 vi.spyOn으로 가로챌 수 없다.
+// ---------------------------------------------------------------------------
+vi.mock("../src/utils/media-devices.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../src/utils/media-devices.js")>();
+  return { ...actual, stopStream: vi.fn(actual.stopStream) };
+});
+
 /** 테스트 컨테이너에서 비디오 요소를 찾는다. */
 function getVideoElement(container: HTMLElement): HTMLVideoElement | null {
   return container.querySelector("video");
@@ -39,13 +48,14 @@ function getVideoElement(container: HTMLElement): HTMLVideoElement | null {
 describe("Webcam 공개 계약", () => {
   let fakeStream: MediaStream;
   let getUserMediaMock: ReturnType<typeof vi.fn>;
-  let stopSpy: ReturnType<typeof vi.spyOn>;
+  let stopSpy: ReturnType<typeof vi.mocked<typeof stopStream>>;
 
   beforeEach(() => {
     vi.useFakeTimers();
     fakeStream = createFakeMediaStream();
     getUserMediaMock = mockGetUserMedia(fakeStream);
-    stopSpy = vi.spyOn(BrowserMediaDevices, "stopStream");
+    stopSpy = vi.mocked(stopStream);
+    stopSpy.mockClear();
   });
 
   it("비디오 요소와 계산된 제약 조건이 준비되면 미디어 스트림을 요청한다", async () => {

@@ -4,7 +4,7 @@
 import { act, render, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useWebcamController } from "../src/hooks/useWebcamController.js";
-import { BrowserMediaDevices } from "../src/utils/media-devices.js";
+import { stopStream } from "../src/utils/media-devices.js";
 import { Webcam } from "../src/Webcam.js";
 import { createFakeMediaStream, mockGetUserMedia } from "./test-utils.js";
 import { advanceToStreamLoad } from "./webcam-test-helpers.js";
@@ -22,19 +22,29 @@ vi.mock("../src/hooks/useResizeObserver.js", () => ({
 }));
 
 // ---------------------------------------------------------------------------
+// stopStream 호출을 관찰할 수 있도록 실제 구현을 감싼 목으로 교체한다.
+// ESM named export는 vi.spyOn으로 가로챌 수 없다.
+// ---------------------------------------------------------------------------
+vi.mock("../src/utils/media-devices.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../src/utils/media-devices.js")>();
+  return { ...actual, stopStream: vi.fn(actual.stopStream) };
+});
+
+// ---------------------------------------------------------------------------
 // useWebcamController 스트림 생명주기
 // ---------------------------------------------------------------------------
 
 describe("useWebcamController 스트림 생명주기", () => {
   let fakeStream: MediaStream;
   let getUserMediaMock: ReturnType<typeof vi.fn>;
-  let stopSpy: ReturnType<typeof vi.spyOn>;
+  let stopSpy: ReturnType<typeof vi.mocked<typeof stopStream>>;
 
   beforeEach(() => {
     vi.useFakeTimers();
     fakeStream = createFakeMediaStream();
     getUserMediaMock = mockGetUserMedia(fakeStream);
-    stopSpy = vi.spyOn(BrowserMediaDevices, "stopStream");
+    stopSpy = vi.mocked(stopStream);
+    stopSpy.mockClear();
   });
 
   it("videoElement와 constraints가 모두 준비되면 스트림을 요청한다", async () => {
@@ -582,7 +592,8 @@ describe("장치 전환 생명주기", () => {
       configurable: true,
     });
 
-    const stopSpy = vi.spyOn(BrowserMediaDevices, "stopStream");
+    const stopSpy = vi.mocked(stopStream);
+    stopSpy.mockClear();
 
     const { result } = renderHook(() => useWebcamController());
     const videoEl = document.createElement("video");
@@ -640,7 +651,8 @@ describe("장치 전환 생명주기", () => {
       configurable: true,
     });
 
-    const stopSpy = vi.spyOn(BrowserMediaDevices, "stopStream");
+    const stopSpy = vi.mocked(stopStream);
+    stopSpy.mockClear();
 
     const { result } = renderHook(() => useWebcamController());
     const videoEl = document.createElement("video");

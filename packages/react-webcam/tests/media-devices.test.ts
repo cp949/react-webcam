@@ -3,8 +3,11 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  BrowserMediaDevices,
+  findVideoInputById,
+  listDevices,
+  listVideoDevices,
   mapDomExceptionToErrorCode,
+  requestUserMedia,
   WebcamRequestError,
 } from "../src/utils/media-devices.js";
 
@@ -57,9 +60,9 @@ describe("mapDomExceptionToErrorCode", () => {
 });
 
 // ---------------------------------------------------------------------------
-// BrowserMediaDevices.requestUserMedia – environment guards
+// requestUserMedia – environment guards
 // ---------------------------------------------------------------------------
-describe("BrowserMediaDevices.requestUserMedia", () => {
+describe("requestUserMedia", () => {
   describe("environment guards", () => {
     describe("when navigator.mediaDevices is absent", () => {
       let originalMediaDevices: MediaDevices;
@@ -82,7 +85,7 @@ describe("BrowserMediaDevices.requestUserMedia", () => {
       });
 
       it("throws WebcamRequestError with errorCode unsupported-browser", async () => {
-        await expect(BrowserMediaDevices.requestUserMedia({ video: true })).rejects.toSatisfy(
+        await expect(requestUserMedia({ video: true })).rejects.toSatisfy(
           (err: unknown) =>
             err instanceof WebcamRequestError && err.errorCode === "unsupported-browser",
         );
@@ -122,7 +125,7 @@ describe("BrowserMediaDevices.requestUserMedia", () => {
       });
 
       it("throws WebcamRequestError with errorCode insecure-context", async () => {
-        await expect(BrowserMediaDevices.requestUserMedia({ video: true })).rejects.toSatisfy(
+        await expect(requestUserMedia({ video: true })).rejects.toSatisfy(
           (err: unknown) =>
             err instanceof WebcamRequestError && err.errorCode === "insecure-context",
         );
@@ -171,9 +174,9 @@ describe("buildMediaStreamConstraints – device selection", () => {
 });
 
 // ---------------------------------------------------------------------------
-// BrowserMediaDevices enumerateDevices 계열 환경 가드
+// enumerateDevices 계열 환경 가드
 // ---------------------------------------------------------------------------
-describe("BrowserMediaDevices enumerateDevices helpers", () => {
+describe("enumerateDevices helpers", () => {
   let originalMediaDevices: MediaDevices;
 
   beforeEach(() => {
@@ -199,7 +202,7 @@ describe("BrowserMediaDevices enumerateDevices helpers", () => {
       configurable: true,
       writable: true,
     });
-    await expect(BrowserMediaDevices.listDevices()).rejects.toSatisfy(
+    await expect(listDevices()).rejects.toSatisfy(
       (err: unknown) =>
         err instanceof WebcamRequestError && err.errorCode === "unsupported-browser",
     );
@@ -211,7 +214,7 @@ describe("BrowserMediaDevices enumerateDevices helpers", () => {
       configurable: true,
       writable: true,
     });
-    await expect(BrowserMediaDevices.findVideoInputById("device-1")).rejects.toSatisfy(
+    await expect(findVideoInputById("device-1")).rejects.toSatisfy(
       (err: unknown) =>
         err instanceof WebcamRequestError && err.errorCode === "unsupported-browser",
     );
@@ -228,7 +231,7 @@ describe("BrowserMediaDevices enumerateDevices helpers", () => {
       configurable: true,
       writable: true,
     });
-    await expect(BrowserMediaDevices.listVideoDevices()).rejects.toSatisfy(
+    await expect(listVideoDevices()).rejects.toSatisfy(
       (err: unknown) => err instanceof WebcamRequestError && err.errorCode === "insecure-context",
     );
   });

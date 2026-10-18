@@ -15,7 +15,11 @@
  */
 import { useEffect, useState } from "react";
 import { ensureError } from "../utils/ensure-error.js";
-import { BrowserMediaDevices, mapDomExceptionToErrorCode } from "../utils/media-devices.js";
+import {
+  mapDomExceptionToErrorCode,
+  requestUserMedia,
+  stopStream,
+} from "../utils/media-devices.js";
 import { errorCodeToPhase } from "../utils/webcam-controller-state.js";
 import type { WebcamDetail } from "../webcam-types.js";
 
@@ -73,10 +77,10 @@ export function useWebcamStreamLifecycle({
 
     async function requestStream() {
       try {
-        const ms = await BrowserMediaDevices.requestUserMedia(currentConstraints);
+        const ms = await requestUserMedia(currentConstraints);
         if (ctx.canceled) {
           // 취소된 요청이 뒤늦게 끝나면 즉시 스트림을 반납하고 상태는 건드리지 않는다.
-          BrowserMediaDevices.stopStream(ms);
+          stopStream(ms);
           return;
         }
         acquiredStream = ms;
@@ -105,7 +109,7 @@ export function useWebcamStreamLifecycle({
               error: new Error("Video track ended unexpectedly"),
               constraints: currentConstraints,
             });
-            BrowserMediaDevices.stopStream(ms);
+            stopStream(ms);
           };
           track.addEventListener("ended", listener);
           return { track, listener };
@@ -136,7 +140,7 @@ export function useWebcamStreamLifecycle({
         track.removeEventListener("ended", listener);
       });
       if (acquiredStream) {
-        BrowserMediaDevices.stopStream(acquiredStream);
+        stopStream(acquiredStream);
       }
     };
   }, [videoElement, constraints, disabled, requestKey]);

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ensureError } from "../utils/ensure-error.js";
-import { BrowserMediaDevices } from "../utils/media-devices.js";
+import { listDevices } from "../utils/media-devices.js";
 
 /** 미디어 입력 장치 목록과 label 사용 가능 여부. */
 export type UseMediaDevicesResult = {
@@ -31,7 +31,7 @@ export function useMediaDevices(kind?: "videoinput" | "audioinput"): UseMediaDev
   const refresh = useCallback(async () => {
     const requestId = ++requestIdRef.current;
     try {
-      const list = await BrowserMediaDevices.listDevices(kind);
+      const list = await listDevices(kind);
       if (!aliveRef.current || requestId !== requestIdRef.current) return;
       setDevices(list);
       setError(undefined);

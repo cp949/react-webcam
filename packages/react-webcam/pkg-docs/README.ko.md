@@ -482,7 +482,9 @@ function CameraPicker({ onSelect }: { onSelect: (deviceId: string) => void }) {
 카메라·마이크 권한을 허용하기 전에는 브라우저가 `label`을 빈 문자열로 반환합니다.
 `labelsAvailable`이 `false`이면 `카메라 1` 같은 대체 이름을 보여 주세요.
 
-## CSS 변수로 색 바꾸기
+## 스타일링
+
+### CSS 변수
 
 패키지는 스타일시트를 배포하지 않습니다. 색은 인라인 스타일이며 현재 값을
 기본값으로 둔 CSS 변수를 읽습니다. 변수를 지정하기 전에는 아무것도 바뀌지
@@ -508,6 +510,23 @@ function CameraPicker({ onSelect }: { onSelect: (deviceId: string) => void }) {
 변수 이름은 공개 API입니다. 이름을 바꾸면 breaking change입니다. 버튼 오버레이
 같은 다른 색은 바꿀 수 없습니다. `style` prop으로 지정한 속성은 변수보다
 우선합니다.
+
+### 클래스 이름
+
+내장 요소를 직접 만든 CSS로 고칠 때는 아래 클래스 이름을 씁니다. 이 이름은
+공개 API이며 이름을 바꾸면 breaking change입니다.
+
+| 클래스                                                                                      | 요소                                           |
+| ------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| `Webcam-root`                                                                               | 루트 `div`. 전달한 `className`이 함께 붙습니다 |
+| `Webcam-video`                                                                              | `video` 요소                                   |
+| `Webcam-optionBtn`                                                                          | 미러, 전면/후면, 크기 비율 버튼의 래퍼         |
+| `FlipButton-root`, `FacingModeButton-root`, `AspectRatioButton-root`, `SnapshotButton-root` | 각 내장 버튼의 래퍼                            |
+| `x_btn`                                                                                     | 각 내장 버튼 래퍼 안의 `button`                |
+
+색과 레이아웃은 인라인 스타일이므로 클래스 규칙은 `!important` 없이는 이깁니다.
+색은 위의 CSS 변수를 우선 쓰세요. 루트의 `x_fullHeight`, `x_fixedHeight` 같은
+상태 표시 클래스는 내부용이며 바뀔 수 있습니다.
 
 ## 라벨과 로컬라이제이션
 

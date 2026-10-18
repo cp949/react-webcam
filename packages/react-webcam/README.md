@@ -508,7 +508,9 @@ function CameraPicker({ onSelect }: { onSelect: (deviceId: string) => void }) {
 Before camera or microphone permission is granted, browsers return an empty `label`.
 When `labelsAvailable` is `false`, show a fallback name such as `Camera 1`.
 
-## Styling With CSS Variables
+## Styling
+
+### CSS Variables
 
 The package ships no stylesheet. Colors are inline styles that read CSS
 variables with the current value as the fallback, so nothing changes until you
@@ -534,6 +536,23 @@ set a variable. Set them on `Webcam` or any ancestor.
 These names are public API. Renaming one is a breaking change. Other colors, such
 as the button overlays, are not configurable. A `style` prop value still wins
 over the variables for the properties it sets.
+
+### Class Names
+
+Use these class names to target the built-in elements from your own CSS. They are
+public API, and renaming one is a breaking change.
+
+| Class                                                                                       | Element                                                     |
+| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `Webcam-root`                                                                               | Root `div`. Your `className` is added next to it            |
+| `Webcam-video`                                                                              | The `video` element                                         |
+| `Webcam-optionBtn`                                                                          | Wrapper of the flip, camera direction, aspect ratio buttons |
+| `FlipButton-root`, `FacingModeButton-root`, `AspectRatioButton-root`, `SnapshotButton-root` | Wrapper of each built-in button                             |
+| `x_btn`                                                                                     | The `button` inside each built-in button wrapper            |
+
+Colors and layout are inline styles, so a class rule loses to them unless it uses
+`!important`. Prefer the CSS variables above for colors. Other classes, such as the
+`x_fullHeight` and `x_fixedHeight` state markers on the root, are internal and may change.
 
 ## Labels And Localization
 

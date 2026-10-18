@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased
+
+### Major Changes
+
+- Change `SecurityError` reporting from `errorCode: "insecure-context"`, `phase: "insecure"` to `errorCode: "security-error"`, `phase: "error"`. Consumers handling document-level media restrictions must update their error branches. Actual insecure contexts still report `insecure-context` / `insecure`.
+- Extend `WebcamErrorCode` with `security-error` and `policy-blocked`. Consumers with exhaustive error-code handling must cover both values. Confirmed Permissions Policy blocks report `policy-blocked` / `denied`; unconfirmed `NotAllowedError` continues to report `permission-denied` / `denied`.
+
+### Minor Changes
+
+- Export `useWebcam`, `UseWebcamOptions`, and `UseWebcamResult` for existing video elements, with `isFrameReady`, camera retry, and playback controls.
+
+### Patch Changes
+
+- Check secure contexts before media API availability so HTTP does not produce an unsupported-browser diagnosis.
+- Preserve caller-owned `srcObject` values when no stream is attached. Only detach streams attached by the hook.
+- Fall back to the browser's `getUserMedia` decision when policy inspection throws.
+- Reset cached video dimensions when the stream changes and wait for new metadata before reporting `isLoaded`.
+
 ## 1.3.0
 
 ### Minor Changes

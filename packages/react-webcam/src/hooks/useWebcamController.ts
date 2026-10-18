@@ -34,6 +34,12 @@ export type UseWebcamControllerResult = WebcamController & {
   /** 비디오 요소와 미디어 스트림이 모두 준비되었는지 여부 */
   readonly isLoaded: boolean;
 
+  /** 현재 스트림에 처리할 수 있는 프레임이 있는지 여부. */
+  readonly isFrameReady: boolean;
+
+  /** 같은 옵션으로 카메라를 다시 요청한다. */
+  retry: () => void;
+
   /** 비디오 DOM 참조를 등록하는 함수 */
   setVideoElement: (el: HTMLVideoElement | null | undefined) => void;
 
@@ -54,6 +60,9 @@ const DEFAULT_WEBCAM_OPTS: WebcamOptions = { audioEnabled: false };
 export type UseWebcamControllerOptions = {
   /** true이면 스트림 요청을 시작하지 않고 비활성 상태를 유지한다. */
   disabled?: boolean;
+  videoElement?: HTMLVideoElement | null;
+  webcamOptions?: WebcamOptions;
+  manageVideoStyle?: boolean;
 };
 
 /** 현재 스트림에서 재생 중인 비디오 트랙의 장치 ID를 읽는다. */
@@ -87,9 +96,15 @@ export function useWebcamController(
 ): UseWebcamControllerResult {
   const { disabled = false } = options;
   // ─── 원천 상태 ─────────────────────────────────────────────────────────────
-  const [webcamOptions, setWebcamOptionsState] = useState<WebcamOptions>(DEFAULT_WEBCAM_OPTS);
+  const [internalOptions, setWebcamOptionsState] = useState<WebcamOptions>(DEFAULT_WEBCAM_OPTS);
+  const webcamOptions = options.webcamOptions ?? internalOptions;
   const [flipped, setFlippedState] = useState(false);
-  const [videoElement, setVideoElementState] = useState<HTMLVideoElement | undefined>(undefined);
+  const [internalVideoElement, setVideoElementState] = useState<HTMLVideoElement | undefined>(
+    undefined,
+  );
+  const videoElement = options.videoElement ?? internalVideoElement;
+  const [requestKey, setRequestKey] = useState(0);
+  const retry = useCallback(() => setRequestKey((key) => key + 1), []);
   const [fitMode, setFitModeState] = useState<"unset" | "fill" | "cover" | "contain" | undefined>(
     undefined,
   );
@@ -108,7 +123,7 @@ export function useWebcamController(
 
   // ─── stream request lifecycle ───────────────────────────────────────────────
   // 요청 시작 → 성공/실패 publish → 취소된 요청 무시 → cleanup 시 stream stop
-  const streamState = useWebcamStreamLifecycle({ videoElement, constraints, disabled });
+  const streamState = useWebcamStreamLifecycle({ videoElement, constraints, disabled, requestKey });
 
   // 스트림 상태가 바뀌면(새 요청 시작 등) 이전 재생 오류를 초기화한다.
   useEffect(() => {
@@ -151,12 +166,13 @@ export function useWebcamController(
   const isLoaded = webcamDetail.phase === "live" && !!videoElement && !!videoSize;
 
   // ─── DOM 바인딩 (srcObject, transform, objectFit, 해상도 관찰, debug) ───────
-  useVideoElementBindings({
+  const hasFrame = useVideoElementBindings({
     videoElement,
     mediaStream: mediaStreamResult.mediaStream,
     flipped,
     fitMode,
     debugVideoEvents,
+    manageVideoStyle: options.manageVideoStyle,
     onVideoSizeChange: setVideoSize,
     onPlayError: (mediaStream, error) => {
       setPlaybackErrorState({ mediaStream, error });
@@ -168,6 +184,7 @@ export function useWebcamController(
       });
     },
   });
+  const isFrameReady = !disabled && webcamDetail.phase === "live" && hasFrame;
 
   // 외부로 노출하는 setter는 안정적인 참조를 유지한다.
   const setFlipped = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
@@ -245,6 +262,8 @@ export function useWebcamController(
       videoSize,
       constraints,
       isLoaded,
+      isFrameReady,
+      retry,
 
       setVideoElement,
       setFitMode,
@@ -259,6 +278,8 @@ export function useWebcamController(
       videoSize,
       constraints,
       isLoaded,
+      isFrameReady,
+      retry,
       setFlipped,
       setWebcamOptions,
       setVideoElement,

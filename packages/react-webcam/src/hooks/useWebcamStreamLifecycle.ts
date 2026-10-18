@@ -28,6 +28,9 @@ export type UseWebcamStreamLifecycleOptions = {
 
   /** true이면 새 스트림 요청을 막고 idle 상태로 수렴시킨다 */
   disabled?: boolean;
+
+  /** 같은 제약 조건으로 명시적으로 다시 요청할 때 바꾼다. */
+  requestKey?: number;
 };
 
 const IDLE_STATE: WebcamDetail = { phase: "idle" };
@@ -40,6 +43,7 @@ export function useWebcamStreamLifecycle({
   videoElement,
   constraints,
   disabled = false,
+  requestKey = 0,
 }: UseWebcamStreamLifecycleOptions): WebcamDetail {
   const [streamState, setStreamState] = useState<WebcamDetail>(IDLE_STATE);
 
@@ -153,7 +157,7 @@ export function useWebcamStreamLifecycle({
         BrowserMediaDevices.stopStream(acquiredStream);
       }
     };
-  }, [videoElement, constraints, disabled]);
+  }, [videoElement, constraints, disabled, requestKey]);
 
   return streamState;
 }

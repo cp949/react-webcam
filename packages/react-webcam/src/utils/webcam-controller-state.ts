@@ -11,6 +11,7 @@ export type WebcamErrorPhase = "denied" | "unavailable" | "unsupported" | "insec
 export function errorCodeToPhase(code: WebcamErrorCode): WebcamErrorPhase {
   switch (code) {
     case "permission-denied":
+    case "policy-blocked":
       return "denied";
     case "device-not-found":
     case "device-in-use":

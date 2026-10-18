@@ -184,6 +184,23 @@ function readImportsSection(output: string) {
 }
 
 describe("llm.txt 생성 계약", () => {
+  it("외부 video용 공개 훅과 타입을 import 가이드와 API 본문에 포함한다", () => {
+    const fixture = createFixture();
+    const output = renderLlmTxt({
+      ...fixture,
+      declarationText: `${fixture.declarationText}
+        export type UseWebcamOptions = { videoElement: HTMLVideoElement | null };
+        export type UseWebcamResult = { detail: WebcamDetail; isFrameReady: boolean };
+        export declare function useWebcam(options: UseWebcamOptions): UseWebcamResult;
+      `,
+      keySymbols: [...fixture.keySymbols, "useWebcam", "UseWebcamOptions", "UseWebcamResult"],
+    });
+    for (const name of ["useWebcam", "UseWebcamOptions", "UseWebcamResult"]) {
+      expect(readImportsSection(output)).toContain(name);
+      expect(output).toContain(`### \`${name}\``);
+    }
+  });
+
   it("패키지 헤더와 핵심 API, 사용 가이드를 함께 렌더링한다", () => {
     const output = renderLlmTxt(createFixture());
     const { packageJson } = createFixture();

@@ -31,7 +31,7 @@ describe("mapDomExceptionToErrorCode", () => {
     ["TrackStartError", "device-in-use"],
     ["OverconstrainedError", "constraints-unsatisfied"],
     ["ConstraintNotSatisfiedError", "constraints-unsatisfied"],
-    ["SecurityError", "insecure-context"],
+    ["SecurityError", "security-error"],
     ["AbortError", "aborted"],
     ["SomeOtherError", "unknown"],
   ] as const)("maps %s → %s", (name, expected) => {

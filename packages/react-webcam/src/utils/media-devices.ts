@@ -55,7 +55,7 @@ export function mapDomExceptionToErrorCode(err: unknown): WebcamErrorCode {
     case "ConstraintNotSatisfiedError":
       return "constraints-unsatisfied";
     case "SecurityError":
-      return "insecure-context";
+      return "security-error";
     case "AbortError":
       return "aborted";
     default:
@@ -82,6 +82,36 @@ function assertSecureContext() {
   }
 }
 
+/** 정책 검사 API가 예외를 던지면 차단으로 단정하지 않고 허용으로 본다. */
+function isFeatureAllowed(
+  policy: { allowsFeature: (feature: string) => boolean },
+  feature: string,
+) {
+  try {
+    return policy.allowsFeature(feature);
+  } catch {
+    return true;
+  }
+}
+
+/** 브라우저가 정책 검사 API를 제공할 때만 요청한 입력의 차단 여부를 확인한다. */
+function assertMediaPolicy(constraints: MediaStreamConstraints) {
+  if (typeof document === "undefined") return;
+  type MediaPolicy = { allowsFeature: (feature: string) => boolean };
+  const policyDocument = document as Document & {
+    permissionsPolicy?: MediaPolicy;
+    featurePolicy?: MediaPolicy;
+  };
+  const policy = policyDocument.permissionsPolicy ?? policyDocument.featurePolicy;
+  if (!policy?.allowsFeature) return;
+  for (const feature of ["camera", "microphone"] as const) {
+    const requested = feature === "camera" ? constraints.video : constraints.audio;
+    if (requested && !isFeatureAllowed(policy, feature)) {
+      throw new WebcamRequestError("policy-blocked", `Permissions Policy blocks ${feature}`);
+    }
+  }
+}
+
 export class BrowserMediaDevices {
   /**
    * 지정한 제약 조건으로 사용자 미디어 스트림을 요청한다.
@@ -92,6 +122,7 @@ export class BrowserMediaDevices {
    * (호출측에서 `mapDomExceptionToErrorCode`로 변환한다).
    */
   static requestUserMedia = async (constraints: MediaStreamConstraints): Promise<MediaStream> => {
+    assertSecureContext();
     const mediaDevices = getBrowserMediaDevices();
     if (!mediaDevices.getUserMedia) {
       throw new WebcamRequestError(
@@ -99,7 +130,7 @@ export class BrowserMediaDevices {
         "navigator.mediaDevices.getUserMedia is not supported in this browser",
       );
     }
-    assertSecureContext();
+    assertMediaPolicy(constraints);
     return await mediaDevices.getUserMedia(constraints);
   };
 
@@ -115,6 +146,7 @@ export class BrowserMediaDevices {
 
   /** 전체 디바이스 또는 지정한 종류의 입력 디바이스 목록을 조회한다. */
   static listDevices = async (kind?: "videoinput" | "audioinput"): Promise<MediaDeviceInfo[]> => {
+    assertSecureContext();
     const mediaDevices = getBrowserMediaDevices();
     if (!mediaDevices.enumerateDevices) {
       throw new WebcamRequestError(
@@ -122,7 +154,6 @@ export class BrowserMediaDevices {
         "navigator.mediaDevices.enumerateDevices is not supported in this browser",
       );
     }
-    assertSecureContext();
     const devices = await mediaDevices.enumerateDevices();
     if (!kind) {
       return devices;

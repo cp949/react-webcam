@@ -11,7 +11,7 @@
  * `useWebcamController`에서 DOM 계층 effect를 격리해
  * orchestrator가 상태 관리와 stream lifecycle에만 집중할 수 있게 한다.
  */
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { startDebugVideoEventListener } from "../utils/media-debug.js";
 
 export type UseVideoElementBindingsOptions = {
@@ -28,6 +28,9 @@ export type UseVideoElementBindingsOptions = {
 
   /** 비디오 이벤트 디버그 로깅 활성화 여부 */
   debugVideoEvents: boolean;
+
+  /** 외부 video를 사용할 때 호출자가 정한 표시 스타일을 보존한다. */
+  manageVideoStyle?: boolean;
 
   /**
    * 실제 비디오 해상도가 확인되거나 비디오 요소가 제거될 때 호출된다.
@@ -55,10 +58,16 @@ export function useVideoElementBindings({
   flipped,
   fitMode,
   debugVideoEvents,
+  manageVideoStyle = true,
   onVideoSizeChange,
   onPlayError,
   onPlaybackStart,
-}: UseVideoElementBindingsOptions): void {
+}: UseVideoElementBindingsOptions): boolean {
+  const [frameState, setFrameState] = useState<{
+    videoElement: HTMLVideoElement;
+    mediaStream: MediaStream;
+    ready: boolean;
+  }>();
   // callback을 ref로 감싸 effect dep에 포함하지 않아도 항상 최신 참조를 사용한다.
   const onVideoSizeChangeRef = useRef(onVideoSizeChange);
   onVideoSizeChangeRef.current = onVideoSizeChange;
@@ -74,42 +83,75 @@ export function useVideoElementBindings({
   // Safari / 모바일 브라우저는 autoPlay 정책으로 재생이 막힐 수 있으므로
   // play()를 명시적으로 호출해 실패 여부를 감지한다.
   useEffect(() => {
-    if (!videoElement) return;
-    videoElement.srcObject = mediaStream ?? null;
+    // 스트림이 없을 때는 호출자가 직접 설정한 srcObject를 덮어쓰지 않는다.
+    if (!videoElement || !mediaStream) return;
+    videoElement.srcObject = mediaStream;
     let active = true;
-    if (mediaStream) {
-      videoElement
-        .play()
-        .then(() => {
-          if (!active) return;
-          onPlaybackStartRef.current(mediaStream);
-        })
-        .catch((err: unknown) => {
-          if (!active) return;
-          // AbortError는 srcObject 교체 시 이전 play() 요청이 정상적으로 취소되는 경우이므로 무시한다.
-          if ((err as { name?: string })?.name === "AbortError") return;
-          // 자동재생이 브라우저 정책에 의해 차단된 경우 — 상위 상태로 올린다.
-          const error = err instanceof Error ? err : new Error(String(err));
-          console.warn("[react-webcam] autoPlay blocked or failed:", error);
-          onPlayErrorRef.current(mediaStream, error);
-        });
-    }
+    videoElement
+      .play()
+      .then(() => {
+        if (!active) return;
+        onPlaybackStartRef.current(mediaStream);
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        // AbortError는 srcObject 교체 시 이전 play() 요청이 정상적으로 취소되는 경우이므로 무시한다.
+        if ((err as { name?: string })?.name === "AbortError") return;
+        // 자동재생이 브라우저 정책에 의해 차단된 경우 — 상위 상태로 올린다.
+        const error = err instanceof Error ? err : new Error(String(err));
+        console.warn("[react-webcam] autoPlay blocked or failed:", error);
+        onPlayErrorRef.current(mediaStream, error);
+      });
     return () => {
       active = false;
+      if (videoElement.srcObject === mediaStream) videoElement.srcObject = null;
     };
   }, [videoElement, mediaStream]);
 
   // ─── transform (좌우 반전) ────────────────────────────────────────────────
   useEffect(() => {
-    if (!videoElement) return;
+    if (!videoElement || !manageVideoStyle) return;
     videoElement.style.transform = flipped ? "scaleX(-1)" : "none";
-  }, [videoElement, flipped]);
+  }, [videoElement, flipped, manageVideoStyle]);
 
   // ─── objectFit ────────────────────────────────────────────────────────────
   useEffect(() => {
-    if (!videoElement) return;
+    if (!videoElement || !manageVideoStyle) return;
     videoElement.style.objectFit = fitMode ?? "unset";
-  }, [videoElement, fitMode]);
+  }, [videoElement, fitMode, manageVideoStyle]);
+
+  // 메타데이터만으로는 얼굴 인식을 시작할 수 없어 현재 스트림의 프레임 도착도 확인한다.
+  useEffect(() => {
+    if (!videoElement || !mediaStream) return;
+    const updateFrameReady = () => {
+      const ready =
+        videoElement.srcObject === mediaStream &&
+        videoElement.readyState >= 2 && // HAVE_CURRENT_DATA
+        videoElement.videoWidth > 0 &&
+        videoElement.videoHeight > 0;
+      setFrameState((previous) =>
+        previous?.videoElement === videoElement &&
+        previous.mediaStream === mediaStream &&
+        previous.ready === ready
+          ? previous
+          : { videoElement, mediaStream, ready },
+      );
+    };
+    const events = [
+      "loadedmetadata",
+      "loadeddata",
+      "canplay",
+      "playing",
+      "emptied",
+      "waiting",
+      "resize",
+    ];
+    events.forEach((event) => videoElement.addEventListener(event, updateFrameReady));
+    updateFrameReady();
+    return () => {
+      events.forEach((event) => videoElement.removeEventListener(event, updateFrameReady));
+    };
+  }, [videoElement, mediaStream]);
 
   // ─── 실제 비디오 해상도 관찰 ────────────────────────────────────────────────
   // loadedmetadata / loadeddata 두 이벤트를 모두 구독해 videoSize를 보수적으로 갱신한다.
@@ -128,6 +170,8 @@ export function useVideoElementBindings({
       onVideoSizeChangeRef.current({ width: w, height: h });
     };
 
+    // 스트림이 바뀌면 이전 스트림의 해상도를 버린다. 새 메타데이터가 오기 전 isLoaded가 true가 되는 것을 막는다.
+    onVideoSizeChangeRef.current(undefined);
     videoElement.addEventListener("loadedmetadata", handleVideoSize);
     videoElement.addEventListener("loadeddata", handleVideoSize);
     handleVideoSize();
@@ -135,7 +179,7 @@ export function useVideoElementBindings({
       videoElement.removeEventListener("loadedmetadata", handleVideoSize);
       videoElement.removeEventListener("loadeddata", handleVideoSize);
     };
-  }, [videoElement]);
+  }, [videoElement, mediaStream]);
 
   // ─── 실제 playback 시작 감지 ───────────────────────────────────────────────
   useEffect(() => {
@@ -156,4 +200,10 @@ export function useVideoElementBindings({
     if (!videoElement || !debugVideoEvents) return;
     return startDebugVideoEventListener(videoElement);
   }, [videoElement, debugVideoEvents]);
+
+  return (
+    !!frameState?.ready &&
+    frameState.videoElement === videoElement &&
+    frameState.mediaStream === mediaStream
+  );
 }

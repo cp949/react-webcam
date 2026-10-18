@@ -186,6 +186,79 @@ export function DisabledExample() {
 }
 ```
 
+## Use An Existing Video Element
+
+`useWebcam` manages camera access and playback for a video element owned by
+your application. It preserves the element's `transform` and `objectFit` styles
+and does not render UI. Set `muted` and `playsInline` on the video yourself.
+
+```tsx
+import { useState } from "react";
+import { useWebcam } from "@cp949/react-webcam";
+
+export function CameraSource() {
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
+  const camera = useWebcam({
+    videoElement,
+    webcamOptions: { facingMode: "user", size: { width: 1280 } },
+  });
+
+  return (
+    <>
+      <video ref={setVideoElement} muted playsInline />
+      <output>{camera.isFrameReady ? "Frame ready" : camera.detail.phase}</output>
+      <button onClick={camera.retry}>Retry camera</button>
+      <button onClick={camera.resumePlayback}>Resume playback</button>
+    </>
+  );
+}
+```
+
+- `videoElement` accepts an existing `HTMLVideoElement`, `null`, or `undefined`.
+  Use state or a callback ref so that attaching or replacing the element triggers
+  a render. A video with `display: none` also works with explicit camera sizing.
+- `webcamOptions` accepts the same options as `Webcam`. `disabled` prevents
+  requests and stops an existing stream; no element also means no request.
+- `detail.phase === "live"` means the stream was acquired. It does not guarantee
+  that `play()` succeeded or that a frame has arrived. Use `isFrameReady` before
+  starting face detection: it requires the current stream, `readyState >= 2`
+  (`HAVE_CURRENT_DATA`), positive video dimensions, and the `live` phase.
+  A paused video may still have a usable frame; this flag does not mean frames
+  keep advancing.
+- `retry()` stops the current stream and requests a new one with the same options.
+  It also works after access failure or `track-ended`, but does not bypass browser
+  permission requirements or request anything while disabled.
+- `pausePlayback()` pauses only the video. `resumePlayback()` retries playback;
+  failures appear as `playback-error` in `detail`.
+- Element replacement and unmount stop owned tracks and detach the owned stream
+  from the video. Avoid managing the same video's `srcObject` or camera stream
+  from another controller at the same time.
+
+## Camera Error Classification
+
+### Migration For The Next Major Release
+
+`SecurityError` now reports `security-error` / `error` instead of
+`insecure-context` / `insecure`. Update branches that previously treated every
+`SecurityError` as an HTTPS problem. Actual insecure contexts still report
+`insecure-context` / `insecure`.
+
+`WebcamErrorCode` gains `security-error` and `policy-blocked`; update exhaustive
+switches or code-to-message mappings. A confirmed policy block reports
+`policy-blocked` / `denied`. An unconfirmed `NotAllowedError` keeps the existing
+`permission-denied` / `denied` classification.
+
+- `insecure-context`: the page is outside a secure context. This check runs
+  before API support checks, including when HTTP makes `mediaDevices` absent.
+- `policy-blocked` (`denied` phase): the browser's policy inspection API confirms
+  that a requested camera or microphone is blocked. Both `permissionsPolicy`
+  and the older `featurePolicy` API are supported when available.
+- `permission-denied`: `NotAllowedError` or `PermissionDeniedError` without a
+  confirmed policy block. This code does not prove that the user clicked Deny;
+  policy inspection is not available in every browser.
+- `security-error` (`error` phase): the browser returned `SecurityError` because
+  media access is disabled for the document. It is not classified as HTTP usage.
+
 ## Observe Runtime State With `onStateChange`
 
 `onStateChange` fires whenever `WebcamDetail` changes. `pausePlayback()` does

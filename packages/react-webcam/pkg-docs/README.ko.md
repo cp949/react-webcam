@@ -173,6 +173,76 @@ export function DisabledExample() {
 }
 ```
 
+## 기존 video 요소 연결
+
+`useWebcam`은 앱이 소유한 video 요소의 카메라 요청과 재생을 관리한다.
+UI를 만들지 않으며 기존 `transform`, `objectFit` 스타일을 보존한다.
+video의 `muted`, `playsInline`은 호출자가 설정한다.
+
+```tsx
+import { useState } from "react";
+import { useWebcam } from "@cp949/react-webcam";
+
+export function CameraSource() {
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
+  const camera = useWebcam({
+    videoElement,
+    webcamOptions: { facingMode: "user", size: { width: 1280 } },
+  });
+
+  return (
+    <>
+      <video ref={setVideoElement} muted playsInline />
+      <output>{camera.isFrameReady ? "프레임 준비 완료" : camera.detail.phase}</output>
+      <button onClick={camera.retry}>카메라 다시 시도</button>
+      <button onClick={camera.resumePlayback}>재생 다시 시도</button>
+    </>
+  );
+}
+```
+
+- `videoElement`에는 기존 `HTMLVideoElement`, `null`, `undefined`를 넘긴다.
+  요소 연결·교체가 렌더링을 일으키도록 state나 callback ref를 사용한다.
+  카메라 크기를 명시하면 `display: none`인 video도 사용할 수 있다.
+- `webcamOptions`는 `Webcam`과 같은 옵션이다. `disabled`는 요청을 막고 기존
+  스트림을 종료한다. 요소가 없을 때도 요청하지 않는다.
+- `detail.phase === "live"`는 스트림을 얻었다는 뜻이다. `play()` 성공이나
+  프레임 도착을 보장하지 않는다. 얼굴 인식을 시작할 때는 `isFrameReady`를 확인한다.
+  현재 스트림에 연결된 video의 `readyState >= 2` (`HAVE_CURRENT_DATA`), 양수인
+  영상 너비·높이, `live` 상태를 모두 요구한다. 일시 정지한 영상에도 사용 가능한
+  프레임이 남을 수 있으므로 이 값이 프레임의 계속된 갱신을 뜻하지는 않는다.
+- `retry()`는 기존 스트림을 종료하고 같은 옵션으로 새로 요청한다. 권한 요청 실패나
+  `track-ended` 뒤에도 사용할 수 있다. 브라우저 권한 제한을 우회하지 않으며
+  `disabled` 중에는 요청하지 않는다.
+- `pausePlayback()`은 영상 재생만 멈춘다. `resumePlayback()`은 재생을 다시
+  시도하고 실패를 `detail`의 `playback-error`로 전달한다.
+- 요소 교체·언마운트 때 소유한 트랙을 종료하고 video에서 해당 스트림을 분리한다.
+  같은 video의 `srcObject`나 카메라 스트림을 다른 제어 코드에서 동시에 관리하지 않는다.
+
+## 카메라 에러 분류
+
+### 다음 major 릴리스의 마이그레이션
+
+`SecurityError`의 분류가 `insecure-context` / `insecure`에서
+`security-error` / `error`로 바뀐다. 모든 `SecurityError`를 HTTPS 문제로
+안내하던 분기를 수정한다. 실제 보안 컨텍스트 문제는 계속
+`insecure-context` / `insecure`로 보고한다.
+
+`WebcamErrorCode`에 `security-error`, `policy-blocked`가 추가된다.
+모든 코드를 나열하는 switch나 안내 문장 맵에 두 값을 반영한다.
+확인된 정책 차단은 `policy-blocked` / `denied`다. 원인이 확인되지 않은
+`NotAllowedError`는 기존 `permission-denied` / `denied` 분류를 유지한다.
+
+- `insecure-context`: 보안 컨텍스트 밖에서 실행 중이다. HTTP에서 `mediaDevices`가
+  없어지는 경우도 구분하도록 API 지원 여부보다 먼저 검사한다.
+- `policy-blocked` (`denied` 상태): 브라우저의 정책 검사 API로 요청한 카메라나
+  마이크의 차단을 확인했다. `permissionsPolicy`와 구형 `featurePolicy`를 지원한다.
+- `permission-denied`: 정책 차단이 확인되지 않은 `NotAllowedError` 또는
+  `PermissionDeniedError`다. 모든 브라우저에 정책 검사 API가 있지는 않으므로
+  사용자가 거부 버튼을 눌렀다고 단정하지 않는다.
+- `security-error` (`error` 상태): 문서의 미디어 사용이 비활성화되어 브라우저가
+  `SecurityError`를 반환했다. HTTP 문제로 분류하지 않는다.
+
 ## 상태 변화 감지 - `onStateChange`
 
 `onStateChange`는 `WebcamDetail`이 변경될 때마다 호출됩니다. `pausePlayback()`은 `WebcamDetail`을 변경하지 않으므로 `onStateChange`를 발생시키지 않습니다. `resumePlayback()`은 성공 시 보통 현재 상태를 유지하거나 `playback-error`를 해제하고, 실패 시 `playback-error`를 발생시킬 수 있습니다.

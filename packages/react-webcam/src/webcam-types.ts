@@ -29,6 +29,8 @@ export type WebcamPhase =
  */
 export type WebcamErrorCode =
   | "permission-denied"
+  | "policy-blocked"
+  | "security-error"
   | "device-not-found"
   | "device-in-use"
   | "constraints-unsatisfied"
@@ -81,7 +83,7 @@ export type WebcamDetail =
   | (WithVideoSize & { phase: "idle" })
   /** `getUserMedia` request in progress. */
   | (WithVideoSize & { phase: "requesting"; constraints: MediaStreamConstraints })
-  /** Stream acquired and video playback is active. */
+  /** Stream acquired. This alone does not guarantee playback or a decoded frame. */
   | (WithVideoSize & {
       phase: "live";
       /** Acquired `MediaStream`, always present in the `live` phase. */

@@ -429,6 +429,31 @@ export default function PauseResumeExample() {
   );
 }`,
 
+  "use-webcam": `import { useState } from 'react';
+import { useWebcam } from '@cp949/react-webcam';
+
+export default function UseWebcamExample() {
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
+  const camera = useWebcam({
+    videoElement,
+    webcamOptions: { facingMode: 'user', size: { width: 1280 } },
+  });
+
+  return (
+    <>
+      {/* muted와 playsInline은 호출자가 설정합니다. 훅은 바꾸지 않습니다. */}
+      <video ref={setVideoElement} muted playsInline style={{ display: 'none' }} />
+      <p>
+        phase: {camera.detail.phase} / isFrameReady: {String(camera.isFrameReady)}
+      </p>
+      <button onClick={camera.retry}>카메라 다시 시도</button>
+      <button onClick={camera.pausePlayback}>재생 멈춤</button>
+      {/* play()가 막혀 playback-error가 되면 사용자 조작 안에서 호출합니다. */}
+      <button onClick={camera.resumePlayback}>재생 다시 시도</button>
+    </>
+  );
+}`,
+
   "visual-debug": `import { Webcam } from '@cp949/react-webcam';
 
 const styles = \`

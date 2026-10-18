@@ -13,6 +13,7 @@ export type DemoSectionId =
   | "error-fallback"
   | "recipes"
   | "pause-resume"
+  | "use-webcam"
   | "visual-debug";
 
 export interface DemoSection {

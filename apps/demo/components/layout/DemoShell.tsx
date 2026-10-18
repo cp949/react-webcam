@@ -17,6 +17,7 @@ import DisabledFallbackSection from "../sections/DisabledFallbackSection";
 import ErrorFallbackSection from "../sections/ErrorFallbackSection";
 import RecipesSection from "../sections/RecipesSection";
 import PauseResumeSection from "../sections/PauseResumeSection";
+import UseWebcamSection from "../sections/UseWebcamSection";
 import VisualDebugPropsSection from "../sections/VisualDebugPropsSection";
 import DemoHeader from "./DemoHeader";
 import DemoSidebar from "./DemoSidebar";
@@ -51,6 +52,8 @@ function renderSection(section: DemoSectionId) {
       return <RecipesSection />;
     case "pause-resume":
       return <PauseResumeSection />;
+    case "use-webcam":
+      return <UseWebcamSection />;
     case "visual-debug":
       return <VisualDebugPropsSection />;
     default:

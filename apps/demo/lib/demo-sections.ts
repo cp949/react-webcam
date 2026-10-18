@@ -76,6 +76,12 @@ export const DEMO_SECTIONS: DemoSection[] = [
     keywords: ["pausePlayback", "resumePlayback", "WebcamHandle", "playback-error"],
   },
   {
+    id: "use-webcam",
+    title: "useWebcam",
+    description: "앱이 소유한 video에 연결하는 훅",
+    keywords: ["useWebcam", "isFrameReady", "retry", "muted", "playsInline"],
+  },
+  {
     id: "visual-debug",
     title: "Visual / Debug Props",
     description: "children, className, debug UI 확인",

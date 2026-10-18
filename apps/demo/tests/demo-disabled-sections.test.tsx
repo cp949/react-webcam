@@ -104,7 +104,19 @@ vi.mock("@cp949/react-webcam", () => {
     );
   }
 
-  return { Webcam };
+  // 앱이 소유한 video 경로. video가 연결되면 live·프레임 준비 상태를 돌려준다.
+  function useWebcam(options: { videoElement: HTMLVideoElement | null; disabled?: boolean }) {
+    const live = !!options.videoElement && !options.disabled;
+    return {
+      detail: live ? { phase: "live" } : { phase: "idle" },
+      isFrameReady: live,
+      retry: () => {},
+      pausePlayback: () => {},
+      resumePlayback: () => {},
+    };
+  }
+
+  return { Webcam, useWebcam };
 });
 
 describe("demo disabled sections", () => {
@@ -309,5 +321,26 @@ describe("demo disabled sections", () => {
     expect(screen.getByText("Overlay badge child")).toBeTruthy();
     expect(screen.getByTestId("mock-webcam-video-size-debug")).toBeTruthy();
     expect(screen.getByTestId("mock-webcam-constraints-debug")).toBeTruthy();
+  });
+
+  it("registers the useWebcam demo section and shows hook state on an app-owned video", () => {
+    expect(DEMO_SECTIONS.some((section) => section.id === "use-webcam")).toBe(true);
+    expect(CODE_SNIPPETS["use-webcam"]).toContain("useWebcam({");
+    expect(CODE_SNIPPETS["use-webcam"]).toContain("muted playsInline");
+
+    const { container } = render(createElement(DemoShell));
+    fireEvent.click(screen.getAllByText("useWebcam")[0]!);
+
+    expect(screen.getByText("phase: live")).toBeTruthy();
+    expect(screen.getByText("isFrameReady: true")).toBeTruthy();
+
+    const video = container.querySelector("video")!;
+    expect(video.style.display).toBe("block");
+    fireEvent.click(screen.getByLabelText("video 숨기기 (display: none)"));
+    expect(video.style.display).toBe("none");
+
+    fireEvent.click(screen.getByLabelText("disabled"));
+    expect(screen.getByText("phase: idle")).toBeTruthy();
+    expect(screen.getByText("isFrameReady: false")).toBeTruthy();
   });
 });

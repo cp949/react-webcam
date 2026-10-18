@@ -36,8 +36,7 @@ export default function VisualDebugPropsSection() {
           <Box sx={{ width: "100%", maxWidth: 720, height: 320 }}>
             <Webcam
               className='demo-visual-debug-webcam'
-              visibleVideoSizeDebug
-              visibleConstraintsDebug
+              debug={{ videoSize: true, constraints: true }}
               webcamOptions={{ aspectRatio: 16 / 9, facingMode: "user" }}
               style={{ width: "100%", height: "100%", borderRadius: 16 }}
             >

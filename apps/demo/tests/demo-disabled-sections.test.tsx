@@ -66,9 +66,8 @@ vi.mock("@cp949/react-webcam", () => {
     fitMode?: string;
     className?: string;
     children?: React.ReactNode;
-    visibleVideoSizeDebug?: boolean;
-    visibleConstraintsDebug?: boolean;
-    visibleSnapshotButton?: boolean;
+    controls?: { snapshot?: boolean };
+    debug?: { videoSize?: boolean; constraints?: boolean };
     onSnapshot?: (canvas: HTMLCanvasElement) => void;
     webcamOptions?: Record<string, unknown>;
     defaultWebcamOptions?: Record<string, unknown>;
@@ -120,7 +119,7 @@ vi.mock("@cp949/react-webcam", () => {
         { "data-testid": "mock-webcam-options" },
         JSON.stringify(props.webcamOptions ?? initialDefaultWebcamOptions ?? {}),
       ),
-      props.visibleSnapshotButton
+      props.controls?.snapshot
         ? createElement(
             "button",
             {
@@ -130,10 +129,10 @@ vi.mock("@cp949/react-webcam", () => {
             "snapshot",
           )
         : null,
-      props.visibleVideoSizeDebug
+      props.debug?.videoSize
         ? createElement("div", { "data-testid": "mock-webcam-video-size-debug" }, "1280x720")
         : null,
-      props.visibleConstraintsDebug
+      props.debug?.constraints
         ? createElement(
             "pre",
             { "data-testid": "mock-webcam-constraints-debug" },
@@ -206,7 +205,7 @@ describe("demo disabled sections", () => {
     expect(CODE_SNIPPETS.controls).toContain("aspectRatio 없이 fitMode만");
     expect(CODE_SNIPPETS.controls).toContain("기본값 다시 적용");
     expect(CODE_SNIPPETS.controls).toContain("부모에서 facingMode 변경");
-    expect(CODE_SNIPPETS["visual-debug"]).toContain("visibleVideoSizeDebug");
+    expect(CODE_SNIPPETS["visual-debug"]).toContain("videoSize");
     expect(CODE_SNIPPETS["visual-debug"]).toContain("className=");
     expect(CODE_SNIPPETS["visual-debug"]).toContain(".demo-visual-debug-webcam");
   });

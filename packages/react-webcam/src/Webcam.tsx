@@ -22,6 +22,30 @@ import type {
   WebcamOptions,
 } from "./webcam-types.js";
 
+/** `Webcam`이 내장하는 컨트롤 버튼의 표시 여부다. */
+export type WebcamControls = {
+  /** 좌우 반전 토글 버튼 표시 여부다. */
+  flip?: boolean;
+
+  /** 카메라 방향 버튼 표시 여부다. */
+  cameraDirection?: boolean;
+
+  /** 화면 비율 버튼 표시 여부다. */
+  aspectRatio?: boolean;
+
+  /** 스냅샷 버튼 표시 여부다. */
+  snapshot?: boolean;
+};
+
+/** `Webcam`이 내장하는 디버그 오버레이의 표시 여부다. */
+export type WebcamDebug = {
+  /** 비디오 크기 디버그 UI 표시 여부다. */
+  videoSize?: boolean;
+
+  /** 미디어 제약 조건 디버그 UI 표시 여부다. */
+  constraints?: boolean;
+};
+
 /**
  * `ref`로 노출하는 `Webcam` 제어 핸들이다.
  *
@@ -157,30 +181,24 @@ export interface WebcamProps {
    */
   defaultWebcamOptions?: WebcamOptions;
 
-  /** 좌우 반전 토글 버튼 표시 여부다. 기본값은 `false`다. */
-  visibleFlipButton?: boolean;
-
-  /** 카메라 방향 버튼 표시 여부다. 기본값은 `false`다. */
-  visibleCameraDirectionButton?: boolean;
-
-  /** 화면 비율 버튼 표시 여부다. 기본값은 `false`다. */
-  visibleAspectRatioButton?: boolean;
-
-  /** 스냅샷 버튼 표시 여부다. 기본값은 `false`다. */
-  visibleSnapshotButton?: boolean;
+  /**
+   * 표시할 내장 컨트롤 버튼을 고른다.
+   * 켠 항목만 렌더링한다. 기본값은 모두 `false`다.
+   */
+  controls?: WebcamControls;
 
   /**
    * 내장 스냅샷 버튼을 눌렀을 때 캡처한 프레임을 받는다.
    * 캔버스는 원본 해상도다. 프레임을 캡처하지 못하면 호출하지 않는다.
-   * `visibleSnapshotButton`이 켜져 있어야 호출된다.
+   * `controls.snapshot`이 켜져 있어야 호출된다.
    */
   onSnapshot?: (canvas: HTMLCanvasElement) => void;
 
-  /** 비디오 크기 디버그 UI 표시 여부다. 기본값은 `false`다. */
-  visibleVideoSizeDebug?: boolean;
-
-  /** 미디어 제약 조건 디버그 UI 표시 여부다. 기본값은 `false`다. */
-  visibleConstraintsDebug?: boolean;
+  /**
+   * 표시할 디버그 오버레이를 고른다.
+   * 켠 항목만 렌더링한다. 기본값은 모두 `false`다.
+   */
+  debug?: WebcamDebug;
 
   /**
    * 내장 UI 라벨을 부분적으로 덮어쓸 때 사용한다.
@@ -208,7 +226,7 @@ const SIZE_ZERO = {
  * <div style={{ width: 800, height: 'auto' }}>
  *   <Webcam
  *     flipped
- *     visibleFlipButton
+ *     controls={{ flip: true }}
  *     webcamOptions={{ audioEnabled: true, aspectRatio: 4/3, facingMode: 'user' }}
  *     onStateChange={(state) => console.log(state.phase)}
  *   />
@@ -228,12 +246,8 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     disabled = false,
     disabledFallback,
     errorFallback,
-    visibleFlipButton = false,
-    visibleCameraDirectionButton = false,
-    visibleAspectRatioButton = false,
-    visibleVideoSizeDebug = false,
-    visibleConstraintsDebug = false,
-    visibleSnapshotButton = false,
+    controls,
+    debug,
     onSnapshot,
     flipped: flippedProp,
     defaultFlipped,
@@ -373,8 +387,13 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   const [snapshotImageUrl, setSnapshotImageUrl] = useTimeoutValue<string>(700);
 
   // ---- 버튼 UI 가시성 ---------------------------------------------------
-  const hasOptionButtons =
-    visibleFlipButton || visibleCameraDirectionButton || visibleAspectRatioButton;
+  const showFlipButton = controls?.flip === true;
+  const showCameraDirectionButton = controls?.cameraDirection === true;
+  const showAspectRatioButton = controls?.aspectRatio === true;
+  const showSnapshotButton = controls?.snapshot === true;
+  const showVideoSizeDebug = debug?.videoSize === true;
+  const showConstraintsDebug = debug?.constraints === true;
+  const hasOptionButtons = showFlipButton || showCameraDirectionButton || showAspectRatioButton;
   const hasDisabledFallbackProp = Object.prototype.hasOwnProperty.call(props, "disabledFallback");
   const hasErrorFallbackProp = Object.prototype.hasOwnProperty.call(props, "errorFallback");
   const showDefaultDisabledPlaceholder = disabled && !hasDisabledFallbackProp;
@@ -512,7 +531,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             gap: 4,
           }}
         >
-          {visibleFlipButton && (
+          {showFlipButton && (
             <FlipButton
               flipped={flipped}
               className='Webcam-optionBtn'
@@ -521,7 +540,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             />
           )}
 
-          {visibleCameraDirectionButton && (
+          {showCameraDirectionButton && (
             <FacingModeButton
               className='Webcam-optionBtn'
               label={labels.cameraDirection}
@@ -540,7 +559,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             />
           )}
 
-          {visibleAspectRatioButton && (
+          {showAspectRatioButton && (
             <AspectRatioButton
               className='Webcam-optionBtn'
               label={labels.aspectRatio}
@@ -557,7 +576,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
       )}
 
       {/* ---- 스냅샷 버튼 --------------------------------------------------- */}
-      {visibleSnapshotButton && isLoaded && (
+      {showSnapshotButton && isLoaded && (
         <SnapshotButton
           label={labels.snapshot}
           style={{
@@ -594,7 +613,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
       )}
 
       {/* ---- 디버그 UI ----------------------------------------------------- */}
-      {visibleVideoSizeDebug && (
+      {showVideoSizeDebug && (
         <div
           style={{
             position: "absolute",
@@ -612,7 +631,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
         </div>
       )}
 
-      {visibleConstraintsDebug && (
+      {showConstraintsDebug && (
         <pre
           style={{
             position: "absolute",

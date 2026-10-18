@@ -75,10 +75,7 @@ export default function LabelsLocalizationSection() {
 
             <Webcam
               labels={labels}
-              visibleFlipButton
-              visibleSnapshotButton
-              visibleCameraDirectionButton
-              visibleAspectRatioButton
+              controls={{ flip: true, snapshot: true, cameraDirection: true, aspectRatio: true }}
               style={{ maxWidth: "100%", borderRadius: 8 }}
             />
           </Stack>

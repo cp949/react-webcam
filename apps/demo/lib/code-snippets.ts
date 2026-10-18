@@ -8,8 +8,7 @@ export const CODE_SNIPPETS: Record<DemoSectionId, string> = {
 export default function BasicExample() {
   return (
     <Webcam
-      visibleFlipButton
-      visibleCameraDirectionButton
+      controls={{ flip: true, cameraDirection: true }}
     />
   );
 }`,
@@ -62,8 +61,7 @@ export default function ControlsExample() {
         <Webcam
           key={defaultDemoKey}
           defaultWebcamOptions={defaultWebcamOptions}
-          visibleAspectRatioButton
-          visibleCameraDirectionButton
+          controls={{ aspectRatio: true, cameraDirection: true }}
         />
       </div>
 
@@ -77,8 +75,7 @@ export default function ControlsExample() {
         </button>
         <Webcam
           webcamOptions={{ facingMode: lockedFacingMode, aspectRatio: 16 / 9 }}
-          visibleCameraDirectionButton
-          visibleAspectRatioButton
+          controls={{ cameraDirection: true, aspectRatio: true }}
         />
       </div>
     </>
@@ -108,10 +105,7 @@ export default function LabelsExample() {
   return (
     <Webcam
       labels={labels}
-      visibleFlipButton
-      visibleSnapshotButton
-      visibleCameraDirectionButton
-      visibleAspectRatioButton
+      controls={{ flip: true, snapshot: true, cameraDirection: true, aspectRatio: true }}
     />
   );
 }`,
@@ -126,14 +120,14 @@ function ControlledExample() {
     <Webcam
       flipped={flipped}
       onFlippedChange={setFlipped}
-      visibleFlipButton
+      controls={{ flip: true }}
     />
   );
 }
 
 // Uncontrolled: 컴포넌트 내부가 상태를 소유
 function UncontrolledExample() {
-  return <Webcam defaultFlipped={false} visibleFlipButton />;
+  return <Webcam defaultFlipped={false} controls={{ flip: true }} />;
 }
 
 // Read-only controlled: 부모가 값은 주지만 변경 콜백은 생략
@@ -142,7 +136,7 @@ function ReadonlyControlledExample() {
 
   return (
     <>
-      <Webcam flipped={flipped} visibleFlipButton />
+      <Webcam flipped={flipped} controls={{ flip: true }} />
       <button onClick={() => setFlipped((value) => !value)}>
         부모에서만 토글
       </button>
@@ -187,7 +181,7 @@ export default function DeviceSelectionExample() {
       </select>
       <button onClick={() => void refresh()}>새로고침</button>
 
-      <Webcam webcamOptions={webcamOptions} visibleCameraDirectionButton />
+      <Webcam webcamOptions={webcamOptions} controls={{ cameraDirection: true }} />
     </>
   );
 }`,
@@ -234,7 +228,7 @@ export default function SnapshotExample() {
     );
   };
 
-  return <Webcam visibleSnapshotButton onSnapshot={handleSnapshot} />;
+  return <Webcam controls={{ snapshot: true }} onSnapshot={handleSnapshot} />;
 }`,
 
   state: `import { useState } from 'react';
@@ -373,7 +367,7 @@ export default function ProfileCaptureRecipe() {
         ref={ref}
         onStateChange={handleStateChange}
         webcamOptions={{ facingMode: 'user', aspectRatio: 1 }}
-        visibleFlipButton
+        controls={{ flip: true }}
       />
       <p>상태: {status}</p>
       <button onClick={handleCapture} disabled={status !== 'live'}>
@@ -467,8 +461,7 @@ export default function VisualDebugExample() {
       <style>{styles}</style>
       <Webcam
         className="demo-visual-debug-webcam"
-        visibleVideoSizeDebug
-        visibleConstraintsDebug
+        debug={{ videoSize: true, constraints: true }}
         webcamOptions={{ aspectRatio: 16 / 9, facingMode: 'user' }}
       >
         <div

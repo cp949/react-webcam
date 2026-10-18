@@ -60,7 +60,7 @@ export default function RefHandleSection() {
 
       {/* 2. 라이브 예제 + 명령형 제어 */}
       <ExampleCard title='라이브 예제 + 명령형 제어'>
-        <Webcam ref={webcamRef} visibleFlipButton />
+        <Webcam ref={webcamRef} controls={{ flip: true }} />
         <Stack direction='row' spacing={1} sx={{ mt: 2, flexWrap: "wrap" }}>
           <Button variant='outlined' size='small' onClick={handleSnapshot}>
             스냅샷

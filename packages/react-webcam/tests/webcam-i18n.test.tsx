@@ -159,7 +159,7 @@ describe("WebcamLabels: custom labels override defaults", () => {
     render(
       <Webcam
         webcamOptions={{ audioEnabled: false }}
-        visibleFlipButton
+        controls={{ flip: true }}
         labels={{ flip: "Mirror Image" }}
       />,
     );
@@ -198,7 +198,7 @@ describe("WEBCAM_LABELS_EN: 영어 라벨 프리셋", () => {
     render(
       <Webcam
         webcamOptions={{ audioEnabled: false }}
-        visibleFlipButton
+        controls={{ flip: true }}
         labels={WEBCAM_LABELS_EN}
       />,
     );

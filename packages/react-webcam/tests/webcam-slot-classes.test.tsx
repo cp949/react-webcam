@@ -32,10 +32,7 @@ describe("슬롯 클래스 이름 계약", () => {
       <Webcam
         className='custom-root'
         webcamOptions={{ audioEnabled: false }}
-        visibleFlipButton
-        visibleCameraDirectionButton
-        visibleAspectRatioButton
-        visibleSnapshotButton
+        controls={{ flip: true, cameraDirection: true, aspectRatio: true, snapshot: true }}
       />,
     );
     await advanceToStreamLoad();

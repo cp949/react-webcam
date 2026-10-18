@@ -70,6 +70,18 @@ type WebcamLabels = {
   aspectRatioAuto?: string;
 };
 
+type WebcamControls = {
+  flip?: boolean;
+  cameraDirection?: boolean;
+  aspectRatio?: boolean;
+  snapshot?: boolean;
+};
+
+type WebcamDebug = {
+  videoSize?: boolean;
+  constraints?: boolean;
+};
+
 interface WebcamProps {
   style?: React.CSSProperties;
   className?: string;
@@ -84,12 +96,8 @@ interface WebcamProps {
   webcamOptions?: WebcamOptions;
   onWebcamOptionsChange?: (options: WebcamOptions) => void;
   defaultWebcamOptions?: WebcamOptions;
-  visibleFlipButton?: boolean;
-  visibleCameraDirectionButton?: boolean;
-  visibleAspectRatioButton?: boolean;
-  visibleSnapshotButton?: boolean;
-  visibleVideoSizeDebug?: boolean;
-  visibleConstraintsDebug?: boolean;
+  controls?: WebcamControls;
+  debug?: WebcamDebug;
   labels?: WebcamLabels;
   children?: React.ReactNode;
 }

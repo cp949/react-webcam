@@ -42,7 +42,7 @@ function ProfileCaptureRecipe() {
           ref={ref}
           onStateChange={handleStateChange}
           webcamOptions={{ facingMode: "user", aspectRatio: 1 }}
-          visibleFlipButton
+          controls={{ flip: true }}
         />
         <Stack direction='row' spacing={1} sx={{ alignItems: "center", flexWrap: "wrap" }}>
           <Chip label={`상태: ${webcamStatus}`} color={statusColor} size='small' />
@@ -84,8 +84,7 @@ function PortraitRatioRecipe() {
         </Typography>
         <Webcam
           webcamOptions={{ aspectRatio: 3 / 4 }}
-          visibleFlipButton
-          visibleCameraDirectionButton
+          controls={{ flip: true, cameraDirection: true }}
         />
       </Stack>
     </ExampleCard>

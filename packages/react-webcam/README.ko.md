@@ -46,8 +46,7 @@ export function CameraView() {
     <div style={{ width: 640, height: "auto" }}>
       <Webcam
         webcamOptions={{ aspectRatio: 16 / 9 }}
-        visibleFlipButton
-        visibleCameraDirectionButton
+        controls={{ flip: true, cameraDirection: true }}
       />
     </div>
   );
@@ -67,31 +66,43 @@ export function CameraView() {
 `Webcam`은 아래 표의 props 외에 `ref`로 `WebcamHandle`도 받을 수 있습니다(자세한
 내용은 뒤의 ref handle 절 참고).
 
-| Prop                           | 타입                                                                                                  | 기본값        | 설명                                                                                                                                                                                                     |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `style`                        | `React.CSSProperties`                                                                                 | —             | 루트 엘리먼트에 적용할 인라인 스타일입니다.                                                                                                                                                              |
-| `className`                    | `string`                                                                                              | —             | 루트 엘리먼트에 적용할 클래스명입니다.                                                                                                                                                                   |
-| `children`                     | `React.ReactNode`                                                                                     | —             | 루트 엘리먼트 내부, 비디오 위에 렌더링됩니다.                                                                                                                                                            |
-| `disabled`                     | `boolean`                                                                                             | `false`       | 카메라 요청 없이 컴포넌트를 비활성 상태로 유지합니다(뒤의 비활성 상태 절 참고).                                                                                                                          |
-| `disabledFallback`             | `React.ReactNode`                                                                                     | —             | `disabled`일 때 기본 placeholder 대신 렌더링할 커스텀 UI입니다.                                                                                                                                          |
-| `autoRecover`                  | `boolean`                                                                                             | `false`       | `track-ended` 오류 뒤 탭이 다시 보일 때 스트림을 한 번 다시 요청합니다(뒤의 커스텀 오류 fallback 절 참고).                                                                                               |
-| `errorFallback`                | `React.ReactNode \| ((detail: WebcamErrorDetail, helpers: { retry: () => void }) => React.ReactNode)` | —             | `denied` / `unavailable` / `unsupported` / `insecure` / `error` 상태의 커스텀 UI입니다. `playback-error`는 포함하지 않습니다.                                                                            |
-| `onStateChange`                | `(state: WebcamDetail) => void`                                                                       | —             | `WebcamDetail`이 바뀔 때마다 호출됩니다(뒤의 상태 변화 감지 절 참고).                                                                                                                                    |
-| `fitMode`                      | `"unset" \| "fill" \| "cover" \| "contain"`                                                           | `"unset"`     | `webcamOptions.aspectRatio`가 없을 때 비디오를 박스에 맞추는 방식입니다.                                                                                                                                 |
-| `flipped`                      | `boolean`                                                                                             | —             | Controlled 모드의 좌우 반전 값입니다. `onFlippedChange`와 함께 사용하여 부모가 상태를 갱신합니다(뒤의 `flipped` 절 참고).                                                                                |
-| `onFlippedChange`              | `(value: boolean) => void`                                                                            | —             | `flipped`와 함께 사용합니다. 반전 변경이 요청될 때 호출됩니다.                                                                                                                                           |
-| `defaultFlipped`               | `boolean`                                                                                             | `false`       | Uncontrolled 모드의 초기 반전 상태입니다. 마운트 시 한 번만 적용됩니다.                                                                                                                                  |
-| `webcamOptions`                | `WebcamOptions`                                                                                       | —             | Controlled 모드의 카메라 옵션(`facingMode`, `aspectRatio`, `audioEnabled`, `deviceId`, `size` 등)입니다. `onWebcamOptionsChange`와 함께 사용하여 부모가 상태를 갱신합니다(뒤의 `webcamOptions` 절 참고). |
-| `onWebcamOptionsChange`        | `(options: WebcamOptions) => void`                                                                    | —             | `webcamOptions`와 함께 사용합니다. 옵션 변경이 요청될 때 호출됩니다.                                                                                                                                     |
-| `defaultWebcamOptions`         | `WebcamOptions`                                                                                       | —             | Uncontrolled 모드의 초기 카메라 옵션입니다. 마운트 시 한 번만 적용됩니다.                                                                                                                                |
-| `visibleFlipButton`            | `boolean`                                                                                             | `false`       | 내장 좌우 반전 버튼 표시 여부입니다.                                                                                                                                                                     |
-| `visibleCameraDirectionButton` | `boolean`                                                                                             | `false`       | 내장 전/후면 카메라 버튼 표시 여부입니다.                                                                                                                                                                |
-| `visibleAspectRatioButton`     | `boolean`                                                                                             | `false`       | 내장 화면 비율 버튼 표시 여부입니다.                                                                                                                                                                     |
-| `visibleSnapshotButton`        | `boolean`                                                                                             | `false`       | 내장 스냅샷 버튼 표시 여부입니다.                                                                                                                                                                        |
-| `onSnapshot`                   | `(canvas: HTMLCanvasElement) => void`                                                                 | —             | 내장 스냅샷 버튼을 누를 때 캡처한 프레임(원본 해상도)을 받습니다. `visibleSnapshotButton`이 필요합니다.                                                                                                  |
-| `visibleVideoSizeDebug`        | `boolean`                                                                                             | `false`       | 비디오 요소 크기를 보여주는 디버그 오버레이입니다.                                                                                                                                                       |
-| `visibleConstraintsDebug`      | `boolean`                                                                                             | `false`       | 현재 적용된 `MediaStreamConstraints`를 보여주는 디버그 오버레이입니다.                                                                                                                                   |
-| `labels`                       | `WebcamLabels`                                                                                        | 한국어 기본값 | 내장 버튼 라벨을 부분적으로 덮어씁니다(뒤의 라벨과 로컬라이제이션 절 참고).                                                                                                                              |
+| Prop                    | 타입                                                                                                  | 기본값        | 설명                                                                                                                                                                                                     |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `style`                 | `React.CSSProperties`                                                                                 | —             | 루트 엘리먼트에 적용할 인라인 스타일입니다.                                                                                                                                                              |
+| `className`             | `string`                                                                                              | —             | 루트 엘리먼트에 적용할 클래스명입니다.                                                                                                                                                                   |
+| `children`              | `React.ReactNode`                                                                                     | —             | 루트 엘리먼트 내부, 비디오 위에 렌더링됩니다.                                                                                                                                                            |
+| `disabled`              | `boolean`                                                                                             | `false`       | 카메라 요청 없이 컴포넌트를 비활성 상태로 유지합니다(뒤의 비활성 상태 절 참고).                                                                                                                          |
+| `disabledFallback`      | `React.ReactNode`                                                                                     | —             | `disabled`일 때 기본 placeholder 대신 렌더링할 커스텀 UI입니다.                                                                                                                                          |
+| `autoRecover`           | `boolean`                                                                                             | `false`       | `track-ended` 오류 뒤 탭이 다시 보일 때 스트림을 한 번 다시 요청합니다(뒤의 커스텀 오류 fallback 절 참고).                                                                                               |
+| `errorFallback`         | `React.ReactNode \| ((detail: WebcamErrorDetail, helpers: { retry: () => void }) => React.ReactNode)` | —             | `denied` / `unavailable` / `unsupported` / `insecure` / `error` 상태의 커스텀 UI입니다. `playback-error`는 포함하지 않습니다.                                                                            |
+| `onStateChange`         | `(state: WebcamDetail) => void`                                                                       | —             | `WebcamDetail`이 바뀔 때마다 호출됩니다(뒤의 상태 변화 감지 절 참고).                                                                                                                                    |
+| `fitMode`               | `"unset" \| "fill" \| "cover" \| "contain"`                                                           | `"unset"`     | `webcamOptions.aspectRatio`가 없을 때 비디오를 박스에 맞추는 방식입니다.                                                                                                                                 |
+| `flipped`               | `boolean`                                                                                             | —             | Controlled 모드의 좌우 반전 값입니다. `onFlippedChange`와 함께 사용하여 부모가 상태를 갱신합니다(뒤의 `flipped` 절 참고).                                                                                |
+| `onFlippedChange`       | `(value: boolean) => void`                                                                            | —             | `flipped`와 함께 사용합니다. 반전 변경이 요청될 때 호출됩니다.                                                                                                                                           |
+| `defaultFlipped`        | `boolean`                                                                                             | `false`       | Uncontrolled 모드의 초기 반전 상태입니다. 마운트 시 한 번만 적용됩니다.                                                                                                                                  |
+| `webcamOptions`         | `WebcamOptions`                                                                                       | —             | Controlled 모드의 카메라 옵션(`facingMode`, `aspectRatio`, `audioEnabled`, `deviceId`, `size` 등)입니다. `onWebcamOptionsChange`와 함께 사용하여 부모가 상태를 갱신합니다(뒤의 `webcamOptions` 절 참고). |
+| `onWebcamOptionsChange` | `(options: WebcamOptions) => void`                                                                    | —             | `webcamOptions`와 함께 사용합니다. 옵션 변경이 요청될 때 호출됩니다.                                                                                                                                     |
+| `defaultWebcamOptions`  | `WebcamOptions`                                                                                       | —             | Uncontrolled 모드의 초기 카메라 옵션입니다. 마운트 시 한 번만 적용됩니다.                                                                                                                                |
+| `controls`              | `WebcamControls`                                                                                      | `{}`          | 표시할 내장 컨트롤 버튼을 고릅니다: `flip`, `cameraDirection`, `aspectRatio`, `snapshot`. 각 항목의 기본값은 `false`입니다.                                                                              |
+| `onSnapshot`            | `(canvas: HTMLCanvasElement) => void`                                                                 | —             | 내장 스냅샷 버튼을 누를 때 캡처한 프레임(원본 해상도)을 받습니다. `controls.snapshot`이 필요합니다.                                                                                                      |
+| `debug`                 | `WebcamDebug`                                                                                         | `{}`          | 표시할 디버그 오버레이를 고릅니다: `videoSize`(비디오 요소 크기), `constraints`(현재 적용된 `MediaStreamConstraints`). 각 항목의 기본값은 `false`입니다.                                                 |
+| `labels`                | `WebcamLabels`                                                                                        | 한국어 기본값 | 내장 버튼 라벨을 부분적으로 덮어씁니다(뒤의 라벨과 로컬라이제이션 절 참고).                                                                                                                              |
+
+### 3.0.0 마이그레이션
+
+`visible*` prop 6개를 객체 2개로 바꿨습니다. 사용처를 모두 고치세요.
+
+| 2.x                            | 3.0                                    |
+| ------------------------------ | -------------------------------------- |
+| `visibleFlipButton`            | `controls={{ flip: true }}`            |
+| `visibleCameraDirectionButton` | `controls={{ cameraDirection: true }}` |
+| `visibleAspectRatioButton`     | `controls={{ aspectRatio: true }}`     |
+| `visibleSnapshotButton`        | `controls={{ snapshot: true }}`        |
+| `visibleVideoSizeDebug`        | `debug={{ videoSize: true }}`          |
+| `visibleConstraintsDebug`      | `debug={{ constraints: true }}`        |
+
+- `onSnapshot`은 최상위 prop으로 유지합니다. `controls.snapshot`이 필요합니다.
+- 타입 `WebcamControls`, `WebcamDebug`를 export합니다.
 
 ## 비활성 상태 - `disabled`
 
@@ -608,7 +619,7 @@ async function uploadSnapshot(canvas: HTMLCanvasElement) {
 }
 
 <Webcam
-  visibleSnapshotButton
+  controls={{ snapshot: true }}
   onSnapshot={(canvas) => {
     uploadSnapshot(canvas).catch(console.error);
   }}
@@ -625,7 +636,7 @@ async function uploadSnapshot(canvas: HTMLCanvasElement) {
 
 ```tsx
 <div style={{ "--webcam-bg": "#000", "--webcam-accent": "#e91e63" } as React.CSSProperties}>
-  <Webcam visibleSnapshotButton />
+  <Webcam controls={{ snapshot: true }} />
 </div>
 ```
 
@@ -670,10 +681,7 @@ async function uploadSnapshot(canvas: HTMLCanvasElement) {
 import { Webcam, WEBCAM_LABELS_EN } from "@cp949/react-webcam";
 
 <Webcam
-  visibleFlipButton
-  visibleCameraDirectionButton
-  visibleAspectRatioButton
-  visibleSnapshotButton
+  controls={{ flip: true, cameraDirection: true, aspectRatio: true, snapshot: true }}
   labels={WEBCAM_LABELS_EN}
 />;
 ```
@@ -681,7 +689,7 @@ import { Webcam, WEBCAM_LABELS_EN } from "@cp949/react-webcam";
 서비스 문구에 맞추려면 `labels`에 바꿀 항목만 전달합니다.
 
 ```tsx
-<Webcam visibleFlipButton labels={{ ...WEBCAM_LABELS_EN, flip: "셀피 보기" }} />
+<Webcam controls={{ flip: true }} labels={{ ...WEBCAM_LABELS_EN, flip: "셀피 보기" }} />
 ```
 
 내장 스냅샷 버튼을 눌렀을 때 캡처한 프레임을 받으려면 `onSnapshot`을 전달합니다.
@@ -689,7 +697,7 @@ import { Webcam, WEBCAM_LABELS_EN } from "@cp949/react-webcam";
 
 ```tsx
 <Webcam
-  visibleSnapshotButton
+  controls={{ snapshot: true }}
   onSnapshot={(canvas) => {
     canvas.toBlob((blob) => blob && upload(blob), "image/jpeg", 0.9);
   }}
@@ -718,9 +726,9 @@ export function FlipOwnershipExample() {
 
   return (
     <>
-      <Webcam flipped={flipped} onFlippedChange={setFlipped} visibleFlipButton />
+      <Webcam flipped={flipped} onFlippedChange={setFlipped} controls={{ flip: true }} />
 
-      <Webcam defaultFlipped visibleFlipButton />
+      <Webcam defaultFlipped controls={{ flip: true }} />
     </>
   );
 }
@@ -752,14 +760,12 @@ export function WebcamOptionsOwnershipExample() {
       <Webcam
         webcamOptions={options}
         onWebcamOptionsChange={setOptions}
-        visibleCameraDirectionButton
-        visibleAspectRatioButton
+        controls={{ cameraDirection: true, aspectRatio: true }}
       />
 
       <Webcam
         defaultWebcamOptions={{ facingMode: "environment", aspectRatio: 4 / 3 }}
-        visibleCameraDirectionButton
-        visibleAspectRatioButton
+        controls={{ cameraDirection: true, aspectRatio: true }}
       />
     </>
   );

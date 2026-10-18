@@ -522,8 +522,8 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     expect(root.style.overflow).toBe("hidden");
   });
 
-  it("visibleFlipButton=true이고 웹캠이 로드되면 FlipButton을 렌더링한다", async () => {
-    render(<Webcam webcamOptions={{ audioEnabled: false }} visibleFlipButton />);
+  it("controls.flip=true이고 웹캠이 로드되면 FlipButton을 렌더링한다", async () => {
+    render(<Webcam webcamOptions={{ audioEnabled: false }} controls={{ flip: true }} />);
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(300);
@@ -537,10 +537,49 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     expect(flipBtn).not.toBeNull();
   });
 
+  it("controls와 debug가 없으면 내장 버튼과 디버그 오버레이를 렌더링하지 않는다", async () => {
+    const { container } = render(<Webcam webcamOptions={{ audioEnabled: false }} />);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    await markVideoReady(document.querySelector("video")!);
+
+    expect(container.querySelector(".FlipButton-root")).toBeNull();
+    expect(container.querySelector(".SnapshotButton-root")).toBeNull();
+    expect(container.querySelector("pre")).toBeNull();
+  });
+
+  it("controls는 켠 항목의 버튼만 렌더링한다", async () => {
+    const { container } = render(
+      <Webcam webcamOptions={{ audioEnabled: false }} controls={{ flip: true, snapshot: false }} />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    await markVideoReady(document.querySelector("video")!);
+
+    expect(container.querySelector(".FlipButton-root")).not.toBeNull();
+    expect(container.querySelector(".SnapshotButton-root")).toBeNull();
+  });
+
+  it("debug.constraints=true이면 제약 조건 오버레이를 렌더링한다", async () => {
+    const { container } = render(
+      <Webcam webcamOptions={{ audioEnabled: false }} debug={{ constraints: true }} />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(container.querySelector("pre")).not.toBeNull();
+  });
+
   it("FlipButton을 클릭하면 flipped 상태가 토글된다", async () => {
     const ref = { current: null as WebcamHandle | null };
     const { container } = render(
-      <Webcam ref={ref} webcamOptions={{ audioEnabled: false }} visibleFlipButton />,
+      <Webcam ref={ref} webcamOptions={{ audioEnabled: false }} controls={{ flip: true }} />,
     );
 
     await act(async () => {
@@ -564,8 +603,8 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     expect(container.querySelector("video")!.style.transform).toBe("scaleX(-1)");
   });
 
-  it("visibleCameraDirectionButton=true이고 웹캠이 로드되면 FacingModeButton을 렌더링한다", async () => {
-    render(<Webcam webcamOptions={{ audioEnabled: false }} visibleCameraDirectionButton />);
+  it("controls.cameraDirection=true이고 웹캠이 로드되면 FacingModeButton을 렌더링한다", async () => {
+    render(<Webcam webcamOptions={{ audioEnabled: false }} controls={{ cameraDirection: true }} />);
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(300);
@@ -579,7 +618,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
   });
 
   it("FacingModeButton을 클릭하면 드롭다운이 열린다", async () => {
-    render(<Webcam webcamOptions={{ audioEnabled: false }} visibleCameraDirectionButton />);
+    render(<Webcam webcamOptions={{ audioEnabled: false }} controls={{ cameraDirection: true }} />);
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(300);
@@ -636,7 +675,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
         ref={ref}
         webcamOptions={{ audioEnabled: false, deviceId: "camera-1" }}
         onWebcamOptionsChange={onWebcamOptionsChange}
-        visibleCameraDirectionButton
+        controls={{ cameraDirection: true }}
       />,
     );
 
@@ -703,8 +742,8 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     );
   });
 
-  it("visibleAspectRatioButton=true이고 웹캠이 로드되면 AspectRatioButton을 렌더링한다", async () => {
-    render(<Webcam webcamOptions={{ audioEnabled: false }} visibleAspectRatioButton />);
+  it("controls.aspectRatio=true이고 웹캠이 로드되면 AspectRatioButton을 렌더링한다", async () => {
+    render(<Webcam webcamOptions={{ audioEnabled: false }} controls={{ aspectRatio: true }} />);
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(300);
@@ -718,7 +757,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
   });
 
   it("AspectRatioButton을 클릭하면 드롭다운이 열린다", async () => {
-    render(<Webcam webcamOptions={{ audioEnabled: false }} visibleAspectRatioButton />);
+    render(<Webcam webcamOptions={{ audioEnabled: false }} controls={{ aspectRatio: true }} />);
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(300);
@@ -740,8 +779,8 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     expect(menu).not.toBeNull();
   });
 
-  it("visibleSnapshotButton=true이고 웹캠이 로드되면 SnapshotButton을 렌더링한다", async () => {
-    render(<Webcam webcamOptions={{ audioEnabled: false }} visibleSnapshotButton />);
+  it("controls.snapshot=true이고 웹캠이 로드되면 SnapshotButton을 렌더링한다", async () => {
+    render(<Webcam webcamOptions={{ audioEnabled: false }} controls={{ snapshot: true }} />);
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(300);
@@ -768,7 +807,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
       .spyOn(HTMLCanvasElement.prototype, "toDataURL")
       .mockReturnValue("data:image/png;base64,mock");
 
-    render(<Webcam webcamOptions={{ audioEnabled: false }} visibleSnapshotButton />);
+    render(<Webcam webcamOptions={{ audioEnabled: false }} controls={{ snapshot: true }} />);
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(300);
@@ -805,7 +844,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     render(
       <Webcam
         webcamOptions={{ audioEnabled: false }}
-        visibleSnapshotButton
+        controls={{ snapshot: true }}
         onSnapshot={onSnapshot}
       />,
     );
@@ -877,7 +916,7 @@ describe("Webcam 제어 및 비제어 상태 소유권", () => {
   it("flipped만 제어되고 onFlippedChange가 없으면 FlipButton 클릭으로 transform이 바뀌지 않는다", async () => {
     // read-only controlled: prop이 있지만 onChange가 없으므로 버튼 클릭이 무시돼야 한다.
     const { container } = render(
-      <Webcam webcamOptions={{ audioEnabled: false }} flipped={false} visibleFlipButton />,
+      <Webcam webcamOptions={{ audioEnabled: false }} flipped={false} controls={{ flip: true }} />,
     );
 
     await act(async () => {
@@ -909,7 +948,7 @@ describe("Webcam 제어 및 비제어 상태 소유권", () => {
         webcamOptions={{ audioEnabled: false }}
         flipped={false}
         onFlippedChange={onFlippedChange}
-        visibleFlipButton
+        controls={{ flip: true }}
       />,
     );
 
@@ -939,7 +978,11 @@ describe("Webcam 제어 및 비제어 상태 소유권", () => {
   it("defaultFlipped만 쓰는 비제어 모드에서는 FlipButton 클릭으로 transform이 바뀐다", async () => {
     // 비제어 모드: flipped prop 없이 defaultFlipped만 사용 시 내부 상태가 변경돼야 한다.
     const { container } = render(
-      <Webcam webcamOptions={{ audioEnabled: false }} defaultFlipped={false} visibleFlipButton />,
+      <Webcam
+        webcamOptions={{ audioEnabled: false }}
+        defaultFlipped={false}
+        controls={{ flip: true }}
+      />,
     );
 
     await act(async () => {

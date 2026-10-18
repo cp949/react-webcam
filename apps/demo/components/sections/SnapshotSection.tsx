@@ -79,7 +79,7 @@ export default function SnapshotSection() {
 
       <ExampleCard title='라이브 예제'>
         <Webcam
-          visibleSnapshotButton
+          controls={{ snapshot: true }}
           onSnapshot={handleSnapshot}
           webcamOptions={{ aspectRatio: 16 / 9 }}
         />

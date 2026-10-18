@@ -33,8 +33,7 @@ export default function BasicUsageSection() {
         <ExampleCard title='라이브 예제'>
           <Webcam
             onStateChange={(detail) => setPhase(detail.phase)}
-            visibleFlipButton
-            visibleCameraDirectionButton
+            controls={{ flip: true, cameraDirection: true }}
             style={{ maxWidth: "100%", borderRadius: 8 }}
           />
           {phase !== "live" && (

@@ -158,8 +158,7 @@ export default function DeviceSelectionSection() {
             ref={webcamRef}
             webcamOptions={webcamOptions}
             onStateChange={setSnapshot}
-            visibleFlipButton
-            visibleCameraDirectionButton
+            controls={{ flip: true, cameraDirection: true }}
             style={{ maxWidth: "100%", borderRadius: 8 }}
           />
         </Box>

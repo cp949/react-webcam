@@ -71,7 +71,7 @@ export default function ControlledStateSection() {
         <ExampleCard title='Uncontrolled 예제'>
           <Webcam
             defaultFlipped={false}
-            visibleFlipButton
+            controls={{ flip: true }}
             style={{ maxWidth: "100%", borderRadius: 8 }}
           />
           <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
@@ -84,7 +84,7 @@ export default function ControlledStateSection() {
           <Webcam
             flipped={flipped}
             onFlippedChange={setFlipped}
-            visibleFlipButton
+            controls={{ flip: true }}
             style={{ maxWidth: "100%", borderRadius: 8 }}
           />
           <Typography variant='body2' sx={{ mt: 1 }}>
@@ -103,7 +103,7 @@ export default function ControlledStateSection() {
         <ExampleCard title='읽기 전용 controlled 예제'>
           <Webcam
             flipped={readonlyFlipped}
-            visibleFlipButton
+            controls={{ flip: true }}
             style={{ maxWidth: "100%", borderRadius: 8 }}
           />
           <Typography variant='body2' sx={{ mt: 1 }}>

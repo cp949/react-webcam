@@ -7,7 +7,7 @@ if (!rootElement) throw new Error("harness: #root 요소를 찾을 수 없습니
 const root = createRoot(rootElement);
 
 root.render(
-  createElement(Webcam, { webcamOptions: { audioEnabled: false }, visibleSnapshotButton: true }),
+  createElement(Webcam, { webcamOptions: { audioEnabled: false }, controls: { snapshot: true } }),
 );
 
 // harness 전용 언마운트 트리거. 라이브러리 공개 API가 아니라 테스트가

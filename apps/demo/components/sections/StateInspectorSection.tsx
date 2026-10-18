@@ -77,7 +77,7 @@ export default function StateInspectorSection() {
 
       {/* 2. 웹캠 예제 */}
       <ExampleCard title='웹캠 (상태 감지 중)'>
-        <Webcam onStateChange={setSnapshot} visibleFlipButton visibleCameraDirectionButton />
+        <Webcam onStateChange={setSnapshot} controls={{ flip: true, cameraDirection: true }} />
       </ExampleCard>
 
       {/* 3. 현재 상태 카드 */}

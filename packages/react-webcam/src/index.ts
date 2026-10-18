@@ -14,7 +14,7 @@ export {
 export type { SnapshotOptions } from "./types/webcam-controller.js";
 export { WEBCAM_LABELS_EN } from "./types/webcam-labels.js";
 export type { WebcamLabels } from "./types/webcam-labels.js";
-export type { WebcamHandle, WebcamProps } from "./Webcam.js";
+export type { WebcamControls, WebcamDebug, WebcamHandle, WebcamProps } from "./Webcam.js";
 export { Webcam } from "./Webcam.js";
 
 export type {

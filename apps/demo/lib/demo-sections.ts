@@ -7,7 +7,7 @@ export const DEMO_SECTIONS: DemoSection[] = [
     id: "basic",
     title: "Basic Usage",
     description: "가장 단순한 Webcam 사용법",
-    keywords: ["Webcam", "visibleFlipButton", "visibleCameraDirectionButton"],
+    keywords: ["Webcam", "controls", "flip", "cameraDirection"],
   },
   {
     id: "controls",
@@ -43,7 +43,7 @@ export const DEMO_SECTIONS: DemoSection[] = [
     id: "snapshot",
     title: "Snapshot",
     description: "onSnapshot으로 캡처 결과를 받아 저장·업로드",
-    keywords: ["onSnapshot", "visibleSnapshotButton", "toBlob", "HTMLCanvasElement"],
+    keywords: ["onSnapshot", "controls.snapshot", "toBlob", "HTMLCanvasElement"],
   },
   {
     id: "state",
@@ -91,7 +91,7 @@ export const DEMO_SECTIONS: DemoSection[] = [
     id: "visual-debug",
     title: "Visual / Debug Props",
     description: "children, className, debug UI 확인",
-    keywords: ["children", "className", "visibleVideoSizeDebug", "visibleConstraintsDebug"],
+    keywords: ["children", "className", "debug", "videoSize", "constraints"],
   },
 ];
 

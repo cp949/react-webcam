@@ -220,8 +220,7 @@ export default function CommonControlsSection() {
             <Webcam
               key={defaultDemoKey}
               defaultWebcamOptions={defaultWebcamOptions}
-              visibleCameraDirectionButton
-              visibleAspectRatioButton
+              controls={{ cameraDirection: true, aspectRatio: true }}
               style={{ width: "100%", height: "100%", borderRadius: 8 }}
             />
           </Box>
@@ -257,8 +256,7 @@ export default function CommonControlsSection() {
           <Box sx={{ width: "100%", maxWidth: 420, height: 300 }}>
             <Webcam
               webcamOptions={{ facingMode: lockedFacingMode, aspectRatio: 16 / 9 }}
-              visibleCameraDirectionButton
-              visibleAspectRatioButton
+              controls={{ cameraDirection: true, aspectRatio: true }}
               style={{ width: "100%", height: "100%", borderRadius: 8 }}
             />
           </Box>

@@ -40,6 +40,12 @@ export const DEMO_SECTIONS: DemoSection[] = [
     keywords: ["WebcamHandle", "snapshotToCanvas", "setFlipped", "setWebcamOptions"],
   },
   {
+    id: "snapshot",
+    title: "Snapshot",
+    description: "onSnapshot으로 캡처 결과를 받아 저장·업로드",
+    keywords: ["onSnapshot", "visibleSnapshotButton", "toBlob", "HTMLCanvasElement"],
+  },
+  {
     id: "state",
     title: "State Inspector",
     description: "상태 변화 실시간 관찰",

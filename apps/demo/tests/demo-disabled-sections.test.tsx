@@ -29,6 +29,15 @@ function normalizeColor(color: string) {
 
 const mockRetry = vi.fn();
 
+// toBlob만 흉내 낸 가짜 캔버스. 2048바이트 Blob을 돌려준다.
+const mockSnapshotCanvas = {
+  width: 1280,
+  height: 720,
+  toBlob: (callback: (blob: Blob | null) => void, type?: string) => {
+    callback(new Blob([new Uint8Array(2048)], { type: type ?? "image/png" }));
+  },
+} as unknown as HTMLCanvasElement;
+
 vi.mock("@cp949/react-webcam", () => {
   function Webcam(props: {
     disabled?: boolean;
@@ -45,6 +54,8 @@ vi.mock("@cp949/react-webcam", () => {
     children?: React.ReactNode;
     visibleVideoSizeDebug?: boolean;
     visibleConstraintsDebug?: boolean;
+    visibleSnapshotButton?: boolean;
+    onSnapshot?: (canvas: HTMLCanvasElement) => void;
     webcamOptions?: Record<string, unknown>;
     defaultWebcamOptions?: Record<string, unknown>;
   }) {
@@ -95,6 +106,16 @@ vi.mock("@cp949/react-webcam", () => {
         { "data-testid": "mock-webcam-options" },
         JSON.stringify(props.webcamOptions ?? initialDefaultWebcamOptions ?? {}),
       ),
+      props.visibleSnapshotButton
+        ? createElement(
+            "button",
+            {
+              "data-testid": "mock-webcam-snapshot-button",
+              onClick: () => props.onSnapshot?.(mockSnapshotCanvas),
+            },
+            "snapshot",
+          )
+        : null,
       props.visibleVideoSizeDebug
         ? createElement("div", { "data-testid": "mock-webcam-video-size-debug" }, "1280x720")
         : null,
@@ -232,6 +253,32 @@ describe("demo disabled sections", () => {
 
     expect(mockRetry).toHaveBeenCalledTimes(1);
     expect(screen.getByText("재시도 1회")).toBeTruthy();
+  });
+
+  it("registers the snapshot demo section and shows the blob size from onSnapshot", () => {
+    expect(DEMO_SECTIONS.some((section) => section.id === "snapshot")).toBe(true);
+    expect(CODE_SNIPPETS["snapshot"]).toContain("onSnapshot");
+
+    const createObjectURL = vi.fn(() => "blob:mock-snapshot");
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal("URL", Object.assign(URL, { createObjectURL, revokeObjectURL }));
+
+    render(createElement(DemoShell));
+    fireEvent.click(screen.getAllByText("Snapshot")[0]!);
+
+    expect(screen.queryByText("캡처 결과")).toBeNull();
+    fireEvent.click(screen.getByTestId("mock-webcam-snapshot-button"));
+
+    expect(screen.getByText("캡처 결과")).toBeTruthy();
+    expect(screen.getByText("2.0 KB")).toBeTruthy();
+    expect(screen.getByText("1280x720")).toBeTruthy();
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+
+    // 다시 캡처하면 이전 object URL을 해제한다.
+    fireEvent.click(screen.getByTestId("mock-webcam-snapshot-button"));
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:mock-snapshot");
+
+    vi.unstubAllGlobals();
   });
 
   it("keeps the error fallback demo viewport at a fixed aspect ratio", () => {

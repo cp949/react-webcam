@@ -7,6 +7,7 @@ export type DemoSectionId =
   | "controlled"
   | "device-selection"
   | "ref-handle"
+  | "snapshot"
   | "state"
   | "disabled-state"
   | "disabled-fallback"

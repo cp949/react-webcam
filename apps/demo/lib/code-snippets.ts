@@ -239,6 +239,25 @@ export default function RefHandleExample() {
   );
 }`,
 
+  snapshot: `import { Webcam } from '@cp949/react-webcam';
+
+export default function SnapshotExample() {
+  const handleSnapshot = (canvas: HTMLCanvasElement) => {
+    // canvas는 비디오 원본 해상도다. 필요하면 직접 줄여서 쓴다.
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) return;
+        console.log('snapshot', blob.type, blob.size);
+        // upload(blob);
+      },
+      'image/jpeg',
+      0.9,
+    );
+  };
+
+  return <Webcam visibleSnapshotButton onSnapshot={handleSnapshot} />;
+}`,
+
   state: `import { useState } from 'react';
 import { Webcam } from '@cp949/react-webcam';
 import type { WebcamSnapshot } from '@cp949/react-webcam';

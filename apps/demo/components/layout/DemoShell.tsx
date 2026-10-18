@@ -11,6 +11,7 @@ import LabelsLocalizationSection from "../sections/LabelsLocalizationSection";
 import ControlledStateSection from "../sections/ControlledStateSection";
 import DeviceSelectionSection from "../sections/DeviceSelectionSection";
 import RefHandleSection from "../sections/RefHandleSection";
+import SnapshotSection from "../sections/SnapshotSection";
 import StateInspectorSection from "../sections/StateInspectorSection";
 import DisabledStateSection from "../sections/DisabledStateSection";
 import DisabledFallbackSection from "../sections/DisabledFallbackSection";
@@ -40,6 +41,8 @@ function renderSection(section: DemoSectionId) {
       return <DeviceSelectionSection />;
     case "ref-handle":
       return <RefHandleSection />;
+    case "snapshot":
+      return <SnapshotSection />;
     case "state":
       return <StateInspectorSection />;
     case "disabled-state":

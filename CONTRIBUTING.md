@@ -16,6 +16,7 @@ English summary: install with `pnpm install`, run `pnpm test`, `pnpm check-types
 | `pnpm dev`                  | 데모 앱 실행                                                    |
 | `pnpm build`                | 패키지와 데모 빌드                                              |
 | `pnpm test`                 | 패키지·데모 테스트                                              |
+| `pnpm test:demo-smoke`      | 데모 각 섹션의 실브라우저 진입 스모크. 빌드 포함, 로컬 전용     |
 | `pnpm check-types`          | 타입 검사                                                       |
 | `pnpm lint`                 | oxlint                                                          |
 | `pnpm format`               | Prettier. 무관한 파일을 바꿀 수 있어 변경한 파일만 지정해 쓴다. |

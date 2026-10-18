@@ -48,6 +48,7 @@ pnpm test
 pnpm readme:package
 pnpm readme:package:check
 pnpm test:chrome83  # Chrome 83 컨테이너 필요, "Chrome 83 floor validation" 절 참고
+pnpm test:demo-smoke  # 데모 각 섹션을 Playwright 번들 Chromium으로 연다. 패키지와 데모를 빌드한다. CI에는 없다.
 pnpm release  # packages/react-webcam에서 release-it 실행(같은 경로의 커밋만 버전/changelog 대상): 버전 결정·changelog·커밋·태그·push·npm publish를 한 번에 처리
 
 # 데모 앱

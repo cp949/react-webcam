@@ -13,7 +13,8 @@
     "check-types": "turbo run check-types",
     "readme:package": "node scripts/generate-package-readme.mjs",
     "readme:package:check": "node scripts/generate-package-readme.mjs --check",
-    "test:chrome83": "node scripts/run-chrome83-floor.mjs"
+    "test:chrome83": "node scripts/run-chrome83-floor.mjs",
+    "test:demo-smoke": "DEMO_SMOKE=1 playwright test --project demo-smoke"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1",

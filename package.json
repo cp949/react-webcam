@@ -15,16 +15,11 @@
     "test:chrome83": "node scripts/run-chrome83-floor.mjs"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@playwright/test": "1.64.1",
-    "eslint": "10.13.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "globals": "^17.13.0",
+    "oxlint": "1.88.0",
     "prettier": "^3.9.10",
     "turbo": "^2.11.9",
     "typescript": "6.0.3",
-    "typescript-eslint": "^8.71.2",
     "yaml": "^2.9.1"
   },
   "packageManager": "pnpm@12.4.1",

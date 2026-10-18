@@ -193,7 +193,7 @@ GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-we
 ## 코드 스타일과 구현 규칙
 
 - TypeScript strict 모드
-- Biome으로 린트와 포매팅 수행
+- oxlint로 린트, Prettier로 포매팅 수행 (설정: 루트 `.oxlintrc.json`)
 - import 경로에 `.js` 확장자 사용
 - 라이브러리 출력은 tsdown으로 빌드
 - 주석과 UI 라벨은 한국어 유지가 기본 원칙이다

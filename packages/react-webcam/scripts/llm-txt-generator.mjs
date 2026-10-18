@@ -488,6 +488,7 @@ function renderConstraintSection(guidance, packageDescription) {
     "- This package is browser-only and depends on WebRTC and media-device APIs.",
     "- Camera access requires a secure context such as HTTPS or localhost.",
     "- Playback can fail under autoplay policy, surfacing `playback-error` even when the stream is still alive.",
+    "- `useWebcam` calls `play()` right after attaching the stream but never sets `muted` or `playsInline`; the caller must set both on the video before passing it, or `play()` can be rejected and `isFrameReady` stays false.",
     "- `pausePlayback()` pauses only the video element; it does not stop the camera hardware or any `MediaStreamTrack`.",
     `- ${guidance.antiPattern}`,
   ].join("\n");

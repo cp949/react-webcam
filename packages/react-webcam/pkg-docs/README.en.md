@@ -187,6 +187,7 @@ export function DisabledExample() {
 `useWebcam` manages camera access and playback for a video element owned by
 your application. It preserves the element's `transform` and `objectFit` styles
 and does not render UI. Set `muted` and `playsInline` on the video yourself.
+The hook never changes them, because the element belongs to your application.
 
 ```tsx
 import { useState } from "react";
@@ -226,6 +227,13 @@ export function CameraSource() {
   permission requirements or request anything while disabled.
 - `pausePlayback()` pauses only the video. `resumePlayback()` retries playback;
   failures appear as `playback-error` in `detail`.
+- The hook calls `play()` as soon as it attaches the stream. If the browser's
+  autoplay policy rejects that call (for example, `muted` is missing), `detail.phase`
+  becomes `playback-error` and `isFrameReady` stays `false`. Set `muted` and
+  `playsInline` before passing the element. Without `playsInline`, iOS Safari does
+  not play inline. After a playback failure, call `resumePlayback()` from a user gesture.
+  Chrome 83 in the project's automation container did not block unmuted playback,
+  so that environment cannot reproduce this failure.
 - Element replacement and unmount stop owned tracks and detach the owned stream
   from the video. Avoid managing the same video's `srcObject` or camera stream
   from another controller at the same time.

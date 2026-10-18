@@ -182,6 +182,7 @@ export function DisabledExample() {
 `useWebcam`은 앱이 소유한 video 요소의 카메라 요청과 재생을 관리한다.
 UI를 만들지 않으며 기존 `transform`, `objectFit` 스타일을 보존한다.
 video의 `muted`, `playsInline`은 호출자가 설정한다.
+요소가 앱 소유이므로 훅은 두 속성을 바꾸지 않는다.
 
 ```tsx
 import { useState } from "react";
@@ -220,6 +221,13 @@ export function CameraSource() {
   `disabled` 중에는 요청하지 않는다.
 - `pausePlayback()`은 영상 재생만 멈춘다. `resumePlayback()`은 재생을 다시
   시도하고 실패를 `detail`의 `playback-error`로 전달한다.
+- 훅은 스트림을 연결하자마자 `play()`를 호출한다. 브라우저 autoplay 정책이 이
+  호출을 거부하면(예: `muted` 누락) `detail.phase`가 `playback-error`가 되고
+  `isFrameReady`는 `false`로 남는다. 요소를 넘기기 전에 `muted`와 `playsInline`을
+  설정한다. iOS Safari는 `playsInline`이 없으면 인라인 재생하지 않는다.
+  재생이 실패한 뒤에는 사용자 조작 안에서 `resumePlayback()`을 호출한다.
+  이 프로젝트 자동화 컨테이너의 Chrome 83은 `muted` 없는 재생도 막지 않아
+  이 실패를 재현하지 못한다.
 - 요소 교체·언마운트 때 소유한 트랙을 종료하고 video에서 해당 스트림을 분리한다.
   같은 video의 `srcObject`나 카메라 스트림을 다른 제어 코드에서 동시에 관리하지 않는다.
 

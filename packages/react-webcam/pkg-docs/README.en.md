@@ -88,6 +88,7 @@ below) in addition to the props listed here.
 | `visibleCameraDirectionButton` | `boolean`                                                                                             | `false`         | Shows the built-in front/rear camera button.                                                                                                                                                             |
 | `visibleAspectRatioButton`     | `boolean`                                                                                             | `false`         | Shows the built-in aspect ratio button.                                                                                                                                                                  |
 | `visibleSnapshotButton`        | `boolean`                                                                                             | `false`         | Shows the built-in snapshot button.                                                                                                                                                                      |
+| `onSnapshot`                   | `(canvas: HTMLCanvasElement) => void`                                                                 | —               | Receives the captured frame (original resolution) when the built-in snapshot button is clicked. Requires `visibleSnapshotButton`.                                                                        |
 | `visibleVideoSizeDebug`        | `boolean`                                                                                             | `false`         | Shows a debug overlay with the video element size.                                                                                                                                                       |
 | `visibleConstraintsDebug`      | `boolean`                                                                                             | `false`         | Shows a debug overlay with the active `MediaStreamConstraints`.                                                                                                                                          |
 | `labels`                       | `WebcamLabels`                                                                                        | Korean defaults | Overrides for built-in button labels (see Labels And Localization below).                                                                                                                                |
@@ -471,6 +472,18 @@ want English or app-specific strings.
     aspectRatio: "Aspect ratio",
     aspectRatioAuto: "Auto",
     snapshot: "Take snapshot",
+  }}
+/>
+```
+
+To receive the captured frame when the built-in snapshot button is clicked, pass
+`onSnapshot`. The canvas has the original video resolution.
+
+```tsx
+<Webcam
+  visibleSnapshotButton
+  onSnapshot={(canvas) => {
+    canvas.toBlob((blob) => blob && upload(blob), "image/jpeg", 0.9);
   }}
 />
 ```

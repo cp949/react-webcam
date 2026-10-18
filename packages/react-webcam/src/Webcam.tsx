@@ -148,6 +148,13 @@ export interface WebcamProps {
   /** 스냅샷 버튼 표시 여부다. 기본값은 `false`다. */
   visibleSnapshotButton?: boolean;
 
+  /**
+   * 내장 스냅샷 버튼을 눌렀을 때 캡처한 프레임을 받는다.
+   * 캔버스는 원본 해상도다. 프레임을 캡처하지 못하면 호출하지 않는다.
+   * `visibleSnapshotButton`이 켜져 있어야 호출된다.
+   */
+  onSnapshot?: (canvas: HTMLCanvasElement) => void;
+
   /** 비디오 크기 디버그 UI 표시 여부다. 기본값은 `false`다. */
   visibleVideoSizeDebug?: boolean;
 
@@ -206,6 +213,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     visibleVideoSizeDebug = false,
     visibleConstraintsDebug = false,
     visibleSnapshotButton = false,
+    onSnapshot,
   } = props;
 
   // 라벨을 기본값과 병합한다. 미설정 항목은 기본 한국어 값이 사용된다.
@@ -567,6 +575,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             const canvas = ctrl.snapshotToCanvas();
             if (canvas) {
               setSnapshotImageUrl(canvas.toDataURL("image/png"));
+              onSnapshot?.(canvas);
             }
           }}
         />

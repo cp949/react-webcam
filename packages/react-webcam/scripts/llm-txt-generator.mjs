@@ -342,6 +342,7 @@ function renderExpandedWebcamProps() {
     "    visibleCameraDirectionButton?: boolean;",
     "    visibleAspectRatioButton?: boolean;",
     "    visibleSnapshotButton?: boolean;",
+    "    onSnapshot?: (canvas: HTMLCanvasElement) => void;",
     "    visibleVideoSizeDebug?: boolean;",
     "    visibleConstraintsDebug?: boolean;",
     `    labels?: ${WEB_CAM_LABELS_INLINE.replace(/\n/g, "\n    ")};`,

@@ -83,6 +83,7 @@ export function CameraView() {
 | `visibleCameraDirectionButton` | `boolean`                                                                                             | `false`       | 내장 전/후면 카메라 버튼 표시 여부입니다.                                                                                                                                                                |
 | `visibleAspectRatioButton`     | `boolean`                                                                                             | `false`       | 내장 화면 비율 버튼 표시 여부입니다.                                                                                                                                                                     |
 | `visibleSnapshotButton`        | `boolean`                                                                                             | `false`       | 내장 스냅샷 버튼 표시 여부입니다.                                                                                                                                                                        |
+| `onSnapshot`                   | `(canvas: HTMLCanvasElement) => void`                                                                 | —             | 내장 스냅샷 버튼을 누를 때 캡처한 프레임(원본 해상도)을 받습니다. `visibleSnapshotButton`이 필요합니다.                                                                                                  |
 | `visibleVideoSizeDebug`        | `boolean`                                                                                             | `false`       | 비디오 요소 크기를 보여주는 디버그 오버레이입니다.                                                                                                                                                       |
 | `visibleConstraintsDebug`      | `boolean`                                                                                             | `false`       | 현재 적용된 `MediaStreamConstraints`를 보여주는 디버그 오버레이입니다.                                                                                                                                   |
 | `labels`                       | `WebcamLabels`                                                                                        | 한국어 기본값 | 내장 버튼 라벨을 부분적으로 덮어씁니다(뒤의 라벨과 로컬라이제이션 절 참고).                                                                                                                              |
@@ -449,6 +450,18 @@ const selectedDeviceId = allDevices[0]?.deviceId;
     aspectRatio: "Aspect Ratio",
     aspectRatioAuto: "Auto",
     snapshot: "Take snapshot",
+  }}
+/>
+```
+
+내장 스냅샷 버튼을 눌렀을 때 캡처한 프레임을 받으려면 `onSnapshot`을 전달합니다.
+캔버스는 비디오 원본 해상도입니다.
+
+```tsx
+<Webcam
+  visibleSnapshotButton
+  onSnapshot={(canvas) => {
+    canvas.toBlob((blob) => blob && upload(blob), "image/jpeg", 0.9);
   }}
 />
 ```

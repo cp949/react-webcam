@@ -754,6 +754,44 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
 
     expect(toDataURLSpy).toHaveBeenCalledWith("image/png");
   });
+
+  it("SnapshotButton 클릭 시 캡처한 canvas를 onSnapshot으로 전달한다", async () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+      setTransform: vi.fn(),
+      imageSmoothingEnabled: true,
+      drawImage: vi.fn(),
+      translate: vi.fn(),
+      scale: vi.fn(),
+    } as unknown as CanvasRenderingContext2D);
+    vi.spyOn(HTMLCanvasElement.prototype, "toDataURL").mockReturnValue(
+      "data:image/png;base64,mock",
+    );
+
+    const onSnapshot = vi.fn();
+    render(
+      <Webcam
+        webcamOptions={{ audioEnabled: false }}
+        visibleSnapshotButton
+        onSnapshot={onSnapshot}
+      />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    const video = document.querySelector("video")!;
+    await markVideoReady(video);
+
+    expect(onSnapshot).not.toHaveBeenCalled();
+
+    await act(async () => {
+      document.querySelector<HTMLButtonElement>(".SnapshotButton-root button")!.click();
+    });
+
+    expect(onSnapshot).toHaveBeenCalledTimes(1);
+    expect(onSnapshot.mock.calls[0]![0]).toBeInstanceOf(HTMLCanvasElement);
+  });
 });
 
 // ---------------------------------------------------------------------------

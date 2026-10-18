@@ -1,6 +1,8 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { findPropNameMismatch } from "../packages/react-webcam/scripts/readme-props.mjs";
+
 const rootDir = resolve(import.meta.dirname, "..");
 const docsDir = resolve(rootDir, "packages/react-webcam/pkg-docs");
 const generatedNotice =
@@ -33,6 +35,16 @@ if (process.argv.includes("--check")) {
         `Generated content does not match ${target.outputPath}. Run pnpm readme:package.`,
       );
     }
+  }
+
+  const { onlyInEn, onlyInKo } = findPropNameMismatch(
+    readFileSync(readmeTargets[0].sourcePath, "utf8"),
+    readFileSync(readmeTargets[1].sourcePath, "utf8"),
+  );
+  if (onlyInEn.length > 0 || onlyInKo.length > 0) {
+    throw new Error(
+      `Props table names differ between README.en.md and README.ko.md. only in en: [${onlyInEn.join(", ")}], only in ko: [${onlyInKo.join(", ")}].`,
+    );
   }
 
   console.log("[readme:package:check] README files are in sync.");

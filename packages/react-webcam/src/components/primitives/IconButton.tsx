@@ -15,6 +15,12 @@ interface IconButtonProps {
   /** 마우스 이탈 핸들러 */
   onMouseLeave?: React.MouseEventHandler<HTMLButtonElement>;
 
+  /** 포커스 진입 핸들러 */
+  onFocus?: React.FocusEventHandler<HTMLButtonElement>;
+
+  /** 포커스 이탈 핸들러 */
+  onBlur?: React.FocusEventHandler<HTMLButtonElement>;
+
   /** 버튼 비활성화 여부 */
   disabled?: boolean;
 
@@ -54,6 +60,8 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       onKeyDown,
       onMouseEnter,
       onMouseLeave,
+      onFocus,
+      onBlur,
       disabled,
       title,
       className,
@@ -73,6 +81,8 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         onKeyDown={onKeyDown}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
+        onFocus={onFocus}
+        onBlur={onBlur}
         disabled={disabled}
         title={title}
         aria-label={ariaLabel}

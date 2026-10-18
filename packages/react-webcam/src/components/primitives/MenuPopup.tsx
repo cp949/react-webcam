@@ -1,6 +1,10 @@
 /** 순수 DOM 기반 팝업 메뉴 컴포넌트다. */
 import type React from "react";
 import { useEffect, useRef } from "react";
+import { isFocusVisible } from "../../utils/is-focus-visible.js";
+
+/** 호버와 키보드 포커스가 공유하는 항목 강조 배경이다. */
+const MENU_ITEM_HIGHLIGHT = "var(--webcam-menu-hover-bg, #f5f5f5)";
 
 /** 팝업 메뉴의 단일 항목 */
 export interface MenuPopupItem {
@@ -173,11 +177,21 @@ export function MenuPopup(props: MenuPopupProps) {
               border: "none",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.backgroundColor =
-                "var(--webcam-menu-hover-bg, #f5f5f5)";
+              e.currentTarget.style.backgroundColor = MENU_ITEM_HIGHLIGHT;
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.backgroundColor = "";
+              // 키보드로 포커스된 항목은 마우스가 나가도 강조를 유지한다.
+              const el = e.currentTarget;
+              if (document.activeElement === el && isFocusVisible(el)) return;
+              el.style.backgroundColor = "";
+            }}
+            onFocus={(e) => {
+              if (isFocusVisible(e.currentTarget)) {
+                e.currentTarget.style.backgroundColor = MENU_ITEM_HIGHLIGHT;
+              }
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.backgroundColor = "";
             }}
           >
             {item.label}

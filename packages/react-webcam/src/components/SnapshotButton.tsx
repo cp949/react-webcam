@@ -3,6 +3,7 @@
 import React from "react";
 import { CameraIcon } from "../icons/CameraIcon.js";
 import { classNames } from "../utils/class-names.js";
+import { isFocusVisible } from "../utils/is-focus-visible.js";
 import { IconButton } from "./primitives/IconButton.js";
 
 /** 스냅샷 버튼이 받는 표시 옵션과 클릭 핸들러다. */
@@ -31,10 +32,12 @@ export function SnapshotButton(props: SnapshotButtonProps) {
   const { style, className, disabled = false, onClick, label = "스냅샷" } = props;
   // 호버 상태를 별도로 두어 아이콘 강조색만 가볍게 바꾼다.
   const [hovered, setHovered] = React.useState(false);
+  // 키보드 포커스에도 같은 강조색을 쓴다. 마우스 클릭으로 생긴 포커스는 제외한다.
+  const [focused, setFocused] = React.useState(false);
   return (
     <span
       className={classNames("SnapshotButton-root", className)}
-      style={{ color: hovered ? "var(--webcam-accent, #1976d2)" : "#fff", ...style }}
+      style={{ color: hovered || focused ? "var(--webcam-accent, #1976d2)" : "#fff", ...style }}
     >
       <IconButton
         className='x_btn'
@@ -44,6 +47,8 @@ export function SnapshotButton(props: SnapshotButtonProps) {
         onClick={onClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
+        onFocus={(e) => setFocused(isFocusVisible(e.currentTarget))}
+        onBlur={() => setFocused(false)}
         style={{ padding: "2px", backgroundColor: "rgba(0,0,0,0.1)", color: "inherit" }}
       >
         <CameraIcon size='2rem' />

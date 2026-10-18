@@ -70,14 +70,22 @@ describe("공개 CSS 변수", () => {
 
   it("메뉴 변수는 배경·글자색·z-index·호버 배경의 기본값을 유지한다", () => {
     const { getByRole, getAllByRole } = render(
-      <MenuPopup open onClose={() => {}} items={[{ label: "A", onClick: () => {} }]} />,
+      <MenuPopup
+        open
+        onClose={() => {}}
+        items={[
+          { label: "A", onClick: () => {} },
+          { label: "B", onClick: () => {} },
+        ]}
+      />,
     );
 
     const menu = getByRole("menu");
     expect(menu.style.backgroundColor).toBe("var(--webcam-menu-bg, #fff)");
     expect(menu.style.zIndex).toBe("var(--webcam-menu-z-index, 1300)");
 
-    const item = getAllByRole("menuitem")[0]!;
+    // 메뉴가 열리면 첫 항목이 포커스를 받으므로, 포커스 없는 둘째 항목으로 호버를 확인한다.
+    const item = getAllByRole("menuitem")[1]!;
     expect(item.style.color).toBe("var(--webcam-menu-fg, #000)");
 
     fireEvent.mouseEnter(item);

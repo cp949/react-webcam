@@ -83,7 +83,7 @@ pnpm readme:package:check
 
 `pnpm release-it`은 저장소 루트에서 패키지 릴리스 절차를 실행한다.
 변경사항이 없는 `main` 또는 `dev` 브랜치가 필요하며 버전 증가, 태그 생성, push와 npm 배포를 수행한다.
-자세한 순서와 복구 방법은 [2.0.0 배포 안내](./docs/releases/2.0.0.md)를 참고한다.
+자세한 순서와 복구 방법은 [릴리스 절차](./CLAUDE.md#릴리스-절차)를 참고한다.
 
 `pnpm lint`와 `pnpm lint:fix`는 루트 `.oxlintrc.json`으로 oxlint를 실행한다.
 `pnpm format`은 `prettier.config.mjs`로 Prettier를 실행해 파일을 덮어쓴다.

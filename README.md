@@ -84,7 +84,7 @@ pnpm readme:package:check
 
 `pnpm release-it` runs the package release workflow from the repository root.
 It requires a clean `main` or `dev` branch and performs versioning, tagging, pushing,
-and npm publishing. See the [2.0.0 release handoff](./docs/releases/2.0.0.md).
+and npm publishing. See the [release procedure](./CLAUDE.md#릴리스-절차) (Korean).
 
 `pnpm lint` and `pnpm lint:fix` run oxlint with the root `.oxlintrc.json`.
 `pnpm format` runs Prettier with `prettier.config.mjs` and rewrites files.

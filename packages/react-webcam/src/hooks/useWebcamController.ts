@@ -1,6 +1,7 @@
 /** 웹캠 컴포넌트가 사용하는 상태와 제어 로직을 한곳에 모은 훅이다. */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { WebcamController } from "../types/webcam-controller.js";
+import { playVideo } from "../utils/play-video.js";
 import { snapshotToCanvas } from "../utils/snapshot-to-canvas.js";
 import {
   mediaStreamResultFromDetail,
@@ -270,20 +271,18 @@ export function useWebcamController(
       resumePlayback: () => {
         if (!videoElement || !mediaStreamResult.mediaStream) return;
         const currentStream = mediaStreamResult.mediaStream;
-        videoElement
-          .play()
-          .then(() => {
+        playVideo(
+          videoElement,
+          () => {
             setPlaybackErrorState((prev) => {
               if (!prev) return prev;
               return prev.mediaStream === currentStream ? undefined : prev;
             });
-          })
-          .catch((err: unknown) => {
-            // AbortError는 재생 요청이 중단된 경우라서 별도 오류로 다루지 않는다.
-            if ((err as { name?: string })?.name === "AbortError") return;
-            const error = err instanceof Error ? err : new Error(String(err));
+          },
+          (error) => {
             setPlaybackErrorState({ mediaStream: currentStream, error });
-          });
+          },
+        );
       },
 
       videoElement,

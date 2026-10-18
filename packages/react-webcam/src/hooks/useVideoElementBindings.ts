@@ -13,6 +13,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { startDebugVideoEventListener } from "../utils/media-debug.js";
+import { playVideo } from "../utils/play-video.js";
 import type { WebcamFitMode } from "../webcam-types.js";
 
 export type UseVideoElementBindingsOptions = {
@@ -88,20 +89,18 @@ export function useVideoElementBindings({
     if (!videoElement || !mediaStream) return;
     videoElement.srcObject = mediaStream;
     let active = true;
-    videoElement
-      .play()
-      .then(() => {
+    playVideo(
+      videoElement,
+      () => {
         if (!active) return;
         onPlaybackStartRef.current(mediaStream);
-      })
-      .catch((err: unknown) => {
+      },
+      (error) => {
         if (!active) return;
-        // AbortError는 srcObject 교체 시 이전 play() 요청이 정상적으로 취소되는 경우이므로 무시한다.
-        if ((err as { name?: string })?.name === "AbortError") return;
         // 자동재생이 브라우저 정책에 의해 차단된 경우 — 상위 상태로 올린다.
-        const error = err instanceof Error ? err : new Error(String(err));
         onPlayErrorRef.current(mediaStream, error);
-      });
+      },
+    );
     return () => {
       active = false;
       if (videoElement.srcObject === mediaStream) videoElement.srcObject = null;

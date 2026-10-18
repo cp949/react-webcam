@@ -75,12 +75,18 @@ describe("패키지 메타데이터 계약", () => {
     expect(peerDeps).toContain("react");
   });
 
-  it('exports["."]에는 types, require, import 키가 모두 있다', () => {
+  it('exports["."]는 import/require 조건마다 types를 따로 선언한다', () => {
     const pkg = JSON.parse(readFileSync(PACKAGE_JSON_PATH, "utf-8"));
     const rootExport = pkg.exports?.["."] ?? {};
-    expect(Object.keys(rootExport)).toContain("types");
-    expect(Object.keys(rootExport)).toContain("require");
-    expect(Object.keys(rootExport)).toContain("import");
+    // CJS 소비자가 .d.ts를 ESM으로 잘못 해석하지 않도록 .d.cts를 분리한다.
+    expect(rootExport.import).toEqual({
+      types: "./dist/index.d.ts",
+      default: "./dist/index.js",
+    });
+    expect(rootExport.require).toEqual({
+      types: "./dist/index.d.cts",
+      default: "./dist/index.cjs",
+    });
   });
 });
 

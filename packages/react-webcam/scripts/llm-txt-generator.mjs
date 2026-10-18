@@ -1,7 +1,44 @@
 /**
  * `dist/index.d.ts`와 보조 가이드를 바탕으로 에이전트 소비용 `llm.txt`를 조합하는 생성기다.
  */
-import * as ts from "typescript-api";
+import { parseSync } from "oxc-parser";
+
+/** `export` 래퍼를 벗겨 실제 선언 노드를 돌려준다. */
+function unwrapDeclaration(node) {
+  return node.type === "ExportNamedDeclaration" && node.declaration ? node.declaration : node;
+}
+
+/** 소스 텍스트와 최상위 문장 목록을 한 객체로 묶는다. 노드 텍스트는 이 텍스트를 잘라 만든다. */
+function parseDeclarationText(fileName, text) {
+  const { program, comments } = parseSync(fileName, text, { lang: "ts" });
+  return { statements: program.body, comments, text };
+}
+
+/** 노드 원문을 잘라 내되 노드 안쪽 주석은 제거한다. */
+function printNode(node, sourceFile) {
+  let result = "";
+  let cursor = node.start;
+  for (const comment of sourceFile.comments) {
+    if (comment.start < node.start || comment.end > node.end) continue;
+    result += sourceFile.text.slice(cursor, comment.start);
+    cursor = comment.end;
+  }
+  // 주석이 있던 줄이 빈 줄로 남지 않게 정리한다.
+  return (result + sourceFile.text.slice(cursor, node.end)).replace(/\n[ \t]*(?=\n)/g, "");
+}
+
+/** 자식 노드를 순회한다. 노드는 `type` 문자열을 가진 객체다. */
+function forEachChild(node, callback) {
+  for (const value of Object.values(node)) {
+    if (Array.isArray(value)) {
+      for (const child of value) {
+        if (child && typeof child.type === "string") callback(child);
+      }
+    } else if (value && typeof value.type === "string") {
+      callback(value);
+    }
+  }
+}
 
 /** 줄바꿈과 후행 공백을 정리해 출력 비교가 안정적으로 유지되게 한다. */
 function normalizeText(value) {
@@ -23,21 +60,13 @@ function formatCodeBlock(value, language = "ts") {
 
 /** declaration 노드에서 공개 심볼 이름을 읽는다. */
 function declarationNameFromNode(node) {
-  if (
-    ts.isFunctionDeclaration(node) ||
-    ts.isTypeAliasDeclaration(node) ||
-    ts.isInterfaceDeclaration(node) ||
-    ts.isEnumDeclaration(node) ||
-    ts.isClassDeclaration(node)
-  ) {
-    return node.name?.text;
+  const declaration = unwrapDeclaration(node);
+  if (declarationKindFromNode(declaration) === "value") {
+    const [first] = declaration.declarations;
+    return first?.id.type === "Identifier" ? first.id.name : undefined;
   }
-
-  if (ts.isVariableStatement(node)) {
-    const [declaration] = node.declarationList.declarations;
-    if (declaration && ts.isIdentifier(declaration.name)) {
-      return declaration.name.text;
-    }
+  if (declarationKindFromNode(declaration) !== "unknown") {
+    return declaration.id?.name;
   }
 
   return undefined;
@@ -45,13 +74,23 @@ function declarationNameFromNode(node) {
 
 /** 노드 종류를 런타임 값과 타입 선언 관점에서 분류한다. */
 function declarationKindFromNode(node) {
-  if (ts.isFunctionDeclaration(node)) return "function";
-  if (ts.isTypeAliasDeclaration(node)) return "type";
-  if (ts.isInterfaceDeclaration(node)) return "interface";
-  if (ts.isEnumDeclaration(node)) return "enum";
-  if (ts.isClassDeclaration(node)) return "class";
-  if (ts.isVariableStatement(node)) return "value";
-  return "unknown";
+  switch (unwrapDeclaration(node).type) {
+    case "FunctionDeclaration":
+    case "TSDeclareFunction":
+      return "function";
+    case "TSTypeAliasDeclaration":
+      return "type";
+    case "TSInterfaceDeclaration":
+      return "interface";
+    case "TSEnumDeclaration":
+      return "enum";
+    case "ClassDeclaration":
+      return "class";
+    case "VariableDeclaration":
+      return "value";
+    default:
+      return "unknown";
+  }
 }
 
 /** import 예시를 만들 수 있게 선언이 런타임 값인지 타입 전용인지 판별한다. */
@@ -62,7 +101,7 @@ function declarationVisibilityFromKind(kind) {
 }
 
 /** AST 노드를 렌더링 가능한 선언 레코드로 정규화한다. */
-function createDeclarationRecord(node, sourceFile, printer) {
+function createDeclarationRecord(node, sourceFile) {
   const name = declarationNameFromNode(node);
   if (!name) return undefined;
 
@@ -71,17 +110,16 @@ function createDeclarationRecord(node, sourceFile, printer) {
     kind: declarationKindFromNode(node),
     visibility: declarationVisibilityFromKind(declarationKindFromNode(node)),
     node,
-    text: normalizeText(printer.printNode(ts.EmitHint.Unspecified, node, sourceFile)),
+    text: normalizeText(printNode(node, sourceFile)),
   };
 }
 
 /** declaration 파일의 최상위 선언을 이름 기준 맵으로 수집한다. */
 function collectTopLevelDeclarations(sourceFile) {
-  const printer = ts.createPrinter({ removeComments: true });
   const declarations = new Map();
 
   for (const statement of sourceFile.statements) {
-    const record = createDeclarationRecord(statement, sourceFile, printer);
+    const record = createDeclarationRecord(statement, sourceFile);
     if (record) {
       declarations.set(record.name, record);
     }
@@ -95,22 +133,18 @@ function collectPublicExportNames(sourceFile) {
   const publicExportNames = new Set();
 
   for (const statement of sourceFile.statements) {
-    if (ts.isExportDeclaration(statement)) {
-      const clause = statement.exportClause;
-      if (clause && ts.isNamedExports(clause)) {
-        for (const element of clause.elements) {
-          publicExportNames.add(element.name.text);
-        }
-      }
-      continue;
-    }
+    if (statement.type !== "ExportNamedDeclaration") continue;
 
-    const modifiers = ts.getModifiers(statement) ?? [];
-    if (modifiers.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword)) {
+    if (statement.declaration) {
       const name = declarationNameFromNode(statement);
       if (name) {
         publicExportNames.add(name);
       }
+      continue;
+    }
+
+    for (const specifier of statement.specifiers) {
+      publicExportNames.add(specifier.exported.name ?? specifier.exported.value);
     }
   }
 
@@ -122,19 +156,18 @@ function findReferencedTopLevelNames(node, declarationNames) {
   const referenced = new Set();
 
   function visit(current) {
-    if (ts.isTypeReferenceNode(current) && ts.isIdentifier(current.typeName)) {
-      if (declarationNames.has(current.typeName.text)) {
-        referenced.add(current.typeName.text);
-      }
+    // 타입 참조, interface extends, class implements가 이름을 참조하는 위치다.
+    const reference =
+      current.type === "TSTypeReference"
+        ? current.typeName
+        : current.type === "TSInterfaceHeritage" || current.type === "TSClassImplements"
+          ? current.expression
+          : undefined;
+    if (reference?.type === "Identifier" && declarationNames.has(reference.name)) {
+      referenced.add(reference.name);
     }
 
-    if (ts.isExpressionWithTypeArguments(current) && ts.isIdentifier(current.expression)) {
-      if (declarationNames.has(current.expression.text)) {
-        referenced.add(current.expression.text);
-      }
-    }
-
-    ts.forEachChild(current, visit);
+    forEachChild(current, visit);
   }
 
   visit(node);
@@ -182,15 +215,16 @@ function resolveDeclarationClosure(declarationMap, keySymbols) {
 
 /** 문자열 리터럴 union 타입에서 값 목록만 추출한다. */
 function extractStringUnionValues(node) {
-  if (!ts.isTypeAliasDeclaration(node)) return [];
+  const declaration = unwrapDeclaration(node);
+  if (declaration.type !== "TSTypeAliasDeclaration") return [];
 
-  const typeNode = node.type;
-  if (!ts.isUnionTypeNode(typeNode)) return [];
+  const typeNode = declaration.typeAnnotation;
+  if (typeNode.type !== "TSUnionType") return [];
 
   const values = [];
   for (const part of typeNode.types) {
-    if (ts.isLiteralTypeNode(part) && ts.isStringLiteral(part.literal)) {
-      values.push(part.literal.text);
+    if (part.type === "TSLiteralType" && typeof part.literal.value === "string") {
+      values.push(part.literal.value);
     }
   }
 
@@ -519,13 +553,7 @@ function buildFallbackDeclarations(keySymbols) {
  * `.d.ts` 텍스트에서 핵심 공개 심볼과 그 의존 선언을 추출한다.
  */
 export function extractDeclarationsFromDtsText(declarationText, keySymbols) {
-  const sourceFile = ts.createSourceFile(
-    "index.d.ts",
-    declarationText,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TS,
-  );
+  const sourceFile = parseDeclarationText("index.d.ts", declarationText);
   const declarationMap = collectTopLevelDeclarations(sourceFile);
   return resolveDeclarationClosure(declarationMap, keySymbols);
 }
@@ -543,15 +571,7 @@ export function renderLlmTxt(input) {
       ? extractDeclarationsFromDtsText(declarationText, keySymbols)
       : buildFallbackDeclarations(keySymbols);
   const publicExportNames = declarationText.trim()
-    ? collectPublicExportNames(
-        ts.createSourceFile(
-          "index.d.ts",
-          declarationText,
-          ts.ScriptTarget.Latest,
-          true,
-          ts.ScriptKind.TS,
-        ),
-      )
+    ? collectPublicExportNames(parseDeclarationText("index.d.ts", declarationText))
     : new Set(keySymbols);
 
   // 출력 섹션에는 승인된 공개 API만 남기고, helper 의존성은 인라인 치환으로 흡수한다.

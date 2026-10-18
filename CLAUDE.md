@@ -194,7 +194,7 @@ GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-we
 
 - TypeScript strict 모드
 - oxlint로 린트, Prettier로 포매팅 수행 (설정: 루트 `.oxlintrc.json`)
-- `scripts/*.mjs`의 컴파일러 API 사용은 `typescript-api`(TS 6 별칭)를 import한다. TS 7에는 JS 컴파일러 API가 없다
+- `scripts/*.mjs`에서 TS 소스를 파싱할 때는 `oxc-parser`를 쓴다. TS 7에는 JS 컴파일러 API가 없다
 - import 경로에 `.js` 확장자 사용
 - 라이브러리 출력은 tsdown으로 빌드
 - 주석과 UI 라벨은 한국어 유지가 기본 원칙이다

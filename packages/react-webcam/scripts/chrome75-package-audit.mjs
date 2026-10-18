@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { extname, join, relative, resolve } from "node:path";
 import { parse } from "acorn";
-import ts from "typescript-api";
+import { parseSync } from "oxc-parser";
 
 const ARTIFACTS = ["dist/index.cjs", "dist/index.js"];
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx"]);
@@ -35,6 +35,14 @@ function memberName(node) {
   return undefined;
 }
 
+function isStringValue(node, expected) {
+  if (node?.type === "Literal") return node.value === expected;
+  if (node?.type === "TemplateLiteral" && node.expressions.length === 0) {
+    return node.quasis[0].value.cooked === expected;
+  }
+  return false;
+}
+
 function findJavaScriptRuntimeApis(node, found) {
   if (!node || typeof node.type !== "string") return;
 
@@ -61,8 +69,7 @@ function findJavaScriptRuntimeApis(node, found) {
     }
     if (
       calledMember === "addEventListener" &&
-      node.arguments[0]?.type === "Literal" &&
-      node.arguments[0].value === "scrollend"
+      isStringValue(node.arguments[0], "scrollend")
     ) {
       found.add("SCROLLEND");
     }
@@ -78,44 +85,6 @@ function findJavaScriptRuntimeApis(node, found) {
   }
 }
 
-function findTypeScriptRuntimeApis(node, found) {
-  if (ts.isCallExpression(node)) {
-    if (ts.isIdentifier(node.expression) && node.expression.text === "structuredClone") {
-      found.add("STRUCTURED_CLONE");
-    }
-    if (ts.isPropertyAccessExpression(node.expression)) {
-      const property = node.expression.name.text;
-      if (property === "at") found.add("ARRAY_AT");
-      if (property === "findLast") found.add("ARRAY_FIND_LAST");
-      if (
-        property === "randomUUID" &&
-        ts.isIdentifier(node.expression.expression) &&
-        node.expression.expression.text === "crypto"
-      ) {
-        found.add("CRYPTO_RANDOM_UUID");
-      }
-      if (
-        property === "hasOwn" &&
-        ts.isIdentifier(node.expression.expression) &&
-        node.expression.expression.text === "Object"
-      ) {
-        found.add("OBJECT_HAS_OWN");
-      }
-      if (
-        property === "addEventListener" &&
-        ts.isStringLiteralLike(node.arguments[0]) &&
-        node.arguments[0].text === "scrollend"
-      ) {
-        found.add("SCROLLEND");
-      }
-    }
-  }
-  if (ts.isPropertyAccessExpression(node) && node.name.text === "onscrollend") {
-    found.add("SCROLLEND");
-  }
-  ts.forEachChild(node, (child) => findTypeScriptRuntimeApis(child, found));
-}
-
 function addRuntimeDiagnostics(diagnostics, path, found) {
   for (const code of [...found].sort()) {
     diagnostics.push({ code, path });
@@ -124,9 +93,9 @@ function addRuntimeDiagnostics(diagnostics, path, found) {
 
 async function auditSource(path, diagnostics) {
   const source = await readFile(path, "utf8");
-  const sourceFile = ts.createSourceFile(path, source, ts.ScriptTarget.Latest, true);
+  const { program } = parseSync(path, source);
   const found = new Set();
-  findTypeScriptRuntimeApis(sourceFile, found);
+  findJavaScriptRuntimeApis(program, found);
   addRuntimeDiagnostics(diagnostics, path, found);
 }
 

@@ -312,6 +312,10 @@ export function CameraView() {
 }
 ```
 
+If only the audio track ends (for example, the microphone is unplugged), the phase stays `live`
+and the video keeps playing. `detail.audioEnded` becomes `true`. A video track ending still
+moves to `error` with `track-ended`.
+
 ### State Flow
 
 ```text

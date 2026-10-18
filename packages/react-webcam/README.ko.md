@@ -301,6 +301,9 @@ export function CameraView() {
 }
 ```
 
+오디오 트랙만 종료되면(예: 마이크를 뽑음) `phase`는 `live`로 유지되고 영상은 계속 재생된다.
+`detail.audioEnded`가 `true`가 된다. 비디오 트랙이 종료되면 기존처럼 `track-ended` 오류로 전환된다.
+
 ### 상태 흐름
 
 ```text

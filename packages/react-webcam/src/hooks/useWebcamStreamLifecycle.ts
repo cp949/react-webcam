@@ -64,10 +64,8 @@ export function useWebcamStreamLifecycle({
 
     const ctx = { canceled: false };
     let acquiredStream: MediaStream | undefined;
-    let acquiredVideoTracks: MediaStreamTrack[] = [];
-    let acquiredAudioTracks: MediaStreamTrack[] = [];
-    let videoTrackEndedHandler: (() => void) | undefined;
-    let audioTrackEndedHandler: (() => void) | undefined;
+    // cleanup에서 제거할 수 있도록 트랙과 리스너 쌍을 저장한다.
+    let trackListeners: Array<{ track: MediaStreamTrack; listener: () => void }> = [];
     // constraints는 가드 통과 후 확정된 값이므로 비동기 경계에서 캡처해 사용한다.
     const currentConstraints = constraints;
 
@@ -83,42 +81,35 @@ export function useWebcamStreamLifecycle({
         }
         acquiredStream = ms;
 
-        // 트랙이 외부 요인(카메라 분리, 권한 회수 등)으로 종료될 때 상태를 전환한다.
-        const videoTracks = ms.getVideoTracks?.() ?? [];
-        const handleVideoTrackEnded = () => {
-          if (ctx.canceled) return;
-          setStreamState({
-            phase: "error",
-            errorCode: "track-ended",
-            error: new Error("Video track ended unexpectedly"),
-            constraints: currentConstraints,
-          });
-          BrowserMediaDevices.stopStream(ms);
-        };
-        videoTracks.forEach((track) => {
-          track.addEventListener("ended", handleVideoTrackEnded);
+        // 트랙이 외부 요인(카메라 분리, 권한 회수, 마이크 분리 등)으로 종료될 때 상태를 전환한다.
+        const tracks = [
+          ...(ms.getVideoTracks?.() ?? []).map((track) => ({ track, kind: "video" as const })),
+          ...(ms.getAudioTracks?.() ?? []).map((track) => ({ track, kind: "audio" as const })),
+        ];
+        trackListeners = tracks.map(({ track, kind }) => {
+          const listener = () => {
+            if (ctx.canceled) return;
+            if (kind === "audio") {
+              // 마이크만 끊겨도 영상은 정상이다. 스트림을 유지하고 audioEnded로만 알린다.
+              // 이미 오류로 전환됐거나 다른 스트림 상태이면 덮어쓰지 않는다.
+              setStreamState((prev) =>
+                prev.phase === "live" && prev.mediaStream === ms
+                  ? { ...prev, audioEnded: true }
+                  : prev,
+              );
+              return;
+            }
+            setStreamState({
+              phase: "error",
+              errorCode: "track-ended",
+              error: new Error("Video track ended unexpectedly"),
+              constraints: currentConstraints,
+            });
+            BrowserMediaDevices.stopStream(ms);
+          };
+          track.addEventListener("ended", listener);
+          return { track, listener };
         });
-        // cleanup에서 제거할 수 있도록 참조를 저장한다.
-        acquiredVideoTracks = videoTracks;
-        videoTrackEndedHandler = handleVideoTrackEnded;
-
-        // 오디오 트랙도 동일하게 모니터링한다 — audioEnabled 사용 시 오디오 트랙 안정성도 계약에 포함된다.
-        const audioTracks = ms.getAudioTracks?.() ?? [];
-        const handleAudioTrackEnded = () => {
-          if (ctx.canceled) return;
-          setStreamState({
-            phase: "error",
-            errorCode: "track-ended",
-            error: new Error("Audio track ended unexpectedly"),
-            constraints: currentConstraints,
-          });
-          BrowserMediaDevices.stopStream(ms);
-        };
-        audioTracks.forEach((track) => {
-          track.addEventListener("ended", handleAudioTrackEnded);
-        });
-        acquiredAudioTracks = audioTracks;
-        audioTrackEndedHandler = handleAudioTrackEnded;
 
         setStreamState({
           phase: "live",
@@ -141,18 +132,9 @@ export function useWebcamStreamLifecycle({
 
     return () => {
       ctx.canceled = true;
-      if (videoTrackEndedHandler) {
-        const listener = videoTrackEndedHandler;
-        acquiredVideoTracks.forEach((t) => {
-          t.removeEventListener("ended", listener);
-        });
-      }
-      if (audioTrackEndedHandler) {
-        const listener = audioTrackEndedHandler;
-        acquiredAudioTracks.forEach((t) => {
-          t.removeEventListener("ended", listener);
-        });
-      }
+      trackListeners.forEach(({ track, listener }) => {
+        track.removeEventListener("ended", listener);
+      });
       if (acquiredStream) {
         BrowserMediaDevices.stopStream(acquiredStream);
       }

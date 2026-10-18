@@ -51,6 +51,12 @@ export type WebcamErrorCode =
 type WithVideoSize = { videoSize?: { width: number; height: number } };
 
 /**
+ * Set to `true` once the audio track ended unexpectedly (for example, the microphone was unplugged).
+ * The video stream is kept alive, so the phase does not change.
+ */
+type WithAudioEnded = { audioEnded?: boolean };
+
+/**
  * Shared fields for error phases.
  */
 type WebcamDetailError = WithVideoSize & {
@@ -84,25 +90,27 @@ export type WebcamDetail =
   /** `getUserMedia` request in progress. */
   | (WithVideoSize & { phase: "requesting"; constraints: MediaStreamConstraints })
   /** Stream acquired. This alone does not guarantee playback or a decoded frame. */
-  | (WithVideoSize & {
-      phase: "live";
-      /** Acquired `MediaStream`, always present in the `live` phase. */
-      mediaStream: MediaStream;
-      constraints: MediaStreamConstraints;
-    })
+  | (WithVideoSize &
+      WithAudioEnded & {
+        phase: "live";
+        /** Acquired `MediaStream`, always present in the `live` phase. */
+        mediaStream: MediaStream;
+        constraints: MediaStreamConstraints;
+      })
   /**
    * Stream acquisition succeeded, but `video.play()` failed.
    * This commonly happens when autoplay is blocked.
    * `AbortError` caused by `srcObject` replacement does not enter this phase.
    */
-  | (WithVideoSize & {
-      phase: "playback-error";
-      /** The stream is still valid even though playback failed. */
-      mediaStream: MediaStream;
-      constraints: MediaStreamConstraints;
-      /** Original `play()` failure. */
-      error: Error;
-    })
+  | (WithVideoSize &
+      WithAudioEnded & {
+        phase: "playback-error";
+        /** The stream is still valid even though playback failed. */
+        mediaStream: MediaStream;
+        constraints: MediaStreamConstraints;
+        /** Original `play()` failure. */
+        error: Error;
+      })
   /** Error phases such as denied, unavailable, unsupported, insecure, or generic failure. */
   | WebcamDetailError;
 

@@ -426,7 +426,7 @@ describe("audio lifecycle 상태 계약", () => {
     vi.useFakeTimers();
   });
 
-  it("audioEnabled true + audio track ended → error 상태, track-ended errorCode", async () => {
+  it("audioEnabled true + audio track ended → live 유지, audioEnded true", async () => {
     const fakeStream = createFakeMediaStream({ includeAudio: true });
     mockGetUserMedia(fakeStream);
 
@@ -444,9 +444,7 @@ describe("audio lifecycle 상태 계약", () => {
       await Promise.resolve();
     });
 
-    expect(result.current.webcamDetail.phase).toBe("error");
-    expect(result.current.webcamDetail).toMatchObject({
-      errorCode: "track-ended",
-    });
+    expect(result.current.webcamDetail.phase).toBe("live");
+    expect(result.current.webcamDetail).toMatchObject({ audioEnded: true });
   });
 });

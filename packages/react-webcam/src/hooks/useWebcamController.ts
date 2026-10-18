@@ -147,6 +147,7 @@ export function useWebcamController(
         constraints: base.constraints,
         error: playbackErrorState.error,
         videoSize: base.videoSize,
+        audioEnded: base.audioEnded,
       };
     }
     return base;

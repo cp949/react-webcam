@@ -385,7 +385,7 @@ describe("오디오 트랙 생명주기", () => {
     vi.useFakeTimers();
   });
 
-  it("audio track ended 이벤트가 error 상태로 전환된다", async () => {
+  it("audio track ended 이벤트가 live를 유지하고 audioEnded로 알린다", async () => {
     const fakeStream = createFakeMediaStream({ includeAudio: true });
     mockGetUserMedia(fakeStream);
 
@@ -396,6 +396,7 @@ describe("오디오 트랙 생명주기", () => {
 
     const liveCalls = onStateChange.mock.calls.filter(([s]) => s.phase === "live");
     expect(liveCalls.length).toBeGreaterThanOrEqual(1);
+    expect(onStateChange.mock.lastCall?.[0]?.audioEnded).toBeUndefined();
 
     const liveCallCount = onStateChange.mock.calls.length;
 
@@ -408,18 +409,21 @@ describe("오디오 트랙 생명주기", () => {
     const callsAfterEnded = onStateChange.mock.calls.slice(liveCallCount);
     expect(callsAfterEnded.length).toBeGreaterThan(0);
 
-    const lastStatus = onStateChange.mock.lastCall?.[0]?.phase;
-    // audio track 종료도 live 상태를 벗어나야 한다
-    expect(lastStatus).not.toBe("live");
+    // 오디오만 끊겨도 영상은 정상이므로 live를 유지한다
+    const lastState = onStateChange.mock.lastCall?.[0];
+    expect(lastState?.phase).toBe("live");
+    expect(lastState?.audioEnded).toBe(true);
   });
 
-  it("audio-only 종료와 video-only 종료를 구분할 수 있다", async () => {
-    // audio track만 종료: errorCode가 track-ended 이고 error.message에 audio가 포함
+  it("audio-only 종료는 audioEnded, video 종료는 track-ended 오류로 구분된다", async () => {
+    // audio track만 종료: live 유지, audioEnded true, 스트림은 stop되지 않는다
     const audioOnlyStream = createFakeMediaStream({ includeAudio: true });
     mockGetUserMedia(audioOnlyStream);
 
     const onStateChange = vi.fn();
-    render(<Webcam webcamOptions={{ audioEnabled: true }} onStateChange={onStateChange} />);
+    const { unmount } = render(
+      <Webcam webcamOptions={{ audioEnabled: true }} onStateChange={onStateChange} />,
+    );
 
     await advanceToStreamLoad();
 
@@ -428,11 +432,32 @@ describe("오디오 트랙 생명주기", () => {
       await Promise.resolve();
     });
 
-    const lastState = onStateChange.mock.lastCall?.[0];
-    expect(lastState?.phase).toBe("error");
-    expect(lastState?.errorCode).toBe("track-ended");
-    // audio track 종료임을 구분 가능해야 한다 (error.message에 audio 관련 내용 포함)
-    expect(lastState?.error?.message).toMatch(/audio/i);
+    const audioEndedState = onStateChange.mock.lastCall?.[0];
+    expect(audioEndedState?.phase).toBe("live");
+    expect(audioEndedState?.audioEnded).toBe(true);
+    for (const track of audioOnlyStream.getVideoTracks()) {
+      expect(vi.mocked(track.stop)).not.toHaveBeenCalled();
+    }
+    unmount();
+
+    // video track 종료: 기존처럼 track-ended 오류로 전환한다
+    const videoStream = createFakeMediaStream({ includeAudio: true });
+    mockGetUserMedia(videoStream);
+
+    const onVideoStateChange = vi.fn();
+    render(<Webcam webcamOptions={{ audioEnabled: true }} onStateChange={onVideoStateChange} />);
+
+    await advanceToStreamLoad();
+
+    await act(async () => {
+      videoStream.fireTrackEnded();
+      await Promise.resolve();
+    });
+
+    const videoEndedState = onVideoStateChange.mock.lastCall?.[0];
+    expect(videoEndedState?.phase).toBe("error");
+    expect(videoEndedState?.errorCode).toBe("track-ended");
+    expect(videoEndedState?.error?.message).toMatch(/video/i);
   });
 });
 

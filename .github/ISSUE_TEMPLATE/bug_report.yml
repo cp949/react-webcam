@@ -1,0 +1,86 @@
+name: 버그 신고 / Bug report
+description: 카메라 동작 문제를 신고한다. / Report a camera problem.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        카메라 문제는 환경 정보 없이는 재현이 어렵습니다. 아래 항목을 채워 주세요.
+        Camera issues are hard to reproduce without environment details. Please fill in every field.
+  - type: input
+    id: version
+    attributes:
+      label: 패키지 버전 / Package version
+      description: "`npm ls @cp949/react-webcam`으로 확인합니다. / Check with `npm ls @cp949/react-webcam`."
+      placeholder: "2.0.0"
+    validations:
+      required: true
+  - type: input
+    id: react-version
+    attributes:
+      label: React 버전 / React version
+      placeholder: "19.0.0"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: 브라우저와 버전 / Browser and version
+      placeholder: "Chrome 130, Safari 18.1, Firefox 132"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: OS와 버전 / OS and version
+      placeholder: "Windows 11, macOS 15, Android 15, iOS 18"
+    validations:
+      required: true
+  - type: dropdown
+    id: phase
+    attributes:
+      label: detail.phase
+      description: "`onDetailChange`나 `useWebcam`이 돌려준 `detail.phase` 값입니다. / The `detail.phase` value from `onDetailChange` or `useWebcam`."
+      options:
+        - idle
+        - requesting
+        - live
+        - playback-error
+        - denied
+        - unavailable
+        - unsupported
+        - insecure
+        - error
+        - 해당 없음 / Not applicable
+    validations:
+      required: true
+  - type: input
+    id: error-code
+    attributes:
+      label: errorCode
+      description: "오류 phase일 때 `detail.errorCode` 값입니다. / The `detail.errorCode` value for error phases."
+      placeholder: "permission-denied"
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대한 동작 / Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 실제 동작 / Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 재현 절차 / Steps to reproduce
+      description: "가능하면 최소 예제 링크를 붙입니다. / Link a minimal example if possible."
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 콘솔 로그 / Console output
+      render: shell

@@ -98,6 +98,16 @@ export interface WebcamProps {
   /** true이면 카메라 요청을 시작하지 않고 비활성 상태로 유지한다. */
   disabled?: boolean;
 
+  /**
+   * true이면 `track-ended` 오류 뒤 탭이 다시 보일 때 스트림을 한 번 다시 요청한다.
+   *
+   * - 일부 모바일 브라우저는 백그라운드 탭의 카메라 트랙을 종료한다.
+   * - `visibilitychange`가 `visible`일 때마다 최대 한 번 `retry`와 같은 요청을 한다.
+   * - 다른 오류(권한 거부 등)에서는 요청하지 않는다.
+   * - 기본값은 `false`다.
+   */
+  autoRecover?: boolean;
+
   /** disabled일 때 기본 UI 대신 렌더링할 커스텀 fallback이다. */
   disabledFallback?: React.ReactNode;
 
@@ -232,7 +242,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   };
 
   // ---- 컨트롤러 ----------------------------------------------------------
-  const ctrl = useWebcamController({ disabled });
+  const ctrl = useWebcamController({ disabled, autoRecover: props.autoRecover });
   const {
     flipped,
     webcamOptions,

@@ -2,7 +2,7 @@
  * 웹캠 스트림 요청, 재시작, 트랙 종료 반응을 검증하는 생명주기 테스트 파일이다.
  */
 import { act, render, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useWebcamController } from "../src/hooks/useWebcamController.js";
 import { BrowserMediaDevices } from "../src/utils/media-devices.js";
 import { Webcam } from "../src/Webcam.js";
@@ -691,5 +691,115 @@ describe("장치 전환 생명주기", () => {
     // stale 스트림들은 즉시 정리되어야 한다.
     expect(stopSpy).toHaveBeenCalledWith(streamA1);
     expect(stopSpy).toHaveBeenCalledWith(streamB);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// autoRecover: 탭 복귀 시 자동 복구
+// ---------------------------------------------------------------------------
+
+/** 탭 가시성을 바꾸고 `visibilitychange`를 발생시킨다. */
+function setDocumentVisibility(state: "visible" | "hidden") {
+  Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state });
+  act(() => {
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+}
+
+describe("autoRecover", () => {
+  let fakeStream: ReturnType<typeof createFakeMediaStream>;
+  let getUserMediaMock: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    fakeStream = createFakeMediaStream();
+    getUserMediaMock = mockGetUserMedia(fakeStream);
+  });
+
+  afterEach(() => {
+    // 인스턴스에 정의한 속성을 지우면 document 프로토타입의 원래 getter가 돌아온다.
+    delete (document as { visibilityState?: unknown }).visibilityState;
+  });
+
+  /** 트랙 종료까지 진행해 `track-ended` 오류 상태로 만든다. */
+  async function renderEnded(autoRecover: boolean | undefined) {
+    const onStateChange = vi.fn();
+    render(
+      <Webcam
+        webcamOptions={{ audioEnabled: false }}
+        autoRecover={autoRecover}
+        onStateChange={onStateChange}
+      />,
+    );
+    await advanceToStreamLoad();
+    await act(async () => {
+      fakeStream.fireTrackEnded();
+      await Promise.resolve();
+    });
+    expect(onStateChange.mock.lastCall?.[0]).toMatchObject({ errorCode: "track-ended" });
+    return onStateChange;
+  }
+
+  it("autoRecover=true이면 탭이 다시 보일 때 track-ended 오류에서 스트림을 다시 요청한다", async () => {
+    const onStateChange = await renderEnded(true);
+    expect(getUserMediaMock).toHaveBeenCalledTimes(1);
+
+    setDocumentVisibility("visible");
+    await advanceToStreamLoad();
+
+    expect(getUserMediaMock).toHaveBeenCalledTimes(2);
+    expect(onStateChange.mock.lastCall?.[0]?.phase).toBe("live");
+  });
+
+  it("기본값에서는 탭이 다시 보여도 재요청하지 않는다", async () => {
+    await renderEnded(undefined);
+
+    setDocumentVisibility("visible");
+    await advanceToStreamLoad();
+
+    expect(getUserMediaMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("탭이 숨겨지는 이벤트에서는 재요청하지 않는다", async () => {
+    await renderEnded(true);
+
+    setDocumentVisibility("hidden");
+    await advanceToStreamLoad();
+
+    expect(getUserMediaMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("track-ended가 아닌 오류에서는 재요청하지 않는다", async () => {
+    getUserMediaMock.mockRejectedValue(new DOMException("denied", "NotAllowedError"));
+    const onStateChange = vi.fn();
+    render(
+      <Webcam webcamOptions={{ audioEnabled: false }} autoRecover onStateChange={onStateChange} />,
+    );
+    await advanceToStreamLoad();
+    expect(onStateChange.mock.lastCall?.[0]).toMatchObject({ errorCode: "permission-denied" });
+
+    setDocumentVisibility("visible");
+    await advanceToStreamLoad();
+
+    expect(getUserMediaMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("복구가 다시 track-ended로 끝나도 탭이 보일 때마다 한 번만 재요청한다", async () => {
+    await renderEnded(true);
+    // 두 번째 스트림도 곧바로 종료되도록 새 가짜 스트림을 준비한다.
+    const second = createFakeMediaStream();
+    getUserMediaMock.mockResolvedValue(second);
+
+    setDocumentVisibility("visible");
+    await advanceToStreamLoad();
+    await act(async () => {
+      second.fireTrackEnded();
+      await Promise.resolve();
+    });
+    expect(getUserMediaMock).toHaveBeenCalledTimes(2);
+
+    setDocumentVisibility("visible");
+    await advanceToStreamLoad();
+    expect(getUserMediaMock).toHaveBeenCalledTimes(3);
   });
 });

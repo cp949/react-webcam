@@ -168,6 +168,31 @@ describe("외부 video용 useWebcam", () => {
     expect(result.current.isFrameReady).toBe(true);
   });
 
+  it("autoRecover=true이면 track-ended 뒤 탭이 다시 보일 때 새 스트림을 얻는다", async () => {
+    const first = createFakeMediaStream();
+    const second = createFakeMediaStream();
+    const request = vi
+      .spyOn(navigator.mediaDevices, "getUserMedia")
+      .mockResolvedValueOnce(first)
+      .mockResolvedValueOnce(second);
+    const video = createVideo();
+    const { result } = renderHook(() => useWebcam({ videoElement: video, autoRecover: true }));
+    await advanceToStreamLoad();
+    await act(async () => {
+      first.fireTrackEnded();
+      await Promise.resolve();
+    });
+    expect(result.current.detail).toMatchObject({ errorCode: "track-ended" });
+
+    act(() => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    await advanceToStreamLoad();
+
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(result.current.detail.phase).toBe("live");
+  });
+
   it("요청 실패 뒤 재시도로 복구한다", async () => {
     const stream = createFakeMediaStream();
     vi.spyOn(navigator.mediaDevices, "getUserMedia")

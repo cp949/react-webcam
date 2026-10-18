@@ -79,6 +79,7 @@ below) in addition to the props listed here.
 | `children`                     | `React.ReactNode`                                                                                     | —               | Rendered inside the root element, overlaid on the video.                                                                                                                                                 |
 | `disabled`                     | `boolean`                                                                                             | `false`         | Keeps the component mounted without requesting camera access (see Disabled State below).                                                                                                                 |
 | `disabledFallback`             | `React.ReactNode`                                                                                     | —               | Custom UI rendered instead of the built-in placeholder while `disabled`.                                                                                                                                 |
+| `autoRecover`                  | `boolean`                                                                                             | `false`         | Requests the stream once when the tab becomes visible again after a `track-ended` error (see Custom Error Fallback below).                                                                               |
 | `errorFallback`                | `React.ReactNode \| ((detail: WebcamErrorDetail, helpers: { retry: () => void }) => React.ReactNode)` | —               | Custom UI for the `denied` / `unavailable` / `unsupported` / `insecure` / `error` phases. Does not cover `playback-error`.                                                                               |
 | `onStateChange`                | `(state: WebcamDetail) => void`                                                                       | —               | Called whenever `WebcamDetail` changes (see Observe Runtime State below).                                                                                                                                |
 | `fitMode`                      | `"unset" \| "fill" \| "cover" \| "contain"`                                                           | `"unset"`       | How the video fills its box when `webcamOptions.aspectRatio` is not set.                                                                                                                                 |
@@ -170,6 +171,15 @@ browser settings.
 `playback-error` is not covered by `errorFallback` because the stream is still
 alive and only video playback failed.
 
+Some mobile browsers end the camera track while the tab is in the background,
+which produces a `track-ended` error. Set `autoRecover` to request the stream
+again when the tab becomes visible. It requests at most once per visibility
+change and ignores other errors such as permission denial.
+
+```tsx
+<Webcam autoRecover />
+```
+
 ### Toggle Disabled State
 
 ```tsx
@@ -241,6 +251,9 @@ export function CameraSource() {
   permission requirements or request anything while disabled.
 - `pausePlayback()` pauses only the video. `resumePlayback()` retries playback;
   failures appear as `playback-error` in `detail`.
+- `autoRecover: true` calls `retry()` when the tab becomes visible after a
+  `track-ended` error. It acts at most once per visibility change, ignores other
+  errors, and does nothing while `disabled`. It defaults to `false`.
 - The hook calls `play()` as soon as it attaches the stream. If the browser's
   autoplay policy rejects that call (for example, `muted` is missing), `detail.phase`
   becomes `playback-error` and `isFrameReady` stays `false`. Set `muted` and

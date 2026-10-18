@@ -69,6 +69,8 @@ export type UseWebcamControllerOptions = {
   videoElement?: HTMLVideoElement | null;
   webcamOptions?: WebcamOptions;
   manageVideoStyle?: boolean;
+  /** true이면 `track-ended` 오류 뒤 탭이 다시 보일 때 스트림을 한 번 다시 요청한다. */
+  autoRecover?: boolean;
 };
 
 /** 현재 스트림에서 재생 중인 비디오 트랙의 장치 ID를 읽는다. */
@@ -100,7 +102,7 @@ function getAudioTrackDeviceId(stream: MediaStream | undefined): string | undefi
 export function useWebcamController(
   options: UseWebcamControllerOptions = {},
 ): UseWebcamControllerResult {
-  const { disabled = false } = options;
+  const { disabled = false, autoRecover = false } = options;
   // ─── 원천 상태 ─────────────────────────────────────────────────────────────
   const [internalOptions, setWebcamOptionsState] = useState<WebcamOptions>(DEFAULT_WEBCAM_OPTS);
   const webcamOptions = options.webcamOptions ?? internalOptions;
@@ -195,6 +197,24 @@ export function useWebcamController(
   const videoTrackMuted = useVideoTrackMuted(mediaStreamResult.mediaStream);
   const isFrameReady =
     !disabled && webcamDetail.phase === "live" && hasFrame && !videoTrackMuted;
+
+  // ─── 탭 복귀 시 자동 복구 ──────────────────────────────────────────────────
+  // 일부 모바일 브라우저는 백그라운드 탭의 트랙을 종료한다.
+  // track-ended 오류일 때만 구독하므로, 탭이 보일 때마다 최대 한 번 재요청한다.
+  // 재요청이 같은 오류로 끝나면 다음 visible 이벤트에서 다시 시도한다.
+  const canAutoRecover =
+    autoRecover &&
+    !disabled &&
+    webcamDetail.phase === "error" &&
+    webcamDetail.errorCode === "track-ended";
+  useEffect(() => {
+    if (!canAutoRecover) return;
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") retry();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", onVisibilityChange);
+  }, [canAutoRecover, retry]);
 
   // 외부로 노출하는 setter는 안정적인 참조를 유지한다.
   const setFlipped = useCallback((value: boolean | ((prev: boolean) => boolean)) => {

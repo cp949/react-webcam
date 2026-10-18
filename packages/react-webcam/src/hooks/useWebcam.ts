@@ -8,6 +8,8 @@ export type UseWebcamOptions = {
   videoElement: HTMLVideoElement | null | undefined;
   webcamOptions?: WebcamOptions;
   disabled?: boolean;
+  /** true이면 `track-ended` 오류 뒤 탭이 다시 보일 때 스트림을 한 번 다시 요청한다. 기본값은 false다. */
+  autoRecover?: boolean;
 };
 
 /** 표시 UI에 의존하지 않는 카메라 상태와 제어 함수. */

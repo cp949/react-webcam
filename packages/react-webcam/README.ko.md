@@ -74,6 +74,7 @@ export function CameraView() {
 | `children`                     | `React.ReactNode`                                                                                     | —             | 루트 엘리먼트 내부, 비디오 위에 렌더링됩니다.                                                                                                                                                            |
 | `disabled`                     | `boolean`                                                                                             | `false`       | 카메라 요청 없이 컴포넌트를 비활성 상태로 유지합니다(뒤의 비활성 상태 절 참고).                                                                                                                          |
 | `disabledFallback`             | `React.ReactNode`                                                                                     | —             | `disabled`일 때 기본 placeholder 대신 렌더링할 커스텀 UI입니다.                                                                                                                                          |
+| `autoRecover`                  | `boolean`                                                                                             | `false`       | `track-ended` 오류 뒤 탭이 다시 보일 때 스트림을 한 번 다시 요청합니다(뒤의 커스텀 오류 fallback 절 참고).                                                                                               |
 | `errorFallback`                | `React.ReactNode \| ((detail: WebcamErrorDetail, helpers: { retry: () => void }) => React.ReactNode)` | —             | `denied` / `unavailable` / `unsupported` / `insecure` / `error` 상태의 커스텀 UI입니다. `playback-error`는 포함하지 않습니다.                                                                            |
 | `onStateChange`                | `(state: WebcamDetail) => void`                                                                       | —             | `WebcamDetail`이 바뀔 때마다 호출됩니다(뒤의 상태 변화 감지 절 참고).                                                                                                                                    |
 | `fitMode`                      | `"unset" \| "fill" \| "cover" \| "contain"`                                                           | `"unset"`     | `webcamOptions.aspectRatio`가 없을 때 비디오를 박스에 맞추는 방식입니다.                                                                                                                                 |
@@ -160,6 +161,15 @@ export function CameraView() {
 
 `playback-error`는 스트림이 살아 있는 재생 오류이므로 `errorFallback` 대상이 아닙니다.
 
+일부 모바일 브라우저는 탭이 백그라운드에 있는 동안 카메라 트랙을 종료해
+`track-ended` 오류가 됩니다. `autoRecover`를 켜면 탭이 다시 보일 때 스트림을
+다시 요청합니다. 탭이 보일 때마다 최대 한 번만 요청하며, 권한 거부 같은 다른
+오류는 무시합니다.
+
+```tsx
+<Webcam autoRecover />
+```
+
 ### 비활성 상태 토글
 
 ```tsx
@@ -230,6 +240,9 @@ export function CameraSource() {
   `disabled` 중에는 요청하지 않는다.
 - `pausePlayback()`은 영상 재생만 멈춘다. `resumePlayback()`은 재생을 다시
   시도하고 실패를 `detail`의 `playback-error`로 전달한다.
+- `autoRecover: true`이면 `track-ended` 오류 뒤 탭이 다시 보일 때 `retry()`를
+  호출한다. 탭이 보일 때마다 최대 한 번만 동작하고, 다른 오류는 무시하며,
+  `disabled` 중에는 아무것도 하지 않는다. 기본값은 `false`다.
 - 훅은 스트림을 연결하자마자 `play()`를 호출한다. 브라우저 autoplay 정책이 이
   호출을 거부하면(예: `muted` 누락) `detail.phase`가 `playback-error`가 되고
   `isFrameReady`는 `false`로 남는다. 요소를 넘기기 전에 `muted`와 `playsInline`을

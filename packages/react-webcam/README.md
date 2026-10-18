@@ -494,26 +494,25 @@ When `labelsAvailable` is `false`, show a fallback name such as `Camera 1`.
 
 ## Labels And Localization
 
-The built-in button labels default to Korean. Pass the `labels` prop when you
-want English or app-specific strings.
+The built-in button labels default to Korean. Pass the `WEBCAM_LABELS_EN`
+preset to switch the built-in UI to English.
 
 ```tsx
+import { Webcam, WEBCAM_LABELS_EN } from "@cp949/react-webcam";
+
 <Webcam
   visibleFlipButton
   visibleCameraDirectionButton
   visibleAspectRatioButton
   visibleSnapshotButton
-  labels={{
-    flip: "Mirror",
-    cameraDirection: "Front / Rear Camera",
-    facingModeBack: "Rear",
-    facingModeFront: "Front",
-    facingModeDefault: "Default",
-    aspectRatio: "Aspect ratio",
-    aspectRatioAuto: "Auto",
-    snapshot: "Take snapshot",
-  }}
-/>
+  labels={WEBCAM_LABELS_EN}
+/>;
+```
+
+For app-specific strings, pass only the keys you want to override to `labels`.
+
+```tsx
+<Webcam visibleFlipButton labels={{ ...WEBCAM_LABELS_EN, flip: "Selfie view" }} />
 ```
 
 To receive the captured frame when the built-in snapshot button is clicked, pass

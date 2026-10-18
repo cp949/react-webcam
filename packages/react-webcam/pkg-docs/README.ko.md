@@ -468,26 +468,25 @@ function CameraPicker({ onSelect }: { onSelect: (deviceId: string) => void }) {
 
 ## 라벨과 로컬라이제이션
 
-내장 버튼 라벨의 기본값은 한국어입니다. 영어 UI나 서비스 문구에 맞추려면
-`labels` prop으로 필요한 항목만 덮어쓰면 됩니다.
+내장 버튼 라벨의 기본값은 한국어입니다. 영어 UI는 `WEBCAM_LABELS_EN` 프리셋을
+`labels`에 전달하면 됩니다.
 
 ```tsx
+import { Webcam, WEBCAM_LABELS_EN } from "@cp949/react-webcam";
+
 <Webcam
   visibleFlipButton
   visibleCameraDirectionButton
   visibleAspectRatioButton
   visibleSnapshotButton
-  labels={{
-    flip: "Mirror",
-    cameraDirection: "Front / Rear Camera",
-    facingModeBack: "Rear",
-    facingModeFront: "Front",
-    facingModeDefault: "Default",
-    aspectRatio: "Aspect Ratio",
-    aspectRatioAuto: "Auto",
-    snapshot: "Take snapshot",
-  }}
-/>
+  labels={WEBCAM_LABELS_EN}
+/>;
+```
+
+서비스 문구에 맞추려면 `labels`에 바꿀 항목만 전달합니다.
+
+```tsx
+<Webcam visibleFlipButton labels={{ ...WEBCAM_LABELS_EN, flip: "셀피 보기" }} />
 ```
 
 내장 스냅샷 버튼을 눌렀을 때 캡처한 프레임을 받으려면 `onSnapshot`을 전달합니다.

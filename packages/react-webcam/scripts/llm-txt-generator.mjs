@@ -247,6 +247,7 @@ const APPROVED_PUBLIC_API_NAMES = new Set([
   "WebcamErrorDetail",
   "WebcamFitMode",
   "SnapshotOptions",
+  "WEBCAM_LABELS_EN",
   "listMediaDevices",
   "listVideoInputDevices",
   "listAudioInputDevices",

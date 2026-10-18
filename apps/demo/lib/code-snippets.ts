@@ -86,7 +86,7 @@ export default function ControlsExample() {
 }`,
 
   labels: `import { useState } from 'react';
-import { Webcam } from '@cp949/react-webcam';
+import { Webcam, WEBCAM_LABELS_EN } from '@cp949/react-webcam';
 
 export default function LabelsExample() {
   const [locale, setLocale] = useState<'ko' | 'en'>('ko');
@@ -103,16 +103,7 @@ export default function LabelsExample() {
           aspectRatio: '크기 비율',
           aspectRatioAuto: '자동',
         }
-      : {
-          flip: 'Mirror',
-          snapshot: 'Take snapshot',
-          cameraDirection: 'Front / Rear Camera',
-          facingModeBack: 'Rear',
-          facingModeFront: 'Front',
-          facingModeDefault: 'Default',
-          aspectRatio: 'Aspect ratio',
-          aspectRatioAuto: 'Auto',
-        };
+      : WEBCAM_LABELS_EN;
 
   return (
     <Webcam

@@ -7,6 +7,8 @@ import { AspectRatioButton } from "../src/components/AspectRatioButton.js";
 import { FacingModeButton } from "../src/components/FacingModeButton.js";
 import { FlipButton } from "../src/components/FlipButton.js";
 import { SnapshotButton } from "../src/components/SnapshotButton.js";
+import { WEBCAM_LABELS_EN } from "../src/index.js";
+import { DEFAULT_WEBCAM_LABELS } from "../src/types/webcam-labels.js";
 import { Webcam } from "../src/Webcam.js";
 import { createFakeMediaStream, mockGetUserMedia } from "./test-utils.js";
 import { markVideoReady } from "./webcam-test-helpers.js";
@@ -171,5 +173,42 @@ describe("WebcamLabels: custom labels override defaults", () => {
     const flipBtn = document.querySelector(".FlipButton-root button") as HTMLButtonElement;
     expect(flipBtn.getAttribute("title")).toBe("Mirror Image");
     expect(flipBtn.getAttribute("aria-label")).toBe("Mirror Image");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// WEBCAM_LABELS_EN 영어 프리셋
+// ---------------------------------------------------------------------------
+
+describe("WEBCAM_LABELS_EN: 영어 라벨 프리셋", () => {
+  it("한국어 기본값과 같은 키를 모두 채운다", () => {
+    expect(Object.keys(WEBCAM_LABELS_EN).sort()).toEqual(Object.keys(DEFAULT_WEBCAM_LABELS).sort());
+  });
+
+  it("어떤 값도 한국어 기본값과 같지 않다", () => {
+    for (const [key, value] of Object.entries(WEBCAM_LABELS_EN)) {
+      expect(value, key).not.toBe(DEFAULT_WEBCAM_LABELS[key as keyof typeof DEFAULT_WEBCAM_LABELS]);
+    }
+  });
+
+  it("labels에 넘기면 내장 버튼이 영어 라벨을 쓴다", async () => {
+    vi.useFakeTimers();
+    mockGetUserMedia(createFakeMediaStream());
+
+    render(
+      <Webcam
+        webcamOptions={{ audioEnabled: false }}
+        visibleFlipButton
+        labels={WEBCAM_LABELS_EN}
+      />,
+    );
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+    await markVideoReady(document.querySelector("video")!);
+
+    const flipBtn = document.querySelector(".FlipButton-root button") as HTMLButtonElement;
+    expect(flipBtn.getAttribute("aria-label")).toBe("Mirror");
   });
 });

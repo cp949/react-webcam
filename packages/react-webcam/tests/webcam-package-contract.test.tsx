@@ -159,6 +159,7 @@ describe("공개 타입 export 계약", () => {
     expect(runtimeKeys).toContain("listMediaDevices");
     expect(runtimeKeys).toContain("listVideoInputDevices");
     expect(runtimeKeys).toContain("listAudioInputDevices");
+    expect(runtimeKeys).toContain("WEBCAM_LABELS_EN");
   });
 });
 

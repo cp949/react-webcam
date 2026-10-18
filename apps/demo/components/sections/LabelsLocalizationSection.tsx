@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Webcam } from "@cp949/react-webcam";
+import { Webcam, WEBCAM_LABELS_EN } from "@cp949/react-webcam";
 import type { WebcamLabels } from "@cp949/react-webcam";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -28,16 +28,7 @@ const LOCALE_LABELS: Record<"ko" | "en", WebcamLabels> = {
     aspectRatio: "크기 비율",
     aspectRatioAuto: "자동",
   },
-  en: {
-    flip: "Mirror",
-    snapshot: "Take snapshot",
-    cameraDirection: "Front / Rear Camera",
-    facingModeBack: "Rear",
-    facingModeFront: "Front",
-    facingModeDefault: "Default",
-    aspectRatio: "Aspect ratio",
-    aspectRatioAuto: "Auto",
-  },
+  en: WEBCAM_LABELS_EN,
 };
 
 /** labels prop으로 내장 UI 문구를 로컬라이즈하는 예제를 보여준다. */

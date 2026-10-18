@@ -41,3 +41,15 @@ export const DEFAULT_WEBCAM_LABELS: Required<WebcamLabels> = {
   aspectRatio: "크기 비율",
   aspectRatioAuto: "자동",
 };
+
+/** Built-in English label table. Pass it as `labels` to switch the built-in UI to English. */
+export const WEBCAM_LABELS_EN: Required<WebcamLabels> = {
+  snapshot: "Take snapshot",
+  flip: "Mirror",
+  cameraDirection: "Front / Rear Camera",
+  facingModeBack: "Rear",
+  facingModeFront: "Front",
+  facingModeDefault: "Default",
+  aspectRatio: "Aspect ratio",
+  aspectRatioAuto: "Auto",
+};

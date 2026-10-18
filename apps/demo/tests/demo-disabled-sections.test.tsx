@@ -156,7 +156,18 @@ vi.mock("@cp949/react-webcam", () => {
     return { ...mockMediaDevices, refresh: mockRefreshDevices };
   }
 
-  return { Webcam, useWebcam, useMediaDevices };
+  const WEBCAM_LABELS_EN = {
+    flip: "Mirror",
+    snapshot: "Take snapshot",
+    cameraDirection: "Front / Rear Camera",
+    facingModeBack: "Rear",
+    facingModeFront: "Front",
+    facingModeDefault: "Default",
+    aspectRatio: "Aspect ratio",
+    aspectRatioAuto: "Auto",
+  };
+
+  return { Webcam, useWebcam, useMediaDevices, WEBCAM_LABELS_EN };
 });
 
 describe("demo disabled sections", () => {

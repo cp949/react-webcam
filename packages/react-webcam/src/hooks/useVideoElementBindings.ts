@@ -100,7 +100,6 @@ export function useVideoElementBindings({
         if ((err as { name?: string })?.name === "AbortError") return;
         // 자동재생이 브라우저 정책에 의해 차단된 경우 — 상위 상태로 올린다.
         const error = err instanceof Error ? err : new Error(String(err));
-        console.warn("[react-webcam] autoPlay blocked or failed:", error);
         onPlayErrorRef.current(mediaStream, error);
       });
     return () => {

@@ -38,7 +38,7 @@ describe("Webcam – Safari/모바일 재생 안정성", () => {
     expect(video.hasAttribute("playsinline")).toBe(true);
   });
 
-  it("autoPlay가 차단되면 playback-error 상태로 전환하고 console.warn을 출력한다", async () => {
+  it("autoPlay가 차단되면 playback-error 상태로 전환하고 console.warn은 출력하지 않는다", async () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const autoPlayError = Object.assign(new Error("autoplay blocked"), {
       name: "NotAllowedError",
@@ -55,11 +55,10 @@ describe("Webcam – Safari/모바일 재생 안정성", () => {
 
     // play() 실패는 playback-error 상태로 전환된다
     expect(result.current.webcamDetail.phase).toBe("playback-error");
-    // 조용히 실패하지 않는다 — console.warn이 호출되어야 한다
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining("[react-webcam] autoPlay blocked or failed:"),
-      autoPlayError,
-    );
+    // 같은 정보가 playback-error로 전달되므로 라이브러리는 콘솔에 중복 출력하지 않는다
+    const detail = result.current.webcamDetail;
+    expect(detail.phase === "playback-error" && detail.error).toBe(autoPlayError);
+    expect(warnSpy).not.toHaveBeenCalled();
   });
 
   it("play()에서 AbortError가 오면 경고를 출력하지 않는다", async () => {

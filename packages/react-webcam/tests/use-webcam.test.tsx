@@ -124,7 +124,6 @@ describe("외부 video용 useWebcam", () => {
   });
 
   it("재생 실패를 알리고 사용자 재생 요청 뒤 복구한다", async () => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
     const play = vi
       .spyOn(HTMLMediaElement.prototype, "play")
       .mockRejectedValueOnce(new DOMException("blocked", "NotAllowedError"))

@@ -64,3 +64,33 @@ jobs:
       - name: Fail when release notes are missing
         if: steps.notes.outputs.missing == 'true'
         run: exit 1
+
+  # 게시 직후 레지스트리에서 설치한 결과를 소비자 관점으로 검증한다.
+  # 레지스트리 전파 지연에 대비해 설치를 30초 간격으로 5회까지 재시도한다.
+  verify-registry-install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Verify the published package installs and type-checks
+        run: node packages/react-webcam/scripts/verify-registry-install.mjs "${GITHUB_REF_NAME#v}"
+
+      - name: Open an issue when verification fails
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "릴리스 ${GITHUB_REF_NAME} 레지스트리 설치 검증 실패" \
+            --body "태그 ${GITHUB_REF_NAME}를 게시한 뒤 레지스트리 설치 검증이 실패했다. 실행 로그: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"

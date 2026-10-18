@@ -135,6 +135,11 @@ release-it 설정은 `packages/react-webcam/.release-it.json`에 있다.
    publish 실패 시 남은 버전·changelog 변경과 Git 상태를 확인한 뒤 복구한다.
 5. GitHub에서 `vX.Y.Z` 태그가 올라왔는지, `release.yml` 워크플로우가 만든 GitHub
    Release가 올바른지 확인한다.
+   `verify-registry-install` job도 확인한다.
+   - 태그 버전을 레지스트리에서 설치해 ESM `import`, CJS `require`, 타입 검사를 실행한다.
+   - 설치는 30초 간격으로 5회까지 재시도한다.
+   - 실패하면 경고 이슈를 만든다.
+   - 같은 검증을 로컬에서 실행하려면 `node packages/react-webcam/scripts/verify-registry-install.mjs X.Y.Z`를 쓴다.
 
 GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-webcam/CHANGELOG.md`에서
 해당 버전 섹션을 읽어 릴리스 노트를 만든다.

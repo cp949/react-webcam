@@ -20,7 +20,7 @@
     "lint:fix": "oxlint -c ../../.oxlintrc.json . --fix",
     "format": "prettier --write .",
     "check-types": "tsc --pretty --noEmit && tsc --pretty --noEmit -p tsconfig.test.json",
-    "test": "vitest run && node --test scripts/chrome75-package-audit.node.mjs scripts/release-publish.node.mjs",
+    "test": "vitest run && node --test scripts/chrome75-package-audit.node.mjs scripts/release-publish.node.mjs scripts/verify-registry-install.node.mjs",
     "test:watch": "vitest",
     "prepare": "pnpm build",
     "prepack": "pnpm build",

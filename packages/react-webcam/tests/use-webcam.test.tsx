@@ -78,6 +78,42 @@ describe("외부 video용 useWebcam", () => {
     expect(result.current.isFrameReady).toBe(false);
   });
 
+  it("비디오 트랙이 mute되면 false로 내리고 unmute되면 다시 true가 된다", async () => {
+    const stream = createFakeMediaStream();
+    mockGetUserMedia(stream);
+    const video = createVideo();
+    const { result } = renderHook(() => useWebcam({ videoElement: video }));
+    await advanceToStreamLoad();
+    setReadyState(video, 2);
+    expect(result.current.isFrameReady).toBe(true);
+    act(() => {
+      stream.fireTrackMute();
+    });
+    expect(result.current.isFrameReady).toBe(false);
+    // mute는 phase를 바꾸지 않는다.
+    expect(result.current.detail.phase).toBe("live");
+    act(() => {
+      stream.fireTrackUnmute();
+    });
+    expect(result.current.isFrameReady).toBe(true);
+  });
+
+  it("스트림을 얻을 때 이미 mute된 트랙이면 unmute 전까지 준비되지 않는다", async () => {
+    const stream = createFakeMediaStream();
+    // 이벤트 없이 처음부터 muted인 트랙을 만든다. muted는 읽기 전용이라 캐스트한다.
+    (stream.getVideoTracks()[0] as { muted: boolean }).muted = true;
+    mockGetUserMedia(stream);
+    const video = createVideo();
+    const { result } = renderHook(() => useWebcam({ videoElement: video }));
+    await advanceToStreamLoad();
+    setReadyState(video, 2);
+    expect(result.current.isFrameReady).toBe(false);
+    act(() => {
+      stream.fireTrackUnmute();
+    });
+    expect(result.current.isFrameReady).toBe(true);
+  });
+
   it("프레임이 있어도 영상 크기가 0이면 준비되지 않는다", async () => {
     const video = createVideo();
     Object.defineProperty(video, "videoWidth", { value: 0, configurable: true });

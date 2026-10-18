@@ -14,6 +14,7 @@ import type {
 } from "../webcam-types.js";
 import { useElementMediaConstraints } from "./useElementMediaConstraints.js";
 import { useVideoElementBindings } from "./useVideoElementBindings.js";
+import { useVideoTrackMuted } from "./useVideoTrackMuted.js";
 import { useWebcamStreamLifecycle } from "./useWebcamStreamLifecycle.js";
 
 /**
@@ -190,7 +191,10 @@ export function useWebcamController(
       });
     },
   });
-  const isFrameReady = !disabled && webcamDetail.phase === "live" && hasFrame;
+  // 트랙이 muted인 동안은 프레임이 멈춰 있으므로 준비된 것으로 보지 않는다.
+  const videoTrackMuted = useVideoTrackMuted(mediaStreamResult.mediaStream);
+  const isFrameReady =
+    !disabled && webcamDetail.phase === "live" && hasFrame && !videoTrackMuted;
 
   // 외부로 노출하는 setter는 안정적인 참조를 유지한다.
   const setFlipped = useCallback((value: boolean | ((prev: boolean) => boolean)) => {

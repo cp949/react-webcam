@@ -77,10 +77,14 @@ type CreateFakeMediaStreamOptions = {
   includeAudio?: boolean;
 };
 
-/** 테스트에서 `fireTrackEnded()` 또는 `fireAudioTrackEnded()`를 호출할 수 있는 가짜 MediaStream 타입이다. */
+/** 테스트에서 트랙 이벤트를 직접 발생시킬 수 있는 가짜 MediaStream 타입이다. */
 export type FakeMediaStream = MediaStream & {
   fireTrackEnded: () => void;
   fireAudioTrackEnded: () => void;
+  /** 비디오 트랙의 `muted`를 true로 바꾸고 `mute` 이벤트를 발생시킨다. */
+  fireTrackMute: () => void;
+  /** 비디오 트랙의 `muted`를 false로 바꾸고 `unmute` 이벤트를 발생시킨다. */
+  fireTrackUnmute: () => void;
 };
 
 /** 비디오 트랙 하나와 선택적 오디오 트랙을 가진 최소한의 가짜 MediaStream을 만든다. */
@@ -160,6 +164,19 @@ export function createFakeMediaStream(options?: CreateFakeMediaStreamOptions): F
     }
   }
 
+  /** 비디오 트랙의 muted 값을 바꾸고 같은 이름의 이벤트를 발생시킨다. */
+  function setVideoTrackMuted(muted: boolean) {
+    (videoTrack as { muted: boolean }).muted = muted;
+    const event = new Event(muted ? "mute" : "unmute");
+    for (const listener of videoTrackListeners.get(event.type) ?? []) {
+      if (typeof listener === "function") {
+        listener(event);
+      } else {
+        listener.handleEvent(event);
+      }
+    }
+  }
+
   /** 마이크 분리 상황을 흉내 내기 위해 오디오 트랙에 `ended` 이벤트를 발생시킨다. */
   function fireAudioTrackEnded() {
     const listeners = audioTrackListeners.get("ended") ?? [];
@@ -192,6 +209,8 @@ export function createFakeMediaStream(options?: CreateFakeMediaStreamOptions): F
     oninactive: null,
     fireTrackEnded,
     fireAudioTrackEnded,
+    fireTrackMute: () => setVideoTrackMuted(true),
+    fireTrackUnmute: () => setVideoTrackMuted(false),
   } as unknown as FakeMediaStream;
 }
 

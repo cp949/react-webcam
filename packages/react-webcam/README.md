@@ -230,7 +230,10 @@ export function CameraSource() {
 - `detail.phase === "live"` means the stream was acquired. It does not guarantee
   that `play()` succeeded or that a frame has arrived. Use `isFrameReady` before
   starting face detection: it requires the current stream, `readyState >= 2`
-  (`HAVE_CURRENT_DATA`), positive video dimensions, and the `live` phase.
+  (`HAVE_CURRENT_DATA`), positive video dimensions, the `live` phase, and a video
+  track that is not `muted`. The track becomes `muted` without `ended` when
+  another app takes the camera or the page goes to the background; `phase` stays
+  `live` and `isFrameReady` turns `false` until the track is `unmuted`.
   A paused video may still have a usable frame; this flag does not mean frames
   keep advancing.
 - `retry()` stops the current stream and requests a new one with the same options.

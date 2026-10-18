@@ -13,7 +13,10 @@ export type UseWebcamOptions = {
 /** 표시 UI에 의존하지 않는 카메라 상태와 제어 함수. */
 export type UseWebcamResult = {
   readonly detail: WebcamDetail;
-  /** live 상태에서 현재 스트림의 readyState가 2 이상이고 영상 크기가 양수일 때 true다. */
+  /**
+   * live 상태에서 현재 스트림의 readyState가 2 이상이고 영상 크기가 양수일 때 true다.
+   * 비디오 트랙이 `muted`인 동안은 false다.
+   */
   readonly isFrameReady: boolean;
   /** 현재 스트림을 정리하고 같은 옵션으로 다시 요청한다. disabled 중에는 요청하지 않는다. */
   retry: () => void;

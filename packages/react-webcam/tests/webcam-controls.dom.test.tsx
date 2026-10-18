@@ -1,7 +1,7 @@
 /**
  * 개별 제어 버튼 컴포넌트의 DOM 계약을 검증하는 테스트 파일이다.
  */
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AspectRatioButton } from "../src/components/AspectRatioButton.js";
 import { FacingModeButton } from "../src/components/FacingModeButton.js";
@@ -258,5 +258,110 @@ describe("SnapshotButton – DOM interactions", () => {
     const btn = container.querySelector("button")!;
     const label = btn.getAttribute("title") ?? btn.getAttribute("aria-label");
     expect(label).toBeTruthy();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 메뉴 버튼 접근성 계약 (ARIA, 포커스 복귀, 키보드 조작)
+// ---------------------------------------------------------------------------
+
+describe.each([
+  { name: "AspectRatioButton", Button: AspectRatioButton, rootClass: ".AspectRatioButton-root" },
+  { name: "FacingModeButton", Button: FacingModeButton, rootClass: ".FacingModeButton-root" },
+])("$name – 메뉴 접근성", ({ Button, rootClass }) => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  function renderButton() {
+    const { container } = render(<Button onChange={() => {}} />);
+    const trigger = container.querySelector(`${rootClass} button`) as HTMLButtonElement;
+    const menuItems = () =>
+      Array.from(container.querySelectorAll<HTMLElement>('[role="menuitem"]'));
+    return { trigger, menuItems };
+  }
+
+  it("트리거는 aria-haspopup='menu'이고 aria-expanded가 열림 상태를 항상 나타낸다", async () => {
+    const { trigger } = renderButton();
+    expect(trigger.getAttribute("aria-haspopup")).toBe("menu");
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+
+    await act(async () => {
+      trigger.click();
+    });
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+
+    await act(async () => {
+      trigger.click();
+    });
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("Escape로 닫으면 포커스가 트리거로 돌아온다", async () => {
+    const { trigger, menuItems } = renderButton();
+    await act(async () => {
+      trigger.click();
+    });
+    expect(document.activeElement).toBe(menuItems()[0]);
+
+    await act(async () => {
+      fireEvent.keyDown(document.activeElement!, { key: "Escape" });
+    });
+    expect(menuItems().length).toBe(0);
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it("항목을 선택해 닫으면 포커스가 트리거로 돌아온다", async () => {
+    const { trigger, menuItems } = renderButton();
+    await act(async () => {
+      trigger.click();
+    });
+    await act(async () => {
+      menuItems()[1]!.click();
+      await vi.advanceTimersByTimeAsync(10);
+    });
+    expect(menuItems().length).toBe(0);
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it("바깥 클릭으로 닫으면 포커스를 트리거로 돌리지 않는다", async () => {
+    const { trigger, menuItems } = renderButton();
+    await act(async () => {
+      trigger.click();
+    });
+    await act(async () => {
+      fireEvent.mouseDown(document.body);
+    });
+    expect(menuItems().length).toBe(0);
+    expect(document.activeElement).not.toBe(trigger);
+  });
+
+  it("트리거에서 ArrowDown을 누르면 메뉴가 열리고 첫 항목에 포커스가 간다", async () => {
+    const { trigger, menuItems } = renderButton();
+    trigger.focus();
+    await act(async () => {
+      fireEvent.keyDown(trigger, { key: "ArrowDown" });
+    });
+    expect(menuItems().length).toBeGreaterThan(0);
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(document.activeElement).toBe(menuItems()[0]);
+  });
+
+  it("Home/End로 첫 항목과 마지막 항목으로 이동한다", async () => {
+    const { trigger, menuItems } = renderButton();
+    await act(async () => {
+      trigger.click();
+    });
+    const items = menuItems();
+
+    await act(async () => {
+      fireEvent.keyDown(document.activeElement!, { key: "End" });
+    });
+    expect(document.activeElement).toBe(items[items.length - 1]);
+
+    await act(async () => {
+      fireEvent.keyDown(document.activeElement!, { key: "Home" });
+    });
+    expect(document.activeElement).toBe(items[0]);
   });
 });

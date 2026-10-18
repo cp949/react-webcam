@@ -6,6 +6,9 @@ interface IconButtonProps {
   /** 클릭 핸들러 */
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
 
+  /** 키 입력 핸들러 */
+  onKeyDown?: React.KeyboardEventHandler<HTMLButtonElement>;
+
   /** 마우스 진입 핸들러 */
   onMouseEnter?: React.MouseEventHandler<HTMLButtonElement>;
 
@@ -48,6 +51,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
   function IconButton(props, ref) {
     const {
       onClick,
+      onKeyDown,
       onMouseEnter,
       onMouseLeave,
       disabled,
@@ -66,6 +70,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         ref={ref}
         type='button'
         onClick={onClick}
+        onKeyDown={onKeyDown}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
         disabled={disabled}

@@ -31,7 +31,11 @@ interface MenuPopupProps {
   /** 루트 메뉴 요소에 합칠 클래스 이름 */
   className?: string;
 
-  /** 트리거 버튼 ref. mousedown 이벤트가 이 버튼에서 발생하면 메뉴를 닫지 않는다. */
+  /**
+   * 트리거 버튼 ref.
+   * mousedown 이벤트가 이 버튼에서 발생하면 메뉴를 닫지 않는다.
+   * Escape와 항목 선택으로 닫힐 때 포커스를 이 버튼으로 돌려준다.
+   */
   buttonRef?: React.RefObject<HTMLElement | null>;
 }
 
@@ -75,6 +79,8 @@ export function MenuPopup(props: MenuPopupProps) {
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
+        // 키보드 사용자가 처음부터 다시 Tab하지 않도록 트리거로 포커스를 돌려준다.
+        buttonRef?.current?.focus();
         onClose();
       }
     }
@@ -111,9 +117,10 @@ export function MenuPopup(props: MenuPopupProps) {
         minWidth: 80,
       }}
     >
-      {items.map((item, index) => {
+      {items.map((item) => {
         // 메뉴를 먼저 닫아 포커스 정리를 끝낸 뒤, 실제 선택 콜백은 다음 틱에 실행한다.
         const handleClick = () => {
+          buttonRef?.current?.focus();
           onClose();
           setTimeout(() => {
             item.onClick();
@@ -121,7 +128,7 @@ export function MenuPopup(props: MenuPopupProps) {
         };
         return (
           <button
-            key={index}
+            key={item.label}
             type='button'
             role='menuitem'
             onClick={handleClick}
@@ -129,6 +136,13 @@ export function MenuPopup(props: MenuPopupProps) {
               if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
                 handleClick();
+              } else if (e.key === "Home" || e.key === "End") {
+                e.preventDefault();
+                const menuItems =
+                  e.currentTarget.parentElement?.querySelectorAll<HTMLElement>('[role="menuitem"]');
+                const target =
+                  e.key === "Home" ? menuItems?.[0] : menuItems?.[menuItems.length - 1];
+                target?.focus();
               } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
                 // 방향키 탐색은 마지막과 처음 항목 사이를 순환하도록 처리한다.
                 e.preventDefault();

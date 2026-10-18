@@ -68,11 +68,18 @@ export function AspectRatioButton(props: AspectRatioButtonProps) {
         className='x_btn'
         title={label}
         aria-label={label}
-        aria-haspopup='true'
-        aria-expanded={menuOpen ? "true" : undefined}
+        aria-haspopup='menu'
+        aria-expanded={menuOpen}
         aria-controls={menuId}
         style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#fff" }}
         onClick={() => setMenuOpen((prev) => !prev)}
+        onKeyDown={(e) => {
+          // 메뉴 버튼 패턴: 아래 화살표로 메뉴를 연다. 첫 항목 포커스는 MenuPopup이 맡는다.
+          if (e.key === "ArrowDown" && !menuOpen) {
+            e.preventDefault();
+            setMenuOpen(true);
+          }
+        }}
       >
         <AspectRatioIcon size='1.2rem' />
       </IconButton>

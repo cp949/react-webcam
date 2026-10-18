@@ -1,8 +1,29 @@
 /** 웹캠 상태 전환 규칙을 순수 함수로 모은 유틸이다. */
-import type { MediaStreamLoadResult, WebcamDetail, WebcamErrorCode } from "../webcam-types.js";
+import type {
+  MediaStreamLoadResult,
+  WebcamDetail,
+  WebcamErrorCode,
+  WebcamErrorDetail,
+} from "../webcam-types.js";
 
 /** 오류 상태 variant의 phase 값 — WebcamDetailError의 phase 필드와 일치한다. */
 export type WebcamErrorPhase = "denied" | "unavailable" | "unsupported" | "insecure" | "error";
+
+const ERROR_PHASES: readonly WebcamErrorPhase[] = [
+  "denied",
+  "unavailable",
+  "unsupported",
+  "insecure",
+  "error",
+];
+
+/**
+ * detail이 오류 계열 phase인지 판별한다.
+ * 오류 phase 목록을 이 파일 한 곳에서 관리한다.
+ */
+export function isErrorDetail(detail: WebcamDetail): detail is WebcamErrorDetail {
+  return (ERROR_PHASES as readonly string[]).includes(detail.phase);
+}
 
 /**
  * `WebcamErrorCode`를 오류 상태 phase로 변환한다.
@@ -53,13 +74,7 @@ export function mediaStreamResultFromDetail(detail: WebcamDetail): MediaStreamLo
   if (detail.phase === "live" || detail.phase === "playback-error") {
     return { mediaStream: detail.mediaStream };
   }
-  if (
-    detail.phase === "denied" ||
-    detail.phase === "unavailable" ||
-    detail.phase === "unsupported" ||
-    detail.phase === "insecure" ||
-    detail.phase === "error"
-  ) {
+  if (isErrorDetail(detail)) {
     return { error: detail.error };
   }
   return {};

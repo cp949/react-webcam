@@ -12,6 +12,7 @@ import { useTimeoutValue } from "./hooks/useTimeoutValue.js";
 import { useWebcamController } from "./hooks/useWebcamController.js";
 import { CameraIcon } from "./icons/CameraIcon.js";
 import { classNames } from "./utils/class-names.js";
+import { isErrorDetail } from "./utils/webcam-controller-state.js";
 import type { SnapshotOptions } from "./types/webcam-controller.js";
 import { DEFAULT_WEBCAM_LABELS, type WebcamLabels } from "./types/webcam-labels.js";
 import type {
@@ -376,14 +377,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   const rootBackgroundColor = disabled
     ? "var(--webcam-disabled-bg, #f7f8fa)"
     : "var(--webcam-bg, #1e1e1e)";
-  const errorDetail =
-    webcamDetail.phase === "denied" ||
-    webcamDetail.phase === "unavailable" ||
-    webcamDetail.phase === "unsupported" ||
-    webcamDetail.phase === "insecure" ||
-    webcamDetail.phase === "error"
-      ? webcamDetail
-      : undefined;
+  const errorDetail = isErrorDetail(webcamDetail) ? webcamDetail : undefined;
   const errorFallbackNode: React.ReactNode = errorDetail
     ? typeof errorFallback === "function"
       ? errorFallback(errorDetail, { retry: ctrl.retry })

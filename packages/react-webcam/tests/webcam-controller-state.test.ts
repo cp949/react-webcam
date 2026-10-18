@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import {
   errorCodeToPhase,
+  isErrorDetail,
   mediaStreamResultFromDetail,
   patchDetailVideoSize,
 } from "../src/utils/webcam-controller-state.js";
@@ -115,5 +116,53 @@ describe("mediaStreamResultFromDetail", () => {
     const detail: WebcamDetail = { phase: "requesting", constraints: { video: true } };
     const result = mediaStreamResultFromDetail(detail);
     expect(result).toEqual({});
+  });
+});
+
+// ---------------------------------------------------------------------------
+// isErrorDetail
+// ---------------------------------------------------------------------------
+
+describe("isErrorDetail", () => {
+  const stream = {} as MediaStream;
+  const constraints: MediaStreamConstraints = { video: true };
+  const error = new Error("실패");
+
+  const details: Array<[WebcamDetail["phase"], boolean, WebcamDetail]> = [
+    ["idle", false, { phase: "idle" }],
+    ["requesting", false, { phase: "requesting", constraints }],
+    ["live", false, { phase: "live", mediaStream: stream, constraints }],
+    ["playback-error", false, { phase: "playback-error", mediaStream: stream, constraints, error }],
+    ["denied", true, { phase: "denied", errorCode: "permission-denied", error, constraints }],
+    [
+      "unavailable",
+      true,
+      { phase: "unavailable", errorCode: "device-not-found", error, constraints },
+    ],
+    [
+      "unsupported",
+      true,
+      { phase: "unsupported", errorCode: "unsupported-browser", error, constraints },
+    ],
+    ["insecure", true, { phase: "insecure", errorCode: "insecure-context", error, constraints }],
+    ["error", true, { phase: "error", errorCode: "unknown", error, constraints }],
+  ];
+
+  it.each(details)("phase %s의 오류 판별 결과는 %s다", (_phase, expected, detail) => {
+    expect(isErrorDetail(detail)).toBe(expected);
+  });
+
+  it("오류 phase이면 error와 errorCode를 타입 좁히기로 읽을 수 있다", () => {
+    const detail: WebcamDetail = {
+      phase: "denied",
+      errorCode: "permission-denied",
+      error,
+      constraints,
+    };
+
+    if (!isErrorDetail(detail)) throw new Error("오류 detail로 판별돼야 한다");
+
+    expect(detail.error).toBe(error);
+    expect(detail.errorCode).toBe("permission-denied");
   });
 });

@@ -8,11 +8,11 @@
   },
   "dependencies": {
     "@cp949/react-webcam": "workspace:*",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   },
   "devDependencies": {
-    "acorn": "^8.18.0",
+    "acorn": "^8.19.0",
     "esbuild": "^0.28.2"
   }
 }

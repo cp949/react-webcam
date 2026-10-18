@@ -145,6 +145,10 @@ GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-we
 - 새 기능을 추가하더라도 내부 훅이나 유틸을 무심코 export하지 않는다.
 - `package.json`의 `peerDependencies`는 React 18/19 / React DOM 18/19를 모두 지원한다(`^18.0.0 || ^19.0.0`).
 - 기본 라벨은 한국어이며, 영어나 서비스별 문자열은 `labels` prop으로 덮어쓴다.
+- `packages/react-webcam/package.json`에는 `engines.node`를 두지 않는다.
+  - `publint`가 `engines.node` 미지정을 제안하지만 의도적으로 무시한다.
+  - 패키지는 브라우저용이다. Node는 SSR 시점에만 쓰인다.
+  - 루트 `package.json`의 `>=24.18.0`은 빌드 도구 요구 버전이다. 소비자 제약으로 옮기지 않는다.
 
 ## 핵심 아키텍처
 

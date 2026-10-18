@@ -1,4 +1,5 @@
-_works/*
+_tmp/
+_works/
 .claude/
 .superpowers/
 docs/superpowers/

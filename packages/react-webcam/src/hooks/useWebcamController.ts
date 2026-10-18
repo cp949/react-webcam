@@ -6,7 +6,12 @@ import {
   mediaStreamResultFromDetail,
   patchDetailVideoSize,
 } from "../utils/webcam-controller-state.js";
-import type { MediaStreamLoadResult, WebcamDetail, WebcamOptions } from "../webcam-types.js";
+import type {
+  MediaStreamLoadResult,
+  WebcamDetail,
+  WebcamFitMode,
+  WebcamOptions,
+} from "../webcam-types.js";
 import { useElementMediaConstraints } from "./useElementMediaConstraints.js";
 import { useVideoElementBindings } from "./useVideoElementBindings.js";
 import { useWebcamStreamLifecycle } from "./useWebcamStreamLifecycle.js";
@@ -44,7 +49,7 @@ export type UseWebcamControllerResult = WebcamController & {
   setVideoElement: (el: HTMLVideoElement | null | undefined) => void;
 
   /** 비디오 표시 방식을 바꾸는 함수 */
-  setFitMode: (mode: "unset" | "fill" | "cover" | "contain" | undefined) => void;
+  setFitMode: (mode: WebcamFitMode | undefined) => void;
 
   /** 비디오 이벤트 디버그 로깅을 켜고 끄는 함수 */
   setDebugVideoEvents: (enabled: boolean) => void;
@@ -105,7 +110,7 @@ export function useWebcamController(
   const videoElement = options.videoElement ?? internalVideoElement;
   const [requestKey, setRequestKey] = useState(0);
   const retry = useCallback(() => setRequestKey((key) => key + 1), []);
-  const [fitMode, setFitModeState] = useState<"unset" | "fill" | "cover" | "contain" | undefined>(
+  const [fitMode, setFitModeState] = useState<WebcamFitMode | undefined>(
     undefined,
   );
   const [debugVideoEvents, setDebugVideoEvents] = useState(false);
@@ -207,7 +212,7 @@ export function useWebcamController(
     setVideoElementState(el ?? undefined);
   }, []);
 
-  const setFitMode = useCallback((mode: "unset" | "fill" | "cover" | "contain" | undefined) => {
+  const setFitMode = useCallback((mode: WebcamFitMode | undefined) => {
     setFitModeState(mode);
   }, []);
 

@@ -2,7 +2,7 @@
 
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import { Webcam } from "@cp949/react-webcam";
-import type { WebcamDetail } from "@cp949/react-webcam";
+import type { WebcamErrorDetail } from "@cp949/react-webcam";
 import { useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -19,11 +19,6 @@ import { ExampleCard } from "../shared/ExampleCard";
 import { SectionIntroCard } from "../shared/SectionIntroCard";
 
 const section = DEMO_SECTIONS.find((item) => item.id === "error-fallback")!;
-
-type WebcamErrorDetail = Extract<
-  WebcamDetail,
-  { phase: "denied" | "unavailable" | "unsupported" | "insecure" | "error" }
->;
 
 /** errorCode별 제목과 사용자 안내 문구를 고른다. */
 function describeError(errorCode: WebcamErrorDetail["errorCode"]) {

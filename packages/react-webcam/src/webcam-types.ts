@@ -114,6 +114,18 @@ export type WebcamDetail =
   /** Error phases such as denied, unavailable, unsupported, insecure, or generic failure. */
   | WebcamDetailError;
 
+/**
+ * `WebcamDetail` variants that describe a failed camera request.
+ * This is the detail type passed to the `errorFallback` render function.
+ */
+export type WebcamErrorDetail = Extract<
+  WebcamDetail,
+  { phase: "denied" | "unavailable" | "unsupported" | "insecure" | "error" }
+>;
+
+/** How the video is fitted into its box when no `aspectRatio` is set. */
+export type WebcamFitMode = "unset" | "fill" | "cover" | "contain";
+
 /** Camera options translated into `getUserMedia()` constraints. */
 export type WebcamOptions = {
   /** Enables audio capture. */

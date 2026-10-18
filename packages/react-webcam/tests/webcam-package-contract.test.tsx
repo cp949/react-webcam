@@ -4,6 +4,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import type { WebcamErrorDetail, WebcamFitMode } from "../src/index.js";
 
 const PACKAGE_JSON_PATH = resolve(process.cwd(), "package.json");
 
@@ -120,6 +121,23 @@ describe("공개 타입 export 계약", () => {
   it("모듈 로드가 가능하므로 WebcamDetail 타입 공개 계약도 유지한다", async () => {
     const mod = await import("../src/index.js");
     expect(mod).toBeTruthy();
+  });
+
+  it("WebcamErrorDetail과 WebcamFitMode 타입을 index에서 공개한다", () => {
+    // 타입 검사(`pnpm check-types`)가 계약을 확인한다. export가 빠지면 컴파일이 실패한다.
+    const fitMode: WebcamFitMode = "cover";
+    const detail: WebcamErrorDetail = {
+      phase: "denied",
+      errorCode: "permission-denied",
+      error: new Error("denied"),
+      constraints: {},
+    };
+    // @ts-expect-error live는 오류 phase가 아니다.
+    const notError: WebcamErrorDetail = { phase: "live" };
+
+    expect(fitMode).toBe("cover");
+    expect(detail.phase).toBe("denied");
+    expect(notError).toBeTruthy();
   });
 
   it("모듈 로드가 가능하므로 WebcamPhase 타입 공개 계약도 유지한다", async () => {

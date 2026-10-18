@@ -390,6 +390,7 @@ export function CameraWithSnapshot() {
 | 메서드                       | 설명                                                         |
 | ---------------------------- | ------------------------------------------------------------ |
 | `snapshotToCanvas(options?)` | 현재 프레임을 `HTMLCanvasElement`로 반환. 준비 전이면 `null` |
+| `getDetail()`                | 현재 `WebcamDetail`을 반환. `onStateChange`로 받는 값과 같다 |
 | `getPlayingVideoDeviceId()`  | 재생 중인 비디오 트랙의 디바이스 ID                          |
 | `getPlayingAudioDeviceId()`  | 재생 중인 오디오 트랙의 디바이스 ID                          |
 | `setFlipped(value)`          | 좌우 반전 상태 변경                                          |

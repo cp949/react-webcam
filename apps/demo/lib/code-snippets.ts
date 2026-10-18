@@ -328,12 +328,7 @@ export default function DisabledFallbackExample() {
 }`,
 
   "error-fallback": `import { Webcam } from '@cp949/react-webcam';
-import type { WebcamDetail } from '@cp949/react-webcam';
-
-type WebcamErrorDetail = Extract<
-  WebcamDetail,
-  { phase: 'denied' | 'unavailable' | 'unsupported' | 'insecure' | 'error' }
->;
+import type { WebcamErrorDetail } from '@cp949/react-webcam';
 
 export default function ErrorFallbackExample() {
   return (

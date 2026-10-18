@@ -13,7 +13,12 @@ import { CameraIcon } from "./icons/CameraIcon.js";
 import { classNames } from "./utils/class-names.js";
 import type { SnapshotOptions } from "./types/webcam-controller.js";
 import { DEFAULT_WEBCAM_LABELS, type WebcamLabels } from "./types/webcam-labels.js";
-import type { WebcamDetail, WebcamOptions } from "./webcam-types.js";
+import type {
+  WebcamDetail,
+  WebcamErrorDetail,
+  WebcamFitMode,
+  WebcamOptions,
+} from "./webcam-types.js";
 
 /**
  * `ref`로 노출하는 `Webcam` 제어 핸들이다.
@@ -28,6 +33,15 @@ import type { WebcamDetail, WebcamOptions } from "./webcam-types.js";
 export type WebcamHandle = {
   /** 현재 프레임을 캔버스로 캡처한다. 아직 준비 전이면 `null`을 반환한다. */
   snapshotToCanvas: (options?: SnapshotOptions) => HTMLCanvasElement | null;
+
+  /**
+   * 현재 webcam detail을 반환한다.
+   *
+   * - `onStateChange`로 받는 값과 같다.
+   * - 이벤트 핸들러 안에서 "지금 live인가"를 확인할 때 쓴다.
+   * - 호출 시점의 값이며 구독하지 않는다. 변경을 따라가려면 `onStateChange`를 쓴다.
+   */
+  getDetail: () => WebcamDetail;
 
   /** 현재 재생 중인 비디오 트랙의 장치 ID다. */
   getPlayingVideoDeviceId: () => string | undefined;
@@ -75,11 +89,6 @@ export type WebcamHandle = {
   resumePlayback: () => void;
 };
 
-type WebcamErrorDetail = Extract<
-  WebcamDetail,
-  { phase: "denied" | "unavailable" | "unsupported" | "insecure" | "error" }
->;
-
 /** `Webcam` 컴포넌트가 노출하는 공개 props다. */
 export interface WebcamProps {
   style?: React.CSSProperties;
@@ -104,7 +113,7 @@ export interface WebcamProps {
    * 비디오의 원본 크기와 부모 박스 크기가 다를 때 맞춤 방식을 제어한다.
    * `aspectRatio`가 없을 때만 사용한다.
    */
-  fitMode?: "unset" | "fill" | "cover" | "contain";
+  fitMode?: WebcamFitMode;
 
   /**
    * 제어형 좌우 반전 값이다.
@@ -248,6 +257,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     ref,
     () => ({
       snapshotToCanvas: ctrl.snapshotToCanvas,
+      getDetail: () => ctrl.webcamDetail,
       getPlayingVideoDeviceId: ctrl.getPlayingVideoDeviceId,
       getPlayingAudioDeviceId: ctrl.getPlayingAudioDeviceId,
       setFlipped: (value) => {

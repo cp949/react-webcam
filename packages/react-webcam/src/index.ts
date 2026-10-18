@@ -16,4 +16,11 @@ export type { WebcamLabels } from "./types/webcam-labels.js";
 export type { WebcamHandle, WebcamProps } from "./Webcam.js";
 export { Webcam } from "./Webcam.js";
 
-export type { WebcamDetail, WebcamErrorCode, WebcamOptions, WebcamPhase } from "./webcam-types.js";
+export type {
+  WebcamDetail,
+  WebcamErrorCode,
+  WebcamErrorDetail,
+  WebcamFitMode,
+  WebcamOptions,
+  WebcamPhase,
+} from "./webcam-types.js";

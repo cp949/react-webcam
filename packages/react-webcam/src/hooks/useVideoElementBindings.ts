@@ -13,6 +13,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { startDebugVideoEventListener } from "../utils/media-debug.js";
+import type { WebcamFitMode } from "../webcam-types.js";
 
 export type UseVideoElementBindingsOptions = {
   videoElement: HTMLVideoElement | undefined;
@@ -24,7 +25,7 @@ export type UseVideoElementBindingsOptions = {
   flipped: boolean;
 
   /** object-fit 값 */
-  fitMode: "unset" | "fill" | "cover" | "contain" | undefined;
+  fitMode: WebcamFitMode | undefined;
 
   /** 비디오 이벤트 디버그 로깅 활성화 여부 */
   debugVideoEvents: boolean;

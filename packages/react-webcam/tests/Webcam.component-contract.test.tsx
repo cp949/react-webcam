@@ -404,6 +404,30 @@ describe("Webcam 공개 계약", () => {
     expect(getUserMediaMock).toHaveBeenLastCalledWith(expect.objectContaining({ audio: false }));
   });
 
+  it("ref의 getDetail은 현재 webcam detail을 반환한다", async () => {
+    const ref = createRef<WebcamHandle>();
+    render(<Webcam ref={ref} webcamOptions={{ audioEnabled: false }} />);
+
+    expect(ref.current?.getDetail().phase).not.toBe("live");
+
+    await advanceToStreamLoad();
+
+    expect(ref.current?.getDetail().phase).toBe("live");
+  });
+
+  it("ref의 getDetail은 오류 상태의 errorCode도 반환한다", async () => {
+    getUserMediaMock.mockRejectedValue(new DOMException("denied", "NotAllowedError"));
+    const ref = createRef<WebcamHandle>();
+    render(<Webcam ref={ref} webcamOptions={{ audioEnabled: false }} />);
+
+    await advanceToStreamLoad();
+
+    expect(ref.current?.getDetail()).toMatchObject({
+      phase: "denied",
+      errorCode: "permission-denied",
+    });
+  });
+
   it("disabled=true이면 errorFallback보다 disabledFallback을 우선 렌더링한다", async () => {
     const { queryByTestId } = render(
       <Webcam

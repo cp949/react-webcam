@@ -24,6 +24,8 @@ const KEY_SYMBOLS = [
   "WebcamProps",
   "WebcamPhase",
   "WebcamErrorCode",
+  "WebcamErrorDetail",
+  "WebcamFitMode",
   "SnapshotOptions",
   "listMediaDevices",
   "listVideoInputDevices",

@@ -408,6 +408,7 @@ export function CameraWithSnapshot() {
 | Method                       | Description                                                              |
 | ---------------------------- | ------------------------------------------------------------------------ |
 | `snapshotToCanvas(options?)` | Returns the current frame as `HTMLCanvasElement`, or `null` before ready |
+| `getDetail()`                | Returns the current `WebcamDetail`, same value as `onStateChange`        |
 | `getPlayingVideoDeviceId()`  | Returns the current video track device ID                                |
 | `getPlayingAudioDeviceId()`  | Returns the current audio track device ID                                |
 | `setFlipped(value)`          | Updates the horizontal flip state                                        |

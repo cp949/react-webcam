@@ -160,33 +160,19 @@ function ReadonlyControlledExample() {
 }`,
 
   "device-selection": `import { useEffect, useMemo, useState } from 'react';
-import {
-  Webcam,
-  listMediaDevices,
-  listAudioInputDevices,
-  listVideoInputDevices,
-} from '@cp949/react-webcam';
+import { Webcam, useMediaDevices } from '@cp949/react-webcam';
 
 export default function DeviceSelectionExample() {
-  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
-  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
+  // devicechange(USB 카메라 꽂기·뽑기)마다 devices가 자동으로 갱신된다.
+  const { devices, labelsAvailable, error, refresh } = useMediaDevices('videoinput');
   const [deviceId, setDeviceId] = useState<string>('');
 
+  // 선택한 장치가 뽑히면 첫 장치로 돌린다.
   useEffect(() => {
-    async function load() {
-      const [all, videos, audios] = await Promise.all([
-        listMediaDevices(),
-        listVideoInputDevices(),
-        listAudioInputDevices(),
-      ]);
-      console.log(all);
-      setVideoDevices(videos);
-      setAudioDevices(audios);
-      setDeviceId(videos[0]?.deviceId ?? '');
-    }
-
-    void load();
-  }, []);
+    setDeviceId((current) =>
+      devices.some((d) => d.deviceId === current) ? current : (devices[0]?.deviceId ?? ''),
+    );
+  }, [devices]);
 
   const webcamOptions = useMemo(
     () => ({
@@ -196,19 +182,21 @@ export default function DeviceSelectionExample() {
     [deviceId],
   );
 
+  if (error) return <p>카메라 목록을 불러오지 못했습니다: {error.message}</p>;
+
   return (
     <>
       <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)}>
-        {videoDevices.map((device) => (
+        {devices.map((device, index) => (
           <option key={device.deviceId} value={device.deviceId}>
-            {device.label || '(권한 필요)'}
+            {/* 권한 허용 전에는 label이 비어 있으므로 대체 이름을 쓴다. */}
+            {labelsAvailable ? device.label : \`카메라 \${index + 1}\`}
           </option>
         ))}
       </select>
+      <button onClick={() => void refresh()}>새로고침</button>
 
       <Webcam webcamOptions={webcamOptions} visibleCameraDirectionButton />
-
-      <pre>{JSON.stringify({ videoDevices, audioDevices }, null, 2)}</pre>
     </>
   );
 }`,

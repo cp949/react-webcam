@@ -28,6 +28,14 @@ function normalizeColor(color: string) {
 }
 
 const mockRetry = vi.fn();
+const mockRefreshDevices = vi.fn();
+
+// useMediaDevices mock이 돌려줄 값. 테스트마다 바꾼다.
+const mockMediaDevices = {
+  devices: [] as Array<{ deviceId: string; kind: string; label: string; groupId: string }>,
+  labelsAvailable: false,
+  error: undefined as Error | undefined,
+};
 
 // toBlob만 흉내 낸 가짜 캔버스. 2048바이트 Blob을 돌려준다.
 const mockSnapshotCanvas = {
@@ -143,7 +151,12 @@ vi.mock("@cp949/react-webcam", () => {
     };
   }
 
-  return { Webcam, useWebcam };
+  // 모듈 수준 상수라 참조가 안정적이다. 매 렌더마다 새 배열을 주면 effect가 무한 반복한다.
+  function useMediaDevices() {
+    return { ...mockMediaDevices, refresh: mockRefreshDevices };
+  }
+
+  return { Webcam, useWebcam, useMediaDevices };
 });
 
 describe("demo disabled sections", () => {
@@ -279,6 +292,39 @@ describe("demo disabled sections", () => {
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:mock-snapshot");
 
     vi.unstubAllGlobals();
+  });
+
+  it("shows devices from useMediaDevices and falls back to generic names without labels", () => {
+    expect(CODE_SNIPPETS["device-selection"]).toContain("useMediaDevices");
+    mockRefreshDevices.mockClear();
+    mockMediaDevices.devices = [
+      { deviceId: "cam1", kind: "videoinput", label: "", groupId: "g1" },
+      { deviceId: "mic1", kind: "audioinput", label: "", groupId: "g2" },
+    ];
+    mockMediaDevices.labelsAvailable = false;
+
+    render(createElement(DemoShell));
+    fireEvent.click(screen.getAllByText("Device Selection")[0]!);
+
+    // 권한 허용 전에는 label이 없으므로 대체 이름을 보여 준다.
+    expect(screen.getByText("비디오 입력 1")).toBeTruthy();
+    expect(screen.getByText("오디오 입력 1")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "디바이스 새로고침" }));
+    expect(mockRefreshDevices).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows device labels once labelsAvailable is true", () => {
+    mockMediaDevices.devices = [
+      { deviceId: "cam1", kind: "videoinput", label: "FaceTime HD Camera", groupId: "g1" },
+    ];
+    mockMediaDevices.labelsAvailable = true;
+
+    render(createElement(DemoShell));
+    fireEvent.click(screen.getAllByText("Device Selection")[0]!);
+
+    expect(screen.getAllByText("FaceTime HD Camera").length).toBeGreaterThan(0);
+    expect(screen.queryByText("비디오 입력 1")).toBeNull();
   });
 
   it("keeps the error fallback demo viewport at a fixed aspect ratio", () => {

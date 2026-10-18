@@ -1,12 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  Webcam,
-  listMediaDevices,
-  listAudioInputDevices,
-  listVideoInputDevices,
-} from "@cp949/react-webcam";
+import { Webcam, useMediaDevices } from "@cp949/react-webcam";
 import type { WebcamHandle, WebcamDetail } from "@cp949/react-webcam";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
@@ -32,47 +27,38 @@ import { StateLogCard } from "../shared/StateLogCard";
 
 const section = DEMO_SECTIONS.find((item) => item.id === "device-selection")!;
 
-/** 미디어 디바이스 목록 조회와 특정 비디오 디바이스 선택 방법을 시연하는 섹션 */
+/** useMediaDevices로 디바이스 목록을 따라가며 특정 비디오 디바이스 선택 방법을 시연하는 섹션 */
 export default function DeviceSelectionSection() {
   const webcamRef = useRef<WebcamHandle>(null);
-  const [allDevices, setAllDevices] = useState<MediaDeviceInfo[]>([]);
-  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
-  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]);
+  const { devices: allDevices, labelsAvailable, error: loadError, refresh } = useMediaDevices();
+  const videoDevices = useMemo(
+    () => allDevices.filter((device) => device.kind === "videoinput"),
+    [allDevices],
+  );
+  const audioDevices = useMemo(
+    () => allDevices.filter((device) => device.kind === "audioinput"),
+    [allDevices],
+  );
   const [selectedVideoDeviceId, setSelectedVideoDeviceId] = useState("");
   const [snapshot, setSnapshot] = useState<WebcamDetail | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<string | null>(null);
 
-  async function loadDevices() {
-    setLoading(true);
-    setLoadError(null);
-
-    try {
-      const [all, videos, audios] = await Promise.all([
-        listMediaDevices(),
-        listVideoInputDevices(),
-        listAudioInputDevices(),
-      ]);
-
-      setAllDevices(all);
-      setVideoDevices(videos);
-      setAudioDevices(audios);
-      setSelectedVideoDeviceId((current) => {
-        if (current && videos.some((device) => device.deviceId === current)) {
-          return current;
-        }
-        return videos[0]?.deviceId ?? "";
-      });
-    } catch (error) {
-      setLoadError(error instanceof Error ? error.message : String(error));
-    } finally {
-      setLoading(false);
-    }
-  }
-
+  // 목록이 바뀌면 선택값이 아직 목록에 있는지 확인한다. 뽑힌 장치면 첫 장치로 돌린다.
   useEffect(() => {
-    void loadDevices();
-  }, []);
+    setSelectedVideoDeviceId((current) => {
+      if (current && videoDevices.some((device) => device.deviceId === current)) {
+        return current;
+      }
+      return videoDevices[0]?.deviceId ?? "";
+    });
+  }, [videoDevices]);
+
+  // devicechange로 목록이 갱신되는 순간을 눈으로 확인하도록 시각을 남긴다.
+  useEffect(() => {
+    if (allDevices.length > 0) {
+      setLastUpdatedAt(new Date().toLocaleTimeString());
+    }
+  }, [allDevices]);
 
   // 선택된 비디오 디바이스 ID로 webcamOptions를 메모이제이션
   const webcamOptions = useMemo(
@@ -92,16 +78,17 @@ export default function DeviceSelectionSection() {
       />
 
       <Alert severity='info' variant='outlined'>
-        디바이스 label은 브라우저 권한 상태에 따라 비어 있을 수 있습니다. 새로고침 후에도 비어
-        있으면 카메라 권한을 먼저 허용해 보세요.
+        USB 카메라를 꽂거나 뽑으면 목록이 자동으로 갱신됩니다. 디바이스 label은 카메라 권한을
+        허용하기 전에는 비어 있습니다. 이때는 대체 이름을 보여 주고, 권한을 허용한 뒤 새로고침
+        버튼으로 label을 다시 불러옵니다.
       </Alert>
 
       <Card variant='outlined'>
         <CardHeader
           title='디바이스 목록 조회'
           action={
-            <Button size='small' onClick={() => void loadDevices()} disabled={loading}>
-              {loading ? "불러오는 중..." : "디바이스 새로고침"}
+            <Button size='small' onClick={() => void refresh()}>
+              디바이스 새로고침
             </Button>
           }
         />
@@ -123,7 +110,7 @@ export default function DeviceSelectionSection() {
                 ) : (
                   videoDevices.map((device, index) => (
                     <MenuItem key={device.deviceId} value={device.deviceId}>
-                      {device.label || `비디오 입력 ${index + 1}`}
+                      {labelsAvailable ? device.label : `비디오 입력 ${index + 1}`}
                     </MenuItem>
                   ))
                 )}
@@ -142,7 +129,7 @@ export default function DeviceSelectionSection() {
                     {audioDevices.map((device, index) => (
                       <ListItem key={device.deviceId} disableGutters>
                         <ListItemText
-                          primary={device.label || `오디오 입력 ${index + 1}`}
+                          primary={labelsAvailable ? device.label : `오디오 입력 ${index + 1}`}
                           secondary={device.deviceId}
                         />
                       </ListItem>
@@ -153,9 +140,13 @@ export default function DeviceSelectionSection() {
             </Card>
           </Stack>
 
+          <Typography variant='caption' color='text.secondary' sx={{ mt: 1.5, display: "block" }}>
+            마지막 목록 갱신: {lastUpdatedAt ?? "(아직 없음)"}
+          </Typography>
+
           {loadError && (
             <Alert severity='error' sx={{ mt: 2 }}>
-              {loadError}
+              {loadError.message}
             </Alert>
           )}
         </CardContent>
@@ -188,7 +179,7 @@ export default function DeviceSelectionSection() {
       />
 
       <StateLogCard
-        title='enumerateDevices 결과'
+        title='useMediaDevices 결과'
         data={{
           allDevices: allDevices.map((device) => ({
             deviceId: device.deviceId,

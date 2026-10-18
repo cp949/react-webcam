@@ -30,8 +30,8 @@ export const DEMO_SECTIONS: DemoSection[] = [
   {
     id: "device-selection",
     title: "Device Selection",
-    description: "디바이스 목록 조회와 선택 적용",
-    keywords: ["listVideoInputDevices", "listAudioInputDevices", "deviceId"],
+    description: "디바이스 목록을 따라가며 선택 적용",
+    keywords: ["useMediaDevices", "devicechange", "labelsAvailable", "deviceId"],
   },
   {
     id: "ref-handle",

@@ -85,7 +85,7 @@ export const DEMO_SECTIONS: DemoSection[] = [
     id: "use-webcam",
     title: "useWebcam",
     description: "앱이 소유한 video에 연결하는 훅",
-    keywords: ["useWebcam", "isFrameReady", "retry", "muted", "playsInline"],
+    keywords: ["useWebcam", "isFrameReady", "retry", "autoRecover", "muted", "playsInline"],
   },
   {
     id: "visual-debug",

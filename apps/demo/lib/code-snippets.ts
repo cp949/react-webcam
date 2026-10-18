@@ -432,6 +432,8 @@ export default function UseWebcamExample() {
   const camera = useWebcam({
     videoElement,
     webcamOptions: { facingMode: 'user', size: { width: 1280 } },
+    // track-ended 오류 뒤 탭이 다시 보이면 스트림을 한 번 다시 요청합니다.
+    autoRecover: true,
   });
 
   return (
@@ -441,6 +443,7 @@ export default function UseWebcamExample() {
       <p>
         phase: {camera.detail.phase} / isFrameReady: {String(camera.isFrameReady)}
       </p>
+      {/* 트랙이 mute되면 phase는 live로 남고 isFrameReady만 false가 됩니다. */}
       <button onClick={camera.retry}>카메라 다시 시도</button>
       <button onClick={camera.pausePlayback}>재생 멈춤</button>
       {/* play()가 막혀 playback-error가 되면 사용자 조작 안에서 호출합니다. */}

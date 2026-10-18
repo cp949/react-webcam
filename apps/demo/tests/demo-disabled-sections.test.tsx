@@ -37,6 +37,12 @@ const mockMediaDevices = {
   error: undefined as Error | undefined,
 };
 
+// useWebcam mock 제어값. frameReady가 undefined이면 video 연결 여부를 따른다. 테스트마다 바꾼다.
+const mockUseWebcam = {
+  frameReady: undefined as boolean | undefined,
+  lastOptions: undefined as { autoRecover?: boolean } | undefined,
+};
+
 // toBlob만 흉내 낸 가짜 캔버스. 2048바이트 Blob을 돌려준다.
 const mockSnapshotCanvas = {
   width: 1280,
@@ -140,11 +146,16 @@ vi.mock("@cp949/react-webcam", () => {
   }
 
   // 앱이 소유한 video 경로. video가 연결되면 live·프레임 준비 상태를 돌려준다.
-  function useWebcam(options: { videoElement: HTMLVideoElement | null; disabled?: boolean }) {
+  function useWebcam(options: {
+    videoElement: HTMLVideoElement | null;
+    disabled?: boolean;
+    autoRecover?: boolean;
+  }) {
+    mockUseWebcam.lastOptions = options;
     const live = !!options.videoElement && !options.disabled;
     return {
       detail: live ? { phase: "live" } : { phase: "idle" },
-      isFrameReady: live,
+      isFrameReady: live && (mockUseWebcam.frameReady ?? true),
       retry: () => {},
       pausePlayback: () => {},
       resumePlayback: () => {},
@@ -465,5 +476,35 @@ describe("demo disabled sections", () => {
     fireEvent.click(screen.getByLabelText("disabled"));
     expect(screen.getByText("phase: idle")).toBeTruthy();
     expect(screen.getByText("isFrameReady: false")).toBeTruthy();
+  });
+
+  it("passes autoRecover to useWebcam when the switch is toggled", () => {
+    render(createElement(DemoShell));
+    fireEvent.click(screen.getAllByText("useWebcam")[0]!);
+    expect(mockUseWebcam.lastOptions?.autoRecover).toBe(false);
+
+    fireEvent.click(screen.getByLabelText("autoRecover"));
+    expect(mockUseWebcam.lastOptions?.autoRecover).toBe(true);
+  });
+
+  it("explains a live phase without a ready frame and shows the wait time once the frame is ready", () => {
+    mockUseWebcam.frameReady = false;
+    try {
+      render(createElement(DemoShell));
+      fireEvent.click(screen.getAllByText("useWebcam")[0]!);
+
+      expect(screen.getByText("phase: live")).toBeTruthy();
+      expect(screen.getByText(/트랙이 mute 상태이거나 첫 프레임을 기다리는 중/)).toBeTruthy();
+      expect(screen.queryByText(/프레임 준비까지/)).toBeNull();
+
+      mockUseWebcam.frameReady = true;
+      // muted 스위치로 리렌더만 일으킨다.
+      fireEvent.click(screen.getByLabelText("muted"));
+
+      expect(screen.queryByText(/트랙이 mute 상태이거나/)).toBeNull();
+      expect(screen.getByText(/프레임 준비까지: \d+ms/)).toBeTruthy();
+    } finally {
+      mockUseWebcam.frameReady = undefined;
+    }
   });
 });

@@ -72,11 +72,17 @@ Common commands:
 pnpm dev
 pnpm build
 pnpm lint
+pnpm lint:fix
+pnpm format
 pnpm check-types
 pnpm test
+pnpm test:chrome83
 pnpm readme:package
 pnpm readme:package:check
 ```
+
+`pnpm test:chrome83` must run inside the `docker/chrome83` container.
+See `CLAUDE.md` for the full steps.
 
 ## Workspace Layout
 
@@ -84,9 +90,18 @@ pnpm readme:package:check
 .
 ├── apps/
 │   └── demo/                  Next.js demo app
+├── docker/
+│   └── chrome83/              Chrome 83 floor validation container
+├── docs/
+│   └── adr/                   Architecture decision records
+├── e2e/
+│   └── chrome83-floor/        Chrome 83 Playwright smoke tests
+├── fixtures/
+│   └── chrome75-react-consumer/  Chrome 75 consumer fixture
 ├── packages/
 │   ├── react-webcam/          Published npm package
 │   └── typescript-config/     Shared tsconfig package
+├── scripts/                   Repository scripts
 ├── README.md
 ├── README.ko.md
 └── package.json

@@ -71,11 +71,17 @@ pnpm install
 pnpm dev
 pnpm build
 pnpm lint
+pnpm lint:fix
+pnpm format
 pnpm check-types
 pnpm test
+pnpm test:chrome83
 pnpm readme:package
 pnpm readme:package:check
 ```
+
+`pnpm test:chrome83`은 `docker/chrome83` 컨테이너 안에서 실행해야 합니다.
+전체 절차는 `CLAUDE.md`를 참고하세요.
 
 ## 워크스페이스 구조
 
@@ -83,9 +89,18 @@ pnpm readme:package:check
 .
 ├── apps/
 │   └── demo/                  Next.js demo 앱
+├── docker/
+│   └── chrome83/              Chrome 83 floor 검증 컨테이너
+├── docs/
+│   └── adr/                   아키텍처 결정 기록
+├── e2e/
+│   └── chrome83-floor/        Chrome 83 Playwright 스모크 테스트
+├── fixtures/
+│   └── chrome75-react-consumer/  Chrome 75 소비자 fixture
 ├── packages/
 │   ├── react-webcam/          npm 배포 패키지
 │   └── typescript-config/     공유 tsconfig 패키지
+├── scripts/                   저장소 스크립트
 ├── README.md
 ├── README.ko.md
 └── package.json

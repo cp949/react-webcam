@@ -117,22 +117,22 @@ release-it 설정은 `packages/react-webcam/.release-it.json`에 있다.
    ```
    이 명령은 `packages/react-webcam`에서 `release-it`을 실행해 다음을 한 번에 처리한다.
    - Conventional Commits 기반 버전 결정과 `CHANGELOG.md` 갱신
+   - release-it 내장 npm 플러그인의 `publishPackageManager: "pnpm"` 설정으로 npm 배포
    - `chore: release vX.Y.Z` 커밋 생성
    - `vX.Y.Z` annotated 태그 생성 (`@cp949/...` 형식의 package-scoped 태그는 사용하지 않는다)
    - `git push`로 커밋과 태그를 원격에 반영
-   - `pnpm publish`로 npm 배포 (release-it 내장 npm 플러그인 대신 pnpm 사용)
 4. npm에 실제로 반영됐는지 확인한다.
    ```bash
    npm view @cp949/react-webcam version
    ```
-   `after:release` 훅(`pnpm publish --no-git-checks`)의 출력은 기본적으로 숨겨져
-   있어(release-it이 verbose 채널로만 내보낸다), `pnpm release`가 겉보기에 성공한
-   것처럼 끝나도 npm publish가 실패했거나 아직 끝나지 않았을 수 있다. 훅 출력을
-   직접 보려면 `-V`(`--verbose`)를 추가한다: `pnpm release -V`.
-   publish가 실패했다면(예: OTP를 비대화형으로 입력할 수 없는 경우) `pnpm release`를
-   다시 실행하지 말고 `packages/react-webcam`에서 `pnpm publish --no-git-checks`만
-   다시 실행한다. 새 커밋이 없는 상태에서 `pnpm release`를 재실행하면 release-it이
-   올릴 새 버전이 없어 의도한 대로 동작하지 않는다.
+   일반 터미널 실행에서는 내장 npm 플러그인이 pnpm에 입출력을 전달해 OTP나
+   브라우저 인증을 진행한다. 대화형 인증이 필요하면 `--ci`를 붙이지 않는다.
+   문자열 `after:release` 훅은 입출력을 캡처하므로 배포에 사용하지 않는다.
+   publish 실패 시 먼저 `git status`, 릴리스 커밋과 태그 존재 여부를 확인한다.
+   커밋·태그·push까지 이미 끝난 경우에는 `pnpm release`를 다시 실행하지 않고
+   `packages/react-webcam`에서 `pnpm publish --no-git-checks`만 다시 실행한다.
+   내장 npm 플러그인은 publish 성공 후 릴리스 커밋·태그·push를 진행하므로,
+   publish 실패 시 남은 버전·changelog 변경과 Git 상태를 확인한 뒤 복구한다.
 5. GitHub에서 `vX.Y.Z` 태그가 올라왔는지, `release.yml` 워크플로우가 만든 GitHub
    Release가 올바른지 확인한다.
 

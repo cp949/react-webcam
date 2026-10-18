@@ -7,10 +7,9 @@
     "requireBranch": ["main", "dev"]
   },
   "npm": {
-    "publish": false
-  },
-  "hooks": {
-    "after:release": "pnpm publish --no-git-checks"
+    "publish": true,
+    "publishPackageManager": "pnpm",
+    "publishArgs": ["--no-git-checks"]
   },
   "plugins": {
     "@release-it/conventional-changelog": {

@@ -14,6 +14,8 @@ const OUTPUT_PATH = resolve(PACKAGE_ROOT, "llm.txt");
 const KEY_SYMBOLS = [
   "Webcam",
   "useWebcam",
+  "useMediaDevices",
+  "UseMediaDevicesResult",
   "UseWebcamOptions",
   "UseWebcamResult",
   "WebcamHandle",

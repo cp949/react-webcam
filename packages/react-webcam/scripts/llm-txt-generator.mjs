@@ -234,6 +234,8 @@ function extractStringUnionValues(node) {
 const APPROVED_PUBLIC_API_NAMES = new Set([
   "Webcam",
   "useWebcam",
+  "useMediaDevices",
+  "UseMediaDevicesResult",
   "UseWebcamOptions",
   "UseWebcamResult",
   "WebcamHandle",

@@ -456,6 +456,41 @@ const selectedDeviceId = allDevices[0]?.deviceId;
 <Webcam webcamOptions={{ deviceId: selectedDeviceId }} />;
 ```
 
+### Follow Device Changes with `useMediaDevices`
+
+`useMediaDevices(kind?)` loads the device list after mount and refreshes it on every
+`devicechange` event, such as plugging in or unplugging a USB camera.
+
+```tsx
+import { useMediaDevices } from "@cp949/react-webcam";
+
+function CameraPicker({ onSelect }: { onSelect: (deviceId: string) => void }) {
+  const { devices, labelsAvailable, error, refresh } = useMediaDevices("videoinput");
+
+  if (error) return <p>Could not list cameras: {error.message}</p>;
+
+  return (
+    <select onChange={(e) => onSelect(e.target.value)} onFocus={() => void refresh()}>
+      {devices.map((device, index) => (
+        <option key={device.deviceId} value={device.deviceId}>
+          {labelsAvailable ? device.label : `Camera ${index + 1}`}
+        </option>
+      ))}
+    </select>
+  );
+}
+```
+
+| Field             | Description                                                                       |
+| ----------------- | --------------------------------------------------------------------------------- |
+| `devices`         | Last loaded devices. Empty before the first load.                                 |
+| `labelsAvailable` | `true` when there are devices and all have a `label`.                             |
+| `error`           | Last load error, or `undefined`. The hook does not throw.                         |
+| `refresh()`       | Loads the list again. Call it after the user grants permission to get the labels. |
+
+Before camera or microphone permission is granted, browsers return an empty `label`.
+When `labelsAvailable` is `false`, show a fallback name such as `Camera 1`.
+
 ## Labels And Localization
 
 The built-in button labels default to Korean. Pass the `labels` prop when you

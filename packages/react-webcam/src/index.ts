@@ -1,6 +1,8 @@
 // Public API surface for package consumers.
 // Internal helpers and implementation details stay private.
 
+export { useMediaDevices } from "./hooks/useMediaDevices.js";
+export type { UseMediaDevicesResult } from "./hooks/useMediaDevices.js";
 export { useWebcam } from "./hooks/useWebcam.js";
 export type { UseWebcamOptions, UseWebcamResult } from "./hooks/useWebcam.js";
 

@@ -430,6 +430,41 @@ const selectedDeviceId = allDevices[0]?.deviceId;
 <Webcam webcamOptions={{ deviceId: selectedDeviceId }} />;
 ```
 
+### `useMediaDevices`로 디바이스 변경 따라가기
+
+`useMediaDevices(kind?)`는 마운트 뒤에 디바이스 목록을 불러오고, USB 카메라를 꽂거나 뽑을 때처럼
+`devicechange` 이벤트가 발생할 때마다 목록을 갱신합니다.
+
+```tsx
+import { useMediaDevices } from "@cp949/react-webcam";
+
+function CameraPicker({ onSelect }: { onSelect: (deviceId: string) => void }) {
+  const { devices, labelsAvailable, error, refresh } = useMediaDevices("videoinput");
+
+  if (error) return <p>카메라 목록을 불러오지 못했습니다: {error.message}</p>;
+
+  return (
+    <select onChange={(e) => onSelect(e.target.value)} onFocus={() => void refresh()}>
+      {devices.map((device, index) => (
+        <option key={device.deviceId} value={device.deviceId}>
+          {labelsAvailable ? device.label : `카메라 ${index + 1}`}
+        </option>
+      ))}
+    </select>
+  );
+}
+```
+
+| 필드              | 설명                                                                     |
+| ----------------- | ------------------------------------------------------------------------ |
+| `devices`         | 마지막으로 불러온 디바이스 목록. 첫 조회 전에는 빈 배열입니다.           |
+| `labelsAvailable` | 디바이스가 있고 모두 `label`이 있으면 `true`입니다.                      |
+| `error`           | 마지막 조회 오류. 없으면 `undefined`입니다. 훅은 예외를 던지지 않습니다. |
+| `refresh()`       | 목록을 다시 불러옵니다. 권한 허용 뒤 label을 얻을 때 호출합니다.         |
+
+카메라·마이크 권한을 허용하기 전에는 브라우저가 `label`을 빈 문자열로 반환합니다.
+`labelsAvailable`이 `false`이면 `카메라 1` 같은 대체 이름을 보여 주세요.
+
 ## 라벨과 로컬라이제이션
 
 내장 버튼 라벨의 기본값은 한국어입니다. 영어 UI나 서비스 문구에 맞추려면

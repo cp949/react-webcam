@@ -17,20 +17,22 @@ cp -R "$fixture_dir/." "$temp_dir"
 rm -rf "$temp_dir/node_modules" "$temp_dir/.artifacts"
 mkdir "$temp_dir/.artifacts"
 
-corepack pnpm --dir "$package_dir" pack --pack-destination "$temp_dir/.artifacts"
+# 중첩된 Corepack 실행은 자식 pnpm의 버전 자동 전환을 막는다. pnpm이 packageManager를 직접 따르게 한다.
+pnpm --dir "$package_dir" pack --pack-destination "$temp_dir/.artifacts"
 tarball=$(find "$temp_dir/.artifacts" -maxdepth 1 -name '*.tgz' -print -quit)
 test -n "$tarball"
 mv "$tarball" "$temp_dir/.artifacts/react-webcam.tgz"
 
-node --input-type=module - "$temp_dir/package.json" <<'NODE'
+node --input-type=module - "$temp_dir/package.json" "$repository_dir/package.json" <<'NODE'
 import { readFile, writeFile } from "node:fs/promises";
 
 const manifestPath = process.argv[2];
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
+manifest.packageManager = JSON.parse(await readFile(process.argv[3], "utf8")).packageManager;
 manifest.devDependencies["@cp949/react-webcam"] = "file:.artifacts/react-webcam.tgz";
 await writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 NODE
 
-corepack pnpm --dir "$temp_dir" install --ignore-scripts
-CHROME75_PACKED_FIXTURE=1 corepack pnpm --dir "$temp_dir" build
-corepack pnpm --dir "$temp_dir" test:contract
+pnpm --dir "$temp_dir" install --ignore-scripts
+CHROME75_PACKED_FIXTURE=1 pnpm --dir "$temp_dir" build
+pnpm --dir "$temp_dir" test:contract

@@ -94,11 +94,11 @@ podman run --rm --network host --userns=keep-id \
 트리거하지 않는다.
 
 release-it 설정은 `packages/react-webcam/.release-it.json`에 있다.
-`requireBranch: "main"`이 설정되어 있어 main이 아닌 브랜치에서는 실행이 거부된다.
+`requireBranch: ["main", "dev"]`가 설정되어 있어 main 또는 dev에서 실행할 수 있다.
+두 브랜치 모두 정식 npm 릴리스와 `vX.Y.Z` 태그를 생성하며 prerelease로 자동 전환하지 않는다.
 
-0. 작업 브랜치의 변경 사항을 먼저 `main`에 머지한다. release-it은 main 브랜치가
-   아니면 실행을 거부한다.
-1. main 브랜치에서 아래 검증을 모두 통과시킨다.
+0. 배포할 변경 사항을 `main` 또는 `dev`에 반영하고 작업 트리를 깨끗하게 유지한다.
+1. 배포할 브랜치에서 아래 검증을 모두 통과시킨다.
    - `pnpm test` (`readme:package:check`를 첫 단계로 이미 실행한다)
    - `pnpm check-types`
    - `pnpm lint`
@@ -110,9 +110,7 @@ release-it 설정은 `packages/react-webcam/.release-it.json`에 있다.
    pnpm release --dry-run --ci
    ```
    `--ci`는 비TTY 셸에서 커밋 확인 Y/n 프롬프트가 멈추는 것을 막기 위해 필요하다.
-   main이 아닌 브랜치에서 dry-run만 테스트할 때는 `--no-git.requireBranch`를 추가로
-   붙인다(`pnpm release --dry-run --ci --no-git.requireBranch`). 실제 릴리스는
-   항상 main에서 실행하므로 이 플래그는 필요 없다.
+   main과 dev에서는 브랜치 제한을 우회하는 옵션 없이 dry-run과 실제 릴리스를 실행한다.
 3. 문제가 없으면 루트에서 릴리스를 실행한다.
    ```bash
    pnpm release

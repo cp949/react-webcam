@@ -221,7 +221,7 @@ export function CameraSource() {
 
 ## 카메라 에러 분류
 
-### 다음 major 릴리스의 마이그레이션
+### 2.0.0 마이그레이션
 
 `SecurityError`의 분류가 `insecure-context` / `insecure`에서
 `security-error` / `error`로 바뀐다. 모든 `SecurityError`를 HTTPS 문제로

@@ -71,6 +71,7 @@ Common commands:
 ```bash
 pnpm dev
 pnpm build
+pnpm release-it
 pnpm lint
 pnpm lint:fix
 pnpm format
@@ -80,6 +81,10 @@ pnpm test:chrome83
 pnpm readme:package
 pnpm readme:package:check
 ```
+
+`pnpm release-it` runs the package release workflow from the repository root.
+It requires a clean `main` or `dev` branch and performs versioning, tagging, pushing,
+and npm publishing. See the [2.0.0 release handoff](./docs/releases/2.0.0.md).
 
 `pnpm lint` and `pnpm lint:fix` run oxlint with the root `.oxlintrc.json`.
 `pnpm format` runs Prettier with `prettier.config.mjs` and rewrites files.

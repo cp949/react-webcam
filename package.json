@@ -4,6 +4,7 @@
   "scripts": {
     "build": "turbo run build",
     "release": "pnpm --filter @cp949/react-webcam release",
+    "release-it": "pnpm --filter @cp949/react-webcam release",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",

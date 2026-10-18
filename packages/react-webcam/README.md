@@ -236,7 +236,7 @@ export function CameraSource() {
 
 ## Camera Error Classification
 
-### Migration For The Next Major Release
+### Migration To 2.0.0
 
 `SecurityError` now reports `security-error` / `error` instead of
 `insecure-context` / `insecure`. Update branches that previously treated every

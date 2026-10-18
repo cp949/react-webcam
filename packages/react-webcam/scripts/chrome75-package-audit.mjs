@@ -67,10 +67,7 @@ function findJavaScriptRuntimeApis(node, found) {
     ) {
       found.add("OBJECT_HAS_OWN");
     }
-    if (
-      calledMember === "addEventListener" &&
-      isStringValue(node.arguments[0], "scrollend")
-    ) {
+    if (calledMember === "addEventListener" && isStringValue(node.arguments[0], "scrollend")) {
       found.add("SCROLLEND");
     }
   }
@@ -127,7 +124,9 @@ export async function auditChrome75Package(rootPath) {
   );
 
   diagnostics.sort((left, right) =>
-    left.path === right.path ? left.code.localeCompare(right.code) : left.path.localeCompare(right.path),
+    left.path === right.path
+      ? left.code.localeCompare(right.code)
+      : left.path.localeCompare(right.path),
   );
   if (diagnostics.length > 0) throw new Chrome75PackageAuditError(diagnostics);
 
@@ -139,5 +138,7 @@ export async function auditChrome75Package(rootPath) {
 
 if (process.argv[1] === new URL(import.meta.url).pathname) {
   const result = await auditChrome75Package(process.cwd());
-  console.log(`[chrome75-audit] ${result.sources.length} source file(s), ${result.artifacts.length} artifact(s)`);
+  console.log(
+    `[chrome75-audit] ${result.sources.length} source file(s), ${result.artifacts.length} artifact(s)`,
+  );
 }

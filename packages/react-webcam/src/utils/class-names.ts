@@ -3,13 +3,7 @@
 type ClassNameDictionary = Record<string, unknown>;
 
 export type ClassNameValue =
-  | ClassNameDictionary
-  | ClassNameValue[]
-  | boolean
-  | null
-  | number
-  | string
-  | undefined;
+  ClassNameDictionary | ClassNameValue[] | boolean | null | number | string | undefined;
 
 function appendClassName(className: string, value: string): string {
   return className ? `${className} ${value}` : value;

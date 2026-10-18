@@ -3,10 +3,7 @@ import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
-import {
-  Chrome75PackageAuditError,
-  auditChrome75Package,
-} from "./chrome75-package-audit.mjs";
+import { Chrome75PackageAuditError, auditChrome75Package } from "./chrome75-package-audit.mjs";
 
 async function withPackage(files, callback) {
   const directory = await mkdtemp(join(tmpdir(), "react-webcam-chrome75-audit-"));
@@ -71,24 +68,21 @@ test("rejects the explicit Chrome 75 runtime API denylist in source and artifact
       ].join("\n"),
     },
     async (directory) => {
-      await assert.rejects(
-        auditChrome75Package(directory),
-        (error) => {
-          assert.ok(error instanceof Chrome75PackageAuditError);
-          assert.deepEqual(
-            error.diagnostics.map((diagnostic) => diagnostic.code),
-            [
-              "ARRAY_AT",
-              "ARRAY_FIND_LAST",
-              "CRYPTO_RANDOM_UUID",
-              "OBJECT_HAS_OWN",
-              "SCROLLEND",
-              "STRUCTURED_CLONE",
-            ],
-          );
-          return true;
-        },
-      );
+      await assert.rejects(auditChrome75Package(directory), (error) => {
+        assert.ok(error instanceof Chrome75PackageAuditError);
+        assert.deepEqual(
+          error.diagnostics.map((diagnostic) => diagnostic.code),
+          [
+            "ARRAY_AT",
+            "ARRAY_FIND_LAST",
+            "CRYPTO_RANDOM_UUID",
+            "OBJECT_HAS_OWN",
+            "SCROLLEND",
+            "STRUCTURED_CLONE",
+          ],
+        );
+        return true;
+      });
     },
   );
 });

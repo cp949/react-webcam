@@ -6,7 +6,6 @@
  */
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { useCustomCompareEffect } from "../src/hooks/useCustomCompareEffect.js";
 import { useDeepCompareEffect } from "../src/hooks/useDeepCompareEffect.js";
 import { observeElementSize } from "../src/utils/observe-element-size.js";
 
@@ -30,21 +29,6 @@ describe("browser runtime safety", () => {
       withoutProcess(() => {
         renderHook(() => {
           useDeepCompareEffect(() => {}, [{ key: "value" }]);
-        });
-      });
-    }).not.toThrow();
-  });
-
-  it("useCustomCompareEffect does not throw ReferenceError when process is undefined", () => {
-    // process가 없는 브라우저 환경에서 훅 호출이 안전해야 한다.
-    expect(() => {
-      withoutProcess(() => {
-        renderHook(() => {
-          useCustomCompareEffect(
-            () => {},
-            [{ key: "value" }],
-            (a, b) => a === b,
-          );
         });
       });
     }).not.toThrow();

@@ -505,6 +505,116 @@ function CameraPicker({ onSelect }: { onSelect: (deviceId: string) => void }) {
 카메라·마이크 권한을 허용하기 전에는 브라우저가 `label`을 빈 문자열로 반환합니다.
 `labelsAvailable`이 `false`이면 `카메라 1` 같은 대체 이름을 보여 주세요.
 
+## 레시피
+
+### QR 스캔: 프레임이 준비되면 시작
+
+`isFrameReady`가 `true`가 된 뒤에 프레임 콜백 루프를 시작한다.
+`live`만으로는 프레임 도착을 보장하지 않으므로 `detail.phase`로 시작 시점을 정하지 않는다.
+`decode`는 앱이 고른다. `BarcodeDetector` 또는 QR 디코딩 라이브러리를 감싼다.
+`decode`와 `onResult`는 안정된 참조로 넘긴다. 참조가 바뀌면 루프가 다시 시작된다.
+`requestVideoFrameCallback`을 지원하지 않는 브라우저는 `requestAnimationFrame`으로 바꾼다.
+
+```tsx
+import { useEffect, useState } from "react";
+import { useWebcam } from "@cp949/react-webcam";
+
+export function QrScanner({
+  decode,
+  onResult,
+}: {
+  decode: (video: HTMLVideoElement) => Promise<string | null>;
+  onResult: (text: string) => void;
+}) {
+  const [video, setVideo] = useState<HTMLVideoElement | null>(null);
+  const { isFrameReady } = useWebcam({
+    videoElement: video,
+    webcamOptions: { facingMode: "environment" },
+  });
+
+  useEffect(() => {
+    if (!video || !isFrameReady) return;
+    let canceled = false;
+    let handle = 0;
+
+    const scan = async () => {
+      const text = await decode(video).catch(() => null);
+      if (canceled) return;
+      if (text) {
+        onResult(text);
+        return;
+      }
+      handle = video.requestVideoFrameCallback(scan);
+    };
+
+    handle = video.requestVideoFrameCallback(scan);
+    return () => {
+      canceled = true;
+      video.cancelVideoFrameCallback(handle);
+    };
+  }, [video, isFrameReady, decode, onResult]);
+
+  return <video ref={setVideo} muted playsInline />;
+}
+```
+
+### 권한 거부 안내 화면과 `retry`
+
+`denied` 상태에서는 `permission-denied`와 `policy-blocked`가 모두 해당한다.
+권한을 거부한 뒤에는 브라우저가 프롬프트를 다시 띄우지 않을 수 있다.
+사용자가 브라우저 설정에서 허용하기 전까지 `retry()`는 같은 오류로 실패한다.
+안내 문구는 이 점을 전제로 쓴다. 코드별 조치는 "에러 코드별 원인과 조치" 표를 따른다.
+
+```tsx
+<Webcam
+  errorFallback={(detail, { retry }) =>
+    detail.phase === "denied" ? (
+      <div>
+        <p>카메라 권한이 필요합니다. 주소창의 카메라 아이콘에서 허용해 주세요.</p>
+        <button onClick={retry}>허용했습니다. 다시 시도</button>
+      </div>
+    ) : (
+      <div>
+        <p>카메라를 시작할 수 없습니다. ({detail.errorCode})</p>
+        <button onClick={retry}>다시 시도</button>
+      </div>
+    )
+  }
+/>
+```
+
+### 스냅샷을 `Blob`으로 업로드
+
+`onSnapshot`이 받는 캔버스에서 `canvas.toBlob`을 직접 호출한다.
+`toBlob`은 실패하면 `null`을 넘기므로 `Promise`로 감싸 오류로 바꾼다.
+`/api/snapshots`는 예시 경로다. 앱의 업로드 주소로 바꾼다.
+
+```tsx
+function toBlob(canvas: HTMLCanvasElement, type: string, quality: number) {
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("toBlob 실패"))),
+      type,
+      quality,
+    );
+  });
+}
+
+async function uploadSnapshot(canvas: HTMLCanvasElement) {
+  const body = new FormData();
+  body.append("file", await toBlob(canvas, "image/jpeg", 0.9), "snapshot.jpg");
+  const response = await fetch("/api/snapshots", { method: "POST", body });
+  if (!response.ok) throw new Error(`업로드 실패: ${response.status}`);
+}
+
+<Webcam
+  visibleSnapshotButton
+  onSnapshot={(canvas) => {
+    uploadSnapshot(canvas).catch(console.error);
+  }}
+/>;
+```
+
 ## 스타일링
 
 ### CSS 변수

@@ -524,6 +524,116 @@ function CameraPicker({ onSelect }: { onSelect: (deviceId: string) => void }) {
 Before camera or microphone permission is granted, browsers return an empty `label`.
 When `labelsAvailable` is `false`, show a fallback name such as `Camera 1`.
 
+## Recipes
+
+### QR Scan: Start When A Frame Is Ready
+
+Start the frame-callback loop after `isFrameReady` becomes `true`.
+`live` alone does not guarantee that a frame has arrived, so do not use `detail.phase` as the start signal.
+The app picks `decode`. Wrap `BarcodeDetector` or a QR decoding library.
+Pass stable references for `decode` and `onResult`. A changed reference restarts the loop.
+In browsers without `requestVideoFrameCallback`, switch to `requestAnimationFrame`.
+
+```tsx
+import { useEffect, useState } from "react";
+import { useWebcam } from "@cp949/react-webcam";
+
+export function QrScanner({
+  decode,
+  onResult,
+}: {
+  decode: (video: HTMLVideoElement) => Promise<string | null>;
+  onResult: (text: string) => void;
+}) {
+  const [video, setVideo] = useState<HTMLVideoElement | null>(null);
+  const { isFrameReady } = useWebcam({
+    videoElement: video,
+    webcamOptions: { facingMode: "environment" },
+  });
+
+  useEffect(() => {
+    if (!video || !isFrameReady) return;
+    let canceled = false;
+    let handle = 0;
+
+    const scan = async () => {
+      const text = await decode(video).catch(() => null);
+      if (canceled) return;
+      if (text) {
+        onResult(text);
+        return;
+      }
+      handle = video.requestVideoFrameCallback(scan);
+    };
+
+    handle = video.requestVideoFrameCallback(scan);
+    return () => {
+      canceled = true;
+      video.cancelVideoFrameCallback(handle);
+    };
+  }, [video, isFrameReady, decode, onResult]);
+
+  return <video ref={setVideo} muted playsInline />;
+}
+```
+
+### Permission Denied Guide With `retry`
+
+Both `permission-denied` and `policy-blocked` land in the `denied` phase.
+After a denial, the browser may not show the prompt again.
+`retry()` fails with the same error until the user allows access in the browser settings.
+Write the guidance text with that in mind. For per-code actions, see the "Error Codes, Causes, And Actions" table.
+
+```tsx
+<Webcam
+  errorFallback={(detail, { retry }) =>
+    detail.phase === "denied" ? (
+      <div>
+        <p>Camera access is required. Allow it from the camera icon in the address bar.</p>
+        <button onClick={retry}>I allowed it, try again</button>
+      </div>
+    ) : (
+      <div>
+        <p>The camera could not start. ({detail.errorCode})</p>
+        <button onClick={retry}>Try again</button>
+      </div>
+    )
+  }
+/>
+```
+
+### Upload A Snapshot As A `Blob`
+
+Call `canvas.toBlob` directly on the canvas that `onSnapshot` receives.
+`toBlob` passes `null` on failure, so wrap it in a `Promise` and turn that into an error.
+`/api/snapshots` is an example path. Replace it with your upload endpoint.
+
+```tsx
+function toBlob(canvas: HTMLCanvasElement, type: string, quality: number) {
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error("toBlob failed"))),
+      type,
+      quality,
+    );
+  });
+}
+
+async function uploadSnapshot(canvas: HTMLCanvasElement) {
+  const body = new FormData();
+  body.append("file", await toBlob(canvas, "image/jpeg", 0.9), "snapshot.jpg");
+  const response = await fetch("/api/snapshots", { method: "POST", body });
+  if (!response.ok) throw new Error(`Upload failed: ${response.status}`);
+}
+
+<Webcam
+  visibleSnapshotButton
+  onSnapshot={(canvas) => {
+    uploadSnapshot(canvas).catch(console.error);
+  }}
+/>;
+```
+
 ## Styling
 
 ### CSS Variables

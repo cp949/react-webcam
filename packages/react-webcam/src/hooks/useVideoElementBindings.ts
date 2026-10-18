@@ -6,13 +6,11 @@
  * - transform(좌우 반전) 반영
  * - objectFit 반영
  * - loadedmetadata / loadeddata 이벤트로 실제 비디오 해상도 수집
- * - debug 목적 비디오 이벤트 구독
  *
  * `useWebcamController`에서 DOM 계층 effect를 격리해
  * orchestrator가 상태 관리와 stream lifecycle에만 집중할 수 있게 한다.
  */
 import { useEffect, useRef, useState } from "react";
-import { startDebugVideoEventListener } from "../utils/media-debug.js";
 import { playVideo } from "../utils/play-video.js";
 import type { WebcamFitMode } from "../webcam-types.js";
 
@@ -27,9 +25,6 @@ export type UseVideoElementBindingsOptions = {
 
   /** object-fit 값 */
   fitMode: WebcamFitMode | undefined;
-
-  /** 비디오 이벤트 디버그 로깅 활성화 여부 */
-  debugVideoEvents: boolean;
 
   /** 외부 video를 사용할 때 호출자가 정한 표시 스타일을 보존한다. */
   manageVideoStyle?: boolean;
@@ -59,7 +54,6 @@ export function useVideoElementBindings({
   mediaStream,
   flipped,
   fitMode,
-  debugVideoEvents,
   manageVideoStyle = true,
   onVideoSizeChange,
   onPlayError,
@@ -193,12 +187,6 @@ export function useVideoElementBindings({
       videoElement.removeEventListener("playing", handlePlaying);
     };
   }, [videoElement, mediaStream]);
-
-  // ─── debug 이벤트 리스너 ────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!videoElement || !debugVideoEvents) return;
-    return startDebugVideoEventListener(videoElement);
-  }, [videoElement, debugVideoEvents]);
 
   return (
     !!frameState?.ready &&

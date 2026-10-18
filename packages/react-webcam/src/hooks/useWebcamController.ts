@@ -52,9 +52,6 @@ export type UseWebcamControllerResult = WebcamController & {
 
   /** 비디오 표시 방식을 바꾸는 함수 */
   setFitMode: (mode: WebcamFitMode | undefined) => void;
-
-  /** 비디오 이벤트 디버그 로깅을 켜고 끄는 함수 */
-  setDebugVideoEvents: (enabled: boolean) => void;
 };
 
 // ---------------------------------------------------------------------------
@@ -90,7 +87,7 @@ function getAudioTrackDeviceId(stream: MediaStream | undefined): string | undefi
  * 웹캠 스트림 생명주기와 뷰 상태, 스냅샷 액션을 React 상태만으로 관리한다.
  *
  * 원천 상태:
- * - `webcamOptions`, `flipped`, `videoElement`, `fitMode`, `debugVideoEvents`
+ * - `webcamOptions`, `flipped`, `videoElement`, `fitMode`
  * - `videoSize` — loadedmetadata 이후 확인된 실제 비디오 해상도
  *
  * 파생값:
@@ -117,7 +114,6 @@ export function useWebcamController(
   const [fitMode, setFitModeState] = useState<WebcamFitMode | undefined>(
     undefined,
   );
-  const [debugVideoEvents, setDebugVideoEvents] = useState(false);
   // 실제 비디오 해상도 — loadedmetadata / loadeddata 이후 useVideoElementBindings가 보고한다.
   const [videoSize, setVideoSize] = useState<{ width: number; height: number } | undefined>(
     undefined,
@@ -175,13 +171,12 @@ export function useWebcamController(
   // - 실제 비디오 메타데이터가 확보되어야 한다
   const isLoaded = webcamDetail.phase === "live" && !!videoElement && !!videoSize;
 
-  // ─── DOM 바인딩 (srcObject, transform, objectFit, 해상도 관찰, debug) ───────
+  // ─── DOM 바인딩 (srcObject, transform, objectFit, 해상도 관찰) ───────
   const hasFrame = useVideoElementBindings({
     videoElement,
     mediaStream: mediaStreamResult.mediaStream,
     flipped,
     fitMode,
-    debugVideoEvents,
     manageVideoStyle: options.manageVideoStyle,
     onVideoSizeChange: setVideoSize,
     onPlayError: (mediaStream, error) => {
@@ -296,7 +291,6 @@ export function useWebcamController(
 
       setVideoElement,
       setFitMode,
-      setDebugVideoEvents,
     }),
     [
       flipped,
@@ -313,7 +307,6 @@ export function useWebcamController(
       setWebcamOptions,
       setVideoElement,
       setFitMode,
-      setDebugVideoEvents,
     ],
   );
 }

@@ -273,12 +273,16 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     current: flipped,
     onChange: onFlippedChange,
     setInternal: setFlipped,
+    propName: "flipped",
+    callbackName: "onFlippedChange",
   });
   const requestWebcamOptions = useControllableChange<WebcamOptions, WebcamOptions | undefined>({
     isControlled: isWebcamOptionsControlled,
     current: webcamOptions,
     onChange: onWebcamOptionsChange,
     setInternal: setWebcamOptions,
+    propName: "webcamOptions",
+    callbackName: "onWebcamOptionsChange",
   });
 
   // ---- 명령형 핸들 구성 ---------------------------------------------------

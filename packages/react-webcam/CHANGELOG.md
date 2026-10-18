@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.0.0](https://github.com/cp949/react-webcam/compare/v1.3.0...v2.0.0) (2026-10-18)
+
+### ⚠ BREAKING CHANGES
+
+* SecurityError now reports errorCode security-error and phase error instead of insecure-context and insecure. WebcamErrorCode adds security-error and policy-blocked; consumers must update exhaustive error handling. Actual insecure contexts retain insecure-context and insecure.
+
+### Features
+
+* 외부 video용 웹캠 훅과 카메라 에러 분류 개선 ([c5eda0f](https://github.com/cp949/react-webcam/commit/c5eda0ff981790271dcbc42af876c0aa5146670b))
+
 ## 1.3.0
 
 ### Minor Changes

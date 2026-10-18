@@ -131,7 +131,11 @@ export type WebcamOptions = {
   /** Enables audio capture. */
   audioEnabled?: boolean;
 
-  /** Preferred video size, or `"element-size"` to mirror the rendered element. */
+  /**
+   * Preferred video size, or `"element-size"` to mirror the rendered element.
+   * With `"element-size"`, size changes under 10% of the last requested size
+   * (both width and height) do not request the stream again.
+   */
   size?: { width?: number; height?: number } | "element-size";
 
   /** Preferred aspect ratio. */

@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import { extname, join, relative, resolve } from "node:path";
 import { parse } from "acorn";
-import ts from "typescript";
+import ts from "typescript-api";
 
 const ARTIFACTS = ["dist/index.cjs", "dist/index.js"];
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx"]);

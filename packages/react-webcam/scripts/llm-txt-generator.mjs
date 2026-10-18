@@ -1,7 +1,7 @@
 /**
  * `dist/index.d.ts`와 보조 가이드를 바탕으로 에이전트 소비용 `llm.txt`를 조합하는 생성기다.
  */
-import * as ts from "typescript";
+import * as ts from "typescript-api";
 
 /** 줄바꿈과 후행 공백을 정리해 출력 비교가 안정적으로 유지되게 한다. */
 function normalizeText(value) {

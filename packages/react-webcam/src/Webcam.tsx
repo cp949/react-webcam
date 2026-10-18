@@ -289,20 +289,24 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   // ---- 명령형 핸들 구성 ---------------------------------------------------
   // 외부에 공개하는 메서드만 명시적으로 조립한다.
   // controlled 모드에서 setFlipped/setWebcamOptions는 onXxxChange 콜백만 호출한다.
+  // 핸들 객체는 한 번만 만든다. 소비자가 캐시한 핸들도 최신 상태를 보도록
+  // 메서드는 호출 시점에 latestRef에서 최신 값을 읽는다.
+  const latestRef = useRef({ ctrl, requestFlipped, requestWebcamOptions });
+  latestRef.current = { ctrl, requestFlipped, requestWebcamOptions };
   useImperativeHandle(
     ref,
     () => ({
-      snapshotToCanvas: ctrl.snapshotToCanvas,
-      getDetail: () => ctrl.webcamDetail,
-      getPlayingVideoDeviceId: ctrl.getPlayingVideoDeviceId,
-      getPlayingAudioDeviceId: ctrl.getPlayingAudioDeviceId,
-      setFlipped: requestFlipped,
-      setWebcamOptions: requestWebcamOptions,
-      pausePlayback: ctrl.pausePlayback,
-      resumePlayback: ctrl.resumePlayback,
-      retry: ctrl.retry,
+      snapshotToCanvas: (options) => latestRef.current.ctrl.snapshotToCanvas(options),
+      getDetail: () => latestRef.current.ctrl.webcamDetail,
+      getPlayingVideoDeviceId: () => latestRef.current.ctrl.getPlayingVideoDeviceId(),
+      getPlayingAudioDeviceId: () => latestRef.current.ctrl.getPlayingAudioDeviceId(),
+      setFlipped: (value) => latestRef.current.requestFlipped(value),
+      setWebcamOptions: (updater) => latestRef.current.requestWebcamOptions(updater),
+      pausePlayback: () => latestRef.current.ctrl.pausePlayback(),
+      resumePlayback: () => latestRef.current.ctrl.resumePlayback(),
+      retry: () => latestRef.current.ctrl.retry(),
     }),
-    [ctrl, requestFlipped, requestWebcamOptions],
+    [],
   );
 
   // ---- prop → 컨트롤러 동기화 -------------------------------------------

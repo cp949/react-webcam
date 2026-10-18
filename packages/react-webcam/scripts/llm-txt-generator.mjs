@@ -8,7 +8,7 @@ function unwrapDeclaration(node) {
   return node.type === "ExportNamedDeclaration" && node.declaration ? node.declaration : node;
 }
 
-/** 소스 텍스트와 최상위 문장 목록을 한 객체로 묶는다. 노드 텍스트는 이 텍스트를 잘라 만든다. */
+/** TypeScript 선언을 파싱하고 원문 추출에 필요한 노드·주석 위치와 소스 텍스트를 보관한다. */
 function parseDeclarationText(fileName, text) {
   const { program, comments } = parseSync(fileName, text, { lang: "ts" });
   return { statements: program.body, comments, text };
@@ -27,7 +27,7 @@ function printNode(node, sourceFile) {
   return (result + sourceFile.text.slice(cursor, node.end)).replace(/\n[ \t]*(?=\n)/g, "");
 }
 
-/** 자식 노드를 순회한다. 노드는 `type` 문자열을 가진 객체다. */
+/** `type` 문자열을 가진 직접 자식 노드에만 콜백을 호출한다. 재귀 순회는 호출자가 맡는다. */
 function forEachChild(node, callback) {
   for (const value of Object.values(node)) {
     if (Array.isArray(value)) {

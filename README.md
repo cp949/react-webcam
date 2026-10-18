@@ -81,6 +81,11 @@ pnpm readme:package
 pnpm readme:package:check
 ```
 
+`pnpm lint` and `pnpm lint:fix` run oxlint with the root `.oxlintrc.json`.
+`pnpm format` runs Prettier with `prettier.config.mjs` and rewrites files.
+These commands cover `apps/demo` and `packages/react-webcam`, whose package scripts
+define the corresponding tasks; they do not cover every file in the repository.
+
 `pnpm test:chrome83` must run inside the `docker/chrome83` container.
 See `CLAUDE.md` for the full steps.
 

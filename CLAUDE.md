@@ -193,12 +193,12 @@ GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-we
 ## 코드 스타일과 구현 규칙
 
 - TypeScript strict 모드
-- oxlint로 린트, Prettier로 포매팅 수행 (설정: 루트 `.oxlintrc.json`)
-- `scripts/*.mjs`에서 TS 소스를 파싱할 때는 `oxc-parser`를 쓴다. TS 7에는 JS 컴파일러 API가 없다
+- oxlint로 린트, Prettier로 포매팅 수행 (설정: 루트 `.oxlintrc.json`, `prettier.config.mjs`)
+- `packages/react-webcam/scripts/*.mjs`에서 TypeScript 소스와 선언 파일은 `oxc-parser`로 파싱한다. Chrome 75 정적 검사에서 배포 JavaScript의 ES2019 구문은 `acorn`으로 검사한다.
 - import 경로에 `.js` 확장자 사용
 - 라이브러리 출력은 tsdown으로 빌드
 - 주석과 UI 라벨은 한국어 유지가 기본 원칙이다
-- 작은따옴표, 세미콜론, 2칸 들여쓰기를 따른다
+- 큰따옴표(JSX 속성은 작은따옴표), 세미콜론, 2칸 들여쓰기를 따른다
 
 ## 작업할 때 추천 순서
 

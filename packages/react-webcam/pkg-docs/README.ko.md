@@ -24,7 +24,13 @@ npm install react@^19 react-dom@^19
 
 ## 브라우저 호환성 목표
 
-pack된 라이브러리 산출물과 소비자 번들은 Chrome Desktop 75에서 동작을 확인했습니다.
+pack된 라이브러리 산출물과 소비자 번들은 Chrome Desktop 75를 호환성 목표로 삼는다.
+Chrome 75에서 직접 실행한 기록을 뜻하지 않는다. 카메라 접근에는 HTTPS 또는
+localhost, 사용자 권한, 사용 가능한 장치가 필요하다. 저장소의 Next/MUI 데모는
+별도 소비자이며 이 호환성 목표에 포함하지 않는다.
+
+Playwright의 CDP 제약으로 Chrome 75/76 자동화가 불가능하므로 자동화 검증의
+실제 하한은 Chrome 83이다. 이 검증은 CI가 아닌 릴리스 전 로컬 수동 스크립트로 실행한다.
 
 ## 기본 사용법
 

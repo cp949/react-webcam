@@ -80,6 +80,11 @@ pnpm readme:package
 pnpm readme:package:check
 ```
 
+`pnpm lint`와 `pnpm lint:fix`는 루트 `.oxlintrc.json`으로 oxlint를 실행한다.
+`pnpm format`은 `prettier.config.mjs`로 Prettier를 실행해 파일을 덮어쓴다.
+이 명령들은 해당 작업을 package script에 정의한 `apps/demo`와
+`packages/react-webcam`에 적용되며, 저장소의 모든 파일을 처리하지는 않는다.
+
 `pnpm test:chrome83`은 `docker/chrome83` 컨테이너 안에서 실행해야 합니다.
 전체 절차는 `CLAUDE.md`를 참고하세요.
 

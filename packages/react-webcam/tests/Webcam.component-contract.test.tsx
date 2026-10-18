@@ -357,6 +357,53 @@ describe("Webcam 공개 계약", () => {
     expect(queryByTestId("error-fallback")?.textContent).toBe("unavailable:device-not-found");
   });
 
+  it("errorFallback의 retry를 호출하면 스트림을 다시 요청해 live로 복구한다", async () => {
+    const notFoundError = Object.assign(new Error("camera not found"), { name: "NotFoundError" });
+    getUserMediaMock.mockRejectedValueOnce(notFoundError);
+    const onStateChange = vi.fn();
+
+    const { getByTestId, queryByTestId } = render(
+      <Webcam
+        webcamOptions={{ audioEnabled: false }}
+        onStateChange={onStateChange}
+        errorFallback={(_detail, { retry }) => (
+          <button data-testid='error-retry' onClick={retry}>
+            retry
+          </button>
+        )}
+      />,
+    );
+
+    await advanceToStreamLoad();
+    expect(getUserMediaMock).toHaveBeenCalledTimes(1);
+    expect(queryByTestId("error-retry")).not.toBeNull();
+
+    await act(async () => {
+      getByTestId("error-retry").click();
+    });
+    await advanceToStreamLoad();
+
+    expect(getUserMediaMock).toHaveBeenCalledTimes(2);
+    expect(onStateChange.mock.lastCall?.[0]?.phase).toBe("live");
+    expect(queryByTestId("error-retry")).toBeNull();
+  });
+
+  it("ref의 retry를 호출하면 같은 옵션으로 스트림을 다시 요청한다", async () => {
+    const ref = createRef<WebcamHandle>();
+    render(<Webcam ref={ref} webcamOptions={{ audioEnabled: false }} />);
+
+    await advanceToStreamLoad();
+    expect(getUserMediaMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      ref.current?.retry();
+    });
+    await advanceToStreamLoad();
+
+    expect(getUserMediaMock).toHaveBeenCalledTimes(2);
+    expect(getUserMediaMock).toHaveBeenLastCalledWith(expect.objectContaining({ audio: false }));
+  });
+
   it("disabled=true이면 errorFallback보다 disabledFallback을 우선 렌더링한다", async () => {
     const { queryByTestId } = render(
       <Webcam
@@ -937,6 +984,7 @@ describe("WebcamHandle ref 공개 표면", () => {
     expect(typeof ref.current?.setWebcamOptions).toBe("function");
     expect(typeof ref.current?.getPlayingVideoDeviceId).toBe("function");
     expect(typeof ref.current?.getPlayingAudioDeviceId).toBe("function");
+    expect(typeof ref.current?.retry).toBe("function");
   });
 
   it("ref handle에 video / mediaStream 직접 노출이 없다", async () => {

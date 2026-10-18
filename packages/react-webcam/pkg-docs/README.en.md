@@ -68,29 +68,29 @@ Using `fitMode` to match a fixed parent container:
 `Webcam` also accepts a `ref` to a `WebcamHandle` (see the Ref Handle section
 below) in addition to the props listed here.
 
-| Prop                           | Type                                                                  | Default         | Description                                                                                                                                                                                              |
-| ------------------------------ | --------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `style`                        | `React.CSSProperties`                                                 | —               | Inline style for the root element.                                                                                                                                                                       |
-| `className`                    | `string`                                                              | —               | Class name for the root element.                                                                                                                                                                         |
-| `children`                     | `React.ReactNode`                                                     | —               | Rendered inside the root element, overlaid on the video.                                                                                                                                                 |
-| `disabled`                     | `boolean`                                                             | `false`         | Keeps the component mounted without requesting camera access (see Disabled State below).                                                                                                                 |
-| `disabledFallback`             | `React.ReactNode`                                                     | —               | Custom UI rendered instead of the built-in placeholder while `disabled`.                                                                                                                                 |
-| `errorFallback`                | `React.ReactNode \| ((detail: WebcamErrorDetail) => React.ReactNode)` | —               | Custom UI for the `denied` / `unavailable` / `unsupported` / `insecure` / `error` phases. Does not cover `playback-error`.                                                                               |
-| `onStateChange`                | `(state: WebcamDetail) => void`                                       | —               | Called whenever `WebcamDetail` changes (see Observe Runtime State below).                                                                                                                                |
-| `fitMode`                      | `"unset" \| "fill" \| "cover" \| "contain"`                           | `"unset"`       | How the video fills its box when `webcamOptions.aspectRatio` is not set.                                                                                                                                 |
-| `flipped`                      | `boolean`                                                             | —               | Horizontal flip value for controlled mode. Use with `onFlippedChange` so the parent updates the state (see `flipped` below).                                                                             |
-| `onFlippedChange`              | `(value: boolean) => void`                                            | —               | Use with `flipped`. Called when a flip change is requested.                                                                                                                                              |
-| `defaultFlipped`               | `boolean`                                                             | `false`         | Initial flip state for uncontrolled mode. Applied once on mount.                                                                                                                                         |
-| `webcamOptions`                | `WebcamOptions`                                                       | —               | Camera options for controlled mode (`facingMode`, `aspectRatio`, `audioEnabled`, `deviceId`, `size`, ...). Use with `onWebcamOptionsChange` so the parent updates the state (see `webcamOptions` below). |
-| `onWebcamOptionsChange`        | `(options: WebcamOptions) => void`                                    | —               | Use with `webcamOptions`. Called when an option change is requested.                                                                                                                                     |
-| `defaultWebcamOptions`         | `WebcamOptions`                                                       | —               | Initial camera options for uncontrolled mode. Applied once on mount.                                                                                                                                     |
-| `visibleFlipButton`            | `boolean`                                                             | `false`         | Shows the built-in flip toggle button.                                                                                                                                                                   |
-| `visibleCameraDirectionButton` | `boolean`                                                             | `false`         | Shows the built-in front/rear camera button.                                                                                                                                                             |
-| `visibleAspectRatioButton`     | `boolean`                                                             | `false`         | Shows the built-in aspect ratio button.                                                                                                                                                                  |
-| `visibleSnapshotButton`        | `boolean`                                                             | `false`         | Shows the built-in snapshot button.                                                                                                                                                                      |
-| `visibleVideoSizeDebug`        | `boolean`                                                             | `false`         | Shows a debug overlay with the video element size.                                                                                                                                                       |
-| `visibleConstraintsDebug`      | `boolean`                                                             | `false`         | Shows a debug overlay with the active `MediaStreamConstraints`.                                                                                                                                          |
-| `labels`                       | `WebcamLabels`                                                        | Korean defaults | Overrides for built-in button labels (see Labels And Localization below).                                                                                                                                |
+| Prop                           | Type                                                                                                  | Default         | Description                                                                                                                                                                                              |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `style`                        | `React.CSSProperties`                                                                                 | —               | Inline style for the root element.                                                                                                                                                                       |
+| `className`                    | `string`                                                                                              | —               | Class name for the root element.                                                                                                                                                                         |
+| `children`                     | `React.ReactNode`                                                                                     | —               | Rendered inside the root element, overlaid on the video.                                                                                                                                                 |
+| `disabled`                     | `boolean`                                                                                             | `false`         | Keeps the component mounted without requesting camera access (see Disabled State below).                                                                                                                 |
+| `disabledFallback`             | `React.ReactNode`                                                                                     | —               | Custom UI rendered instead of the built-in placeholder while `disabled`.                                                                                                                                 |
+| `errorFallback`                | `React.ReactNode \| ((detail: WebcamErrorDetail, helpers: { retry: () => void }) => React.ReactNode)` | —               | Custom UI for the `denied` / `unavailable` / `unsupported` / `insecure` / `error` phases. Does not cover `playback-error`.                                                                               |
+| `onStateChange`                | `(state: WebcamDetail) => void`                                                                       | —               | Called whenever `WebcamDetail` changes (see Observe Runtime State below).                                                                                                                                |
+| `fitMode`                      | `"unset" \| "fill" \| "cover" \| "contain"`                                                           | `"unset"`       | How the video fills its box when `webcamOptions.aspectRatio` is not set.                                                                                                                                 |
+| `flipped`                      | `boolean`                                                                                             | —               | Horizontal flip value for controlled mode. Use with `onFlippedChange` so the parent updates the state (see `flipped` below).                                                                             |
+| `onFlippedChange`              | `(value: boolean) => void`                                                                            | —               | Use with `flipped`. Called when a flip change is requested.                                                                                                                                              |
+| `defaultFlipped`               | `boolean`                                                                                             | `false`         | Initial flip state for uncontrolled mode. Applied once on mount.                                                                                                                                         |
+| `webcamOptions`                | `WebcamOptions`                                                                                       | —               | Camera options for controlled mode (`facingMode`, `aspectRatio`, `audioEnabled`, `deviceId`, `size`, ...). Use with `onWebcamOptionsChange` so the parent updates the state (see `webcamOptions` below). |
+| `onWebcamOptionsChange`        | `(options: WebcamOptions) => void`                                                                    | —               | Use with `webcamOptions`. Called when an option change is requested.                                                                                                                                     |
+| `defaultWebcamOptions`         | `WebcamOptions`                                                                                       | —               | Initial camera options for uncontrolled mode. Applied once on mount.                                                                                                                                     |
+| `visibleFlipButton`            | `boolean`                                                                                             | `false`         | Shows the built-in flip toggle button.                                                                                                                                                                   |
+| `visibleCameraDirectionButton` | `boolean`                                                                                             | `false`         | Shows the built-in front/rear camera button.                                                                                                                                                             |
+| `visibleAspectRatioButton`     | `boolean`                                                                                             | `false`         | Shows the built-in aspect ratio button.                                                                                                                                                                  |
+| `visibleSnapshotButton`        | `boolean`                                                                                             | `false`         | Shows the built-in snapshot button.                                                                                                                                                                      |
+| `visibleVideoSizeDebug`        | `boolean`                                                                                             | `false`         | Shows a debug overlay with the video element size.                                                                                                                                                       |
+| `visibleConstraintsDebug`      | `boolean`                                                                                             | `false`         | Shows a debug overlay with the active `MediaStreamConstraints`.                                                                                                                                          |
+| `labels`                       | `WebcamLabels`                                                                                        | Korean defaults | Overrides for built-in button labels (see Labels And Localization below).                                                                                                                                |
 
 ## Disabled State
 
@@ -142,19 +142,25 @@ Pass `disabledFallback` to replace the built-in placeholder completely.
 Pass `errorFallback` to render custom UI for error states such as permission
 denial, missing cameras, unsupported browsers, or insecure contexts. When passed
 as a function, it receives the current `WebcamDetail` so you can branch on
-`errorCode`.
+`errorCode`. The second argument provides `retry()`, which requests the camera
+again with the same options.
 
 ```tsx
 <Webcam
-  errorFallback={(detail) => (
+  errorFallback={(detail, { retry }) => (
     <div>
       {detail.errorCode === "device-not-found"
         ? "No camera is connected."
         : "Camera could not be started."}
+      <button onClick={retry}>Try again</button>
     </div>
   )}
 />
 ```
+
+The browser may not show the permission prompt again after a denial. In that
+case, `retry()` fails with the same error until the user allows access in the
+browser settings.
 
 `playback-error` is not covered by `errorFallback` because the stream is still
 alive and only video playback failed.
@@ -407,6 +413,7 @@ export function CameraWithSnapshot() {
 | `setWebcamOptions(updater)`  | Updates webcam options                                                   |
 | `pausePlayback()`            | Pauses only video playback, while keeping the camera stream alive        |
 | `resumePlayback()`           | Resumes paused video playback                                            |
+| `retry()`                    | Requests the camera stream again with the same options                   |
 
 > `pausePlayback()` and `resumePlayback()` only call `video.pause()` and
 > `video.play()`. They do not stop the camera hardware or stop any

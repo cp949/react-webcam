@@ -329,7 +329,7 @@ function renderExpandedWebcamProps() {
     "    className?: string;",
     "    disabled?: boolean;",
     "    disabledFallback?: React.ReactNode;",
-    '    errorFallback?: React.ReactNode | ((detail: Extract<WebcamDetail, { phase: "denied" | "unavailable" | "unsupported" | "insecure" | "error" }>) => React.ReactNode);',
+    '    errorFallback?: React.ReactNode | ((detail: Extract<WebcamDetail, { phase: "denied" | "unavailable" | "unsupported" | "insecure" | "error" }>, helpers: { retry: () => void }) => React.ReactNode);',
     "    onStateChange?: (state: WebcamDetail) => void;",
     '    fitMode?: "unset" | "fill" | "cover" | "contain";',
     "    flipped?: boolean;",

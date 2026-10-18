@@ -55,6 +55,16 @@ export type WebcamHandle = {
   pausePlayback: () => void;
 
   /**
+   * 같은 옵션으로 카메라 스트림을 다시 요청한다.
+   *
+   * - 권한 거부, 장치 없음, 트랙 종료 같은 오류 뒤에 다시 시도할 때 쓴다.
+   * - `Webcam`을 `key`로 리마운트하지 않아도 된다.
+   * - 브라우저가 권한 프롬프트를 다시 띄우지 않을 수 있다. 거부된 권한은 브라우저 설정에서 풀어야 한다.
+   * - `disabled`이거나 비디오 요소가 없으면 요청하지 않는다.
+   */
+  retry: () => void;
+
+  /**
    * 일시 정지된 비디오 요소의 재생을 다시 시작한다.
    *
    * - `video.play()`를 호출하며 `MediaStreamTrack`을 다시 시작하지는 않는다.
@@ -83,7 +93,9 @@ export interface WebcamProps {
   disabledFallback?: React.ReactNode;
 
   /** 카메라 요청 또는 스트림 오류 상태에서 렌더링할 커스텀 fallback이다. */
-  errorFallback?: React.ReactNode | ((detail: WebcamErrorDetail) => React.ReactNode);
+  errorFallback?:
+    | React.ReactNode
+    | ((detail: WebcamErrorDetail, helpers: { retry: () => void }) => React.ReactNode);
 
   /** 외부에 공개된 webcam detail이 바뀔 때마다 호출한다. */
   onStateChange?: (state: WebcamDetail) => void;
@@ -255,6 +267,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
       },
       pausePlayback: ctrl.pausePlayback,
       resumePlayback: ctrl.resumePlayback,
+      retry: ctrl.retry,
     }),
     [
       ctrl,
@@ -346,7 +359,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
       : undefined;
   const errorFallbackNode: React.ReactNode = errorDetail
     ? typeof errorFallback === "function"
-      ? errorFallback(errorDetail)
+      ? errorFallback(errorDetail, { retry: ctrl.retry })
       : errorFallback
     : undefined;
 

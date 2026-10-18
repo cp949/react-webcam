@@ -277,6 +277,25 @@ export function CameraSource() {
 - `security-error` (`error` 상태): 문서의 미디어 사용이 비활성화되어 브라우저가
   `SecurityError`를 반환했다. HTTP 문제로 분류하지 않는다.
 
+### 에러 코드별 원인과 조치
+
+`detail.errorCode`는 `denied`, `unavailable`, `unsupported`, `insecure`, `error` 상태에 항상 있습니다.
+코드로 복구할 수 없는 원인은 소비자가 안내 문구를 직접 보여 줘야 합니다.
+
+| errorCode                 | phase         | 원인                                                                                           | 소비자 조치                                                                                                 |
+| ------------------------- | ------------- | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `permission-denied`       | `denied`      | `NotAllowedError` 또는 `PermissionDeniedError`. 정책 차단은 확인되지 않았습니다.               | 브라우저 사이트 설정에서 허용하도록 안내합니다. 허용 전에는 `retry()`가 같은 오류입니다.                    |
+| `policy-blocked`          | `denied`      | Permissions-Policy 또는 iframe `allow` 속성이 요청한 카메라·마이크를 막습니다.                 | 호스트 페이지의 헤더나 iframe에 `allow="camera; microphone"`을 설정합니다.                                  |
+| `security-error`          | `error`       | 문서의 미디어 사용이 비활성화되어 브라우저가 `SecurityError`를 반환했습니다.                   | 문서 정책과 iframe 설정을 확인합니다. HTTPS 안내를 보이지 않습니다.                                         |
+| `device-not-found`        | `unavailable` | 요청한 입력 장치가 없습니다(`NotFoundError`).                                                  | 카메라 연결을 안내하고 연결 뒤 `retry()`를 호출합니다.                                                      |
+| `device-in-use`           | `unavailable` | 다른 앱이나 탭이 장치를 점유하거나 하드웨어가 시작에 실패했습니다(`NotReadableError`).         | 다른 앱을 종료하도록 안내하고 `retry()`를 호출합니다.                                                       |
+| `constraints-unsatisfied` | `error`       | 장치가 제약을 만족하지 못합니다(`OverconstrainedError`). 예: 없는 `deviceId`를 `exact`로 지정. | `deviceSelectionStrategy: "ideal"`을 쓰거나 해상도·`deviceId` 제약을 완화합니다.                            |
+| `unsupported-browser`     | `unsupported` | `navigator.mediaDevices` 또는 `getUserMedia`가 없습니다.                                       | 지원 브라우저로 안내합니다. `retry()`로 복구할 수 없습니다.                                                 |
+| `insecure-context`        | `insecure`    | HTTP 같은 보안 컨텍스트 밖에서 실행 중입니다.                                                  | HTTPS 또는 `localhost`로 제공합니다.                                                                        |
+| `aborted`                 | `error`       | 브라우저가 요청을 중단했습니다(`AbortError`).                                                  | `retry()`를 호출합니다.                                                                                     |
+| `track-ended`             | `error`       | 영상 트랙이 예기치 않게 종료되었습니다. 예: 카메라 분리.                                       | `retry()`를 호출하거나 `autoRecover`를 켭니다. 마이크 트랙 종료는 이 코드가 아니라 `audioEnded`로 알립니다. |
+| `unknown`                 | `error`       | 위 분류에 없는 예외입니다.                                                                     | `detail.error`의 `name`과 `message`를 로그로 남기고 `retry()`를 제공합니다.                                 |
+
 ## 상태 변화 감지 - `onStateChange`
 
 `onStateChange`는 `WebcamDetail`이 변경될 때마다 호출됩니다. `pausePlayback()`은 `WebcamDetail`을 변경하지 않으므로 `onStateChange`를 발생시키지 않습니다. `resumePlayback()`은 성공 시 보통 현재 상태를 유지하거나 `playback-error`를 해제하고, 실패 시 `playback-error`를 발생시킬 수 있습니다.

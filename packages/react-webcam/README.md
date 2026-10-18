@@ -290,6 +290,26 @@ switches or code-to-message mappings. A confirmed policy block reports
 - `security-error` (`error` phase): the browser returned `SecurityError` because
   media access is disabled for the document. It is not classified as HTTP usage.
 
+### Error Codes, Causes, And Actions
+
+`detail.errorCode` is always present in the `denied`, `unavailable`, `unsupported`,
+`insecure`, and `error` phases. Causes that code cannot fix need guidance text from
+the consumer.
+
+| errorCode                 | phase         | Cause                                                                                                  | Consumer action                                                                                    |
+| ------------------------- | ------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `permission-denied`       | `denied`      | `NotAllowedError` or `PermissionDeniedError`. No policy block was confirmed.                           | Tell the user to allow access in the browser's site settings. `retry()` fails until then.          |
+| `policy-blocked`          | `denied`      | Permissions-Policy or the iframe `allow` attribute blocks the requested camera or mic.                 | Set the header on the host page or `allow="camera; microphone"` on the iframe.                     |
+| `security-error`          | `error`       | Media use is disabled for the document and the browser returned `SecurityError`.                       | Check the document policy and iframe settings. Do not show HTTPS guidance.                         |
+| `device-not-found`        | `unavailable` | No matching input device exists (`NotFoundError`).                                                     | Ask the user to connect a camera, then call `retry()`.                                             |
+| `device-in-use`           | `unavailable` | Another app or tab holds the device, or the hardware failed to start (`NotReadableError`).             | Ask the user to close the other app, then call `retry()`.                                          |
+| `constraints-unsatisfied` | `error`       | No device meets the constraints (`OverconstrainedError`). Example: an unknown `deviceId` with `exact`. | Use `deviceSelectionStrategy: "ideal"` or relax resolution and `deviceId` constraints.             |
+| `unsupported-browser`     | `unsupported` | `navigator.mediaDevices` or `getUserMedia` is missing.                                                 | Point the user to a supported browser. `retry()` cannot recover.                                   |
+| `insecure-context`        | `insecure`    | The page runs outside a secure context, such as plain HTTP.                                            | Serve over HTTPS or `localhost`.                                                                   |
+| `aborted`                 | `error`       | The browser aborted the request (`AbortError`).                                                        | Call `retry()`.                                                                                    |
+| `track-ended`             | `error`       | The video track ended unexpectedly. Example: the camera was unplugged.                                 | Call `retry()` or enable `autoRecover`. An audio track ending reports `audioEnded`, not this code. |
+| `unknown`                 | `error`       | An exception outside the categories above.                                                             | Log `detail.error`'s `name` and `message`, and offer `retry()`.                                    |
+
 ## Observe Runtime State With `onStateChange`
 
 `onStateChange` fires whenever `WebcamDetail` changes. `pausePlayback()` does

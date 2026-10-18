@@ -5,6 +5,7 @@ import { AspectRatioButton } from "./components/AspectRatioButton.js";
 import { FacingModeButton } from "./components/FacingModeButton.js";
 import { FlipButton } from "./components/FlipButton.js";
 import { SnapshotButton } from "./components/SnapshotButton.js";
+import { useControllableChange } from "./hooks/useControllableChange.js";
 import { useDeepCompareEffect } from "./hooks/useDeepCompareEffect.js";
 import { useResizeObserver } from "./hooks/useResizeObserver.js";
 import { useTimeoutValue } from "./hooks/useTimeoutValue.js";
@@ -233,6 +234,12 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     visibleConstraintsDebug = false,
     visibleSnapshotButton = false,
     onSnapshot,
+    flipped: flippedProp,
+    defaultFlipped,
+    onFlippedChange,
+    webcamOptions: webcamOptionsProp,
+    defaultWebcamOptions,
+    onWebcamOptionsChange,
   } = props;
 
   // 라벨을 기본값과 병합한다. 미설정 항목은 기본 한국어 값이 사용된다.
@@ -257,8 +264,22 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   } = ctrl;
 
   // ---- 제어 및 비제어 모드 판별 -------------------------------------------
-  const isFlipControlled = props.flipped !== undefined;
-  const isWebcamOptionsControlled = props.webcamOptions !== undefined;
+  const isFlipControlled = flippedProp !== undefined;
+  const isWebcamOptionsControlled = webcamOptionsProp !== undefined;
+
+  // 변경 요청은 모드에 따라 컨트롤러 setter 또는 onXxxChange 콜백으로 보낸다.
+  const requestFlipped = useControllableChange<boolean>({
+    isControlled: isFlipControlled,
+    current: flipped,
+    onChange: onFlippedChange,
+    setInternal: setFlipped,
+  });
+  const requestWebcamOptions = useControllableChange<WebcamOptions, WebcamOptions | undefined>({
+    isControlled: isWebcamOptionsControlled,
+    current: webcamOptions,
+    onChange: onWebcamOptionsChange,
+    setInternal: setWebcamOptions,
+  });
 
   // ---- 명령형 핸들 구성 ---------------------------------------------------
   // 외부에 공개하는 메서드만 명시적으로 조립한다.
@@ -270,40 +291,13 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
       getDetail: () => ctrl.webcamDetail,
       getPlayingVideoDeviceId: ctrl.getPlayingVideoDeviceId,
       getPlayingAudioDeviceId: ctrl.getPlayingAudioDeviceId,
-      setFlipped: (value) => {
-        const newValue = typeof value === "function" ? value(ctrl.flipped) : value;
-        if (isFlipControlled) {
-          props.onFlippedChange?.(newValue);
-        } else {
-          ctrl.setFlipped(newValue);
-        }
-      },
-      setWebcamOptions: (updater) => {
-        if (isWebcamOptionsControlled) {
-          if (props.onWebcamOptionsChange) {
-            const current = ctrl.webcamOptions;
-            const newValue = typeof updater === "function" ? updater(current) : updater;
-            if (newValue !== undefined) {
-              props.onWebcamOptionsChange(newValue);
-            }
-            // 제어 모드에서는 undefined 업데이트를 무시한다.
-          }
-          // 변경 콜백이 없으면 제어형 값의 내부 변경 요청을 반영하지 않는다.
-        } else {
-          ctrl.setWebcamOptions(updater);
-        }
-      },
+      setFlipped: requestFlipped,
+      setWebcamOptions: requestWebcamOptions,
       pausePlayback: ctrl.pausePlayback,
       resumePlayback: ctrl.resumePlayback,
       retry: ctrl.retry,
     }),
-    [
-      ctrl,
-      isFlipControlled,
-      isWebcamOptionsControlled,
-      props.onFlippedChange,
-      props.onWebcamOptionsChange,
-    ],
+    [ctrl, requestFlipped, requestWebcamOptions],
   );
 
   // ---- prop → 컨트롤러 동기화 -------------------------------------------
@@ -322,34 +316,33 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   // flipped: controlled 모드에서는 prop 값을 컨트롤러에 동기화하고,
   // uncontrolled 모드에서는 마운트 시 defaultFlipped로 초기화한다.
   useEffect(() => {
-    if (isFlipControlled) {
-      setFlipped(props.flipped!);
+    if (flippedProp !== undefined) {
+      setFlipped(flippedProp);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setFlipped, props.flipped, isFlipControlled]);
+  }, [setFlipped, flippedProp]);
 
   // 비제어 모드의 defaultFlipped는 마운트 시 한 번만 초기화한다.
   useEffect(() => {
-    if (!isFlipControlled && props.defaultFlipped !== undefined) {
-      setFlipped(props.defaultFlipped);
+    if (!isFlipControlled && defaultFlipped !== undefined) {
+      setFlipped(defaultFlipped);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 의도적으로 비워 두고 마운트 시 한 번만 실행한다.
 
   // webcamOptions: controlled 모드에서는 prop 값을 deep compare로 동기화하고,
   // uncontrolled 모드에서는 마운트 시 defaultWebcamOptions로 초기화한다.
   useDeepCompareEffect(() => {
     if (isWebcamOptionsControlled) {
-      setWebcamOptions(props.webcamOptions);
+      setWebcamOptions(webcamOptionsProp);
     }
-  }, [setWebcamOptions, props.webcamOptions, isWebcamOptionsControlled]);
+  }, [setWebcamOptions, webcamOptionsProp, isWebcamOptionsControlled]);
 
   // 비제어 모드의 defaultWebcamOptions는 마운트 시 한 번만 초기화한다.
   useEffect(() => {
-    if (!isWebcamOptionsControlled && props.defaultWebcamOptions !== undefined) {
-      setWebcamOptions(props.defaultWebcamOptions);
+    if (!isWebcamOptionsControlled && defaultWebcamOptions !== undefined) {
+      setWebcamOptions(defaultWebcamOptions);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
   }, []); // 의도적으로 비워 두고 마운트 시 한 번만 실행한다.
 
   // ---- 루트 요소 크기 (aspect-ratio 레이아웃 기준) ----------------------
@@ -521,13 +514,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             <FlipButton
               flipped={flipped}
               className='Webcam-optionBtn'
-              onChange={(newValue) => {
-                if (isFlipControlled) {
-                  props.onFlippedChange?.(newValue);
-                } else {
-                  setFlipped(newValue);
-                }
-              }}
+              onChange={requestFlipped}
               label={labels.flip}
             />
           )}
@@ -542,19 +529,11 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
                 default: labels.facingModeDefault,
               }}
               onChange={(facingMode) => {
-                const updater = (prev: WebcamOptions) => ({
+                requestWebcamOptions((prev) => ({
                   ...prev,
                   facingMode,
                   deviceId: undefined,
-                });
-                if (isWebcamOptionsControlled) {
-                  if (props.onWebcamOptionsChange) {
-                    props.onWebcamOptionsChange(updater(ctrl.webcamOptions));
-                  }
-                  // 변경 콜백이 없으면 제어형 값의 내부 변경 요청을 반영하지 않는다.
-                } else {
-                  setWebcamOptions(updater);
-                }
+                }));
               }}
             />
           )}
@@ -565,18 +544,10 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
               label={labels.aspectRatio}
               autoLabel={labels.aspectRatioAuto}
               onChange={(aspectRatio) => {
-                const updater = (prev: WebcamOptions) => ({
+                requestWebcamOptions((prev) => ({
                   ...prev,
                   aspectRatio: aspectRatio?.value,
-                });
-                if (isWebcamOptionsControlled) {
-                  if (props.onWebcamOptionsChange) {
-                    props.onWebcamOptionsChange(updater(ctrl.webcamOptions));
-                  }
-                  // 변경 콜백이 없으면 제어형 값의 내부 변경 요청을 반영하지 않는다.
-                } else {
-                  setWebcamOptions(updater);
-                }
+                }));
               }}
             />
           )}

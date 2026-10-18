@@ -32,7 +32,7 @@ export function FlipButton(props: FlipButtonProps) {
   return (
     <span
       className={classNames("FlipButton-root", className)}
-      style={{ color: flipped ? "#ff7600" : "#fff", ...style }}
+      style={{ color: flipped ? "var(--webcam-flip-active, #ff7600)" : "#fff", ...style }}
     >
       <IconButton
         className='x_btn'

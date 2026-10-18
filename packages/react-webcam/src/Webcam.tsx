@@ -376,7 +376,9 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   const hasDisabledFallbackProp = Object.prototype.hasOwnProperty.call(props, "disabledFallback");
   const hasErrorFallbackProp = Object.prototype.hasOwnProperty.call(props, "errorFallback");
   const showDefaultDisabledPlaceholder = disabled && !hasDisabledFallbackProp;
-  const rootBackgroundColor = disabled ? "#f7f8fa" : "#1e1e1e";
+  const rootBackgroundColor = disabled
+    ? "var(--webcam-disabled-bg, #f7f8fa)"
+    : "var(--webcam-bg, #1e1e1e)";
   const errorDetail =
     webcamDetail.phase === "denied" ||
     webcamDetail.phase === "unavailable" ||
@@ -427,7 +429,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             display: "inline-block",
             width: videoWidth ?? "100%",
             height: videoHeight ?? "100%",
-            backgroundColor: "#1e1e1e",
+            backgroundColor: "var(--webcam-bg, #1e1e1e)",
             borderRadius: "inherit",
           }}
         />
@@ -478,7 +480,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             alignItems: "center",
             justifyContent: "center",
             pointerEvents: "none",
-            backgroundColor: "#f7f8fa",
+            backgroundColor: "var(--webcam-disabled-bg, #f7f8fa)",
             border: "2px dashed #d7dee8",
             boxSizing: "border-box",
             borderRadius: "inherit",

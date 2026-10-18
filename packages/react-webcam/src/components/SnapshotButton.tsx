@@ -34,7 +34,7 @@ export function SnapshotButton(props: SnapshotButtonProps) {
   return (
     <span
       className={classNames("SnapshotButton-root", className)}
-      style={{ color: hovered ? "#1976d2" : "#fff", ...style }}
+      style={{ color: hovered ? "var(--webcam-accent, #1976d2)" : "#fff", ...style }}
     >
       <IconButton
         className='x_btn'

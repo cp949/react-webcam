@@ -198,7 +198,7 @@ describe("Webcam 공개 계약", () => {
     });
 
     const root = container.firstElementChild as HTMLElement;
-    expect(root.style.backgroundColor).toBe("#f7f8fa");
+    expect(root.style.backgroundColor).toBe("var(--webcam-disabled-bg, #f7f8fa)");
   });
 
   it("disabled가 false로 바뀌면 기본 비활성 placeholder를 제거한다", async () => {
@@ -230,7 +230,7 @@ describe("Webcam 공개 계약", () => {
     });
 
     const placeholder = getByTestId("webcam-disabled-placeholder");
-    expect(placeholder.style.backgroundColor).toBe("#f7f8fa");
+    expect(placeholder.style.backgroundColor).toBe("var(--webcam-disabled-bg, #f7f8fa)");
   });
 
   it("기본 disabled placeholder에 점선 테두리와 조정된 아이콘 색상을 적용한다", async () => {

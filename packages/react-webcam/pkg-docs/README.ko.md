@@ -482,6 +482,33 @@ function CameraPicker({ onSelect }: { onSelect: (deviceId: string) => void }) {
 카메라·마이크 권한을 허용하기 전에는 브라우저가 `label`을 빈 문자열로 반환합니다.
 `labelsAvailable`이 `false`이면 `카메라 1` 같은 대체 이름을 보여 주세요.
 
+## CSS 변수로 색 바꾸기
+
+패키지는 스타일시트를 배포하지 않습니다. 색은 인라인 스타일이며 현재 값을
+기본값으로 둔 CSS 변수를 읽습니다. 변수를 지정하기 전에는 아무것도 바뀌지
+않습니다. `Webcam` 또는 상위 요소에 지정합니다.
+
+```tsx
+<div style={{ "--webcam-bg": "#000", "--webcam-accent": "#e91e63" } as React.CSSProperties}>
+  <Webcam visibleSnapshotButton />
+</div>
+```
+
+| 변수                     | 기본값    | 적용 대상                               |
+| ------------------------ | --------- | --------------------------------------- |
+| `--webcam-bg`            | `#1e1e1e` | 루트와 video 배경                       |
+| `--webcam-disabled-bg`   | `#f7f8fa` | `disabled`일 때 루트와 placeholder 배경 |
+| `--webcam-accent`        | `#1976d2` | 호버 시 스냅샷 버튼 색                  |
+| `--webcam-flip-active`   | `#ff7600` | 반전 켜짐일 때 미러 버튼 색             |
+| `--webcam-menu-bg`       | `#fff`    | 팝업 메뉴 배경                          |
+| `--webcam-menu-fg`       | `#000`    | 팝업 메뉴 항목 글자색                   |
+| `--webcam-menu-hover-bg` | `#f5f5f5` | 호버 시 팝업 메뉴 항목 배경             |
+| `--webcam-menu-z-index`  | `1300`    | 팝업 메뉴 `z-index`                     |
+
+변수 이름은 공개 API입니다. 이름을 바꾸면 breaking change입니다. 버튼 오버레이
+같은 다른 색은 바꿀 수 없습니다. `style` prop으로 지정한 속성은 변수보다
+우선합니다.
+
 ## 라벨과 로컬라이제이션
 
 내장 버튼 라벨의 기본값은 한국어입니다. 영어 UI는 `WEBCAM_LABELS_EN` 프리셋을

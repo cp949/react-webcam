@@ -107,10 +107,10 @@ export function MenuPopup(props: MenuPopupProps) {
         position: "absolute",
         top: "100%",
         right: 0,
-        zIndex: 1300,
+        zIndex: "var(--webcam-menu-z-index, 1300)",
         margin: 0,
         padding: "4px 0",
-        backgroundColor: "#fff",
+        backgroundColor: "var(--webcam-menu-bg, #fff)",
         boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
         borderRadius: 4,
         overflow: "hidden",
@@ -164,7 +164,7 @@ export function MenuPopup(props: MenuPopupProps) {
               padding: "6px 16px",
               cursor: "pointer",
               whiteSpace: "nowrap",
-              color: "#000",
+              color: "var(--webcam-menu-fg, #000)",
               fontSize: "0.875rem",
               display: "block",
               width: "100%",
@@ -173,7 +173,8 @@ export function MenuPopup(props: MenuPopupProps) {
               border: "none",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.backgroundColor = "#f5f5f5";
+              (e.currentTarget as HTMLElement).style.backgroundColor =
+                "var(--webcam-menu-hover-bg, #f5f5f5)";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLElement).style.backgroundColor = "";

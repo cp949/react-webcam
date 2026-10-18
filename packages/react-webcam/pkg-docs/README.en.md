@@ -504,6 +504,33 @@ function CameraPicker({ onSelect }: { onSelect: (deviceId: string) => void }) {
 Before camera or microphone permission is granted, browsers return an empty `label`.
 When `labelsAvailable` is `false`, show a fallback name such as `Camera 1`.
 
+## Styling With CSS Variables
+
+The package ships no stylesheet. Colors are inline styles that read CSS
+variables with the current value as the fallback, so nothing changes until you
+set a variable. Set them on `Webcam` or any ancestor.
+
+```tsx
+<div style={{ "--webcam-bg": "#000", "--webcam-accent": "#e91e63" } as React.CSSProperties}>
+  <Webcam visibleSnapshotButton />
+</div>
+```
+
+| Variable                 | Default   | Affects                                          |
+| ------------------------ | --------- | ------------------------------------------------ |
+| `--webcam-bg`            | `#1e1e1e` | Root and video background                        |
+| `--webcam-disabled-bg`   | `#f7f8fa` | Root and placeholder background while `disabled` |
+| `--webcam-accent`        | `#1976d2` | Snapshot button color on hover                   |
+| `--webcam-flip-active`   | `#ff7600` | Flip button color while flipped                  |
+| `--webcam-menu-bg`       | `#fff`    | Popup menu background                            |
+| `--webcam-menu-fg`       | `#000`    | Popup menu item text color                       |
+| `--webcam-menu-hover-bg` | `#f5f5f5` | Popup menu item background on hover              |
+| `--webcam-menu-z-index`  | `1300`    | Popup menu `z-index`                             |
+
+These names are public API. Renaming one is a breaking change. Other colors, such
+as the button overlays, are not configurable. A `style` prop value still wins
+over the variables for the properties it sets.
+
 ## Labels And Localization
 
 The built-in button labels default to Korean. Pass the `WEBCAM_LABELS_EN`

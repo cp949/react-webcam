@@ -62,7 +62,7 @@ describe("StrictMode / rerender", () => {
 
   it("constraints 빠른 변경에서 중복 state publish가 없다", async () => {
     // webcamOptions를 빠르게 세 번 변경하면 각 변경마다 새 getUserMedia 요청이 시작된다.
-    // debounce 덕분에 마지막 변경 하나만 실제 요청으로 이어져야 한다.
+    // 첫 계산은 즉시 요청되지만, 이후 연속 변경은 debounce로 합쳐 중간 값은 요청하지 않아야 한다.
     const stream = createFakeMediaStream();
     const getUserMediaMock = mockGetUserMedia(stream);
 
@@ -89,8 +89,13 @@ describe("StrictMode / rerender", () => {
       await vi.advanceTimersByTimeAsync(300);
     });
 
-    // 마지막 constraints 하나만 실제 getUserMedia 호출로 이어져야 한다.
-    expect(getUserMediaMock).toHaveBeenCalledTimes(1);
+    // 중간 값(15, 24fps)은 요청되지 않고 마지막 값(30fps)이 요청돼야 한다.
+    const frameRates = getUserMediaMock.mock.calls.map(
+      ([constraints]) => (constraints.video as MediaTrackConstraints).frameRate,
+    );
+    expect(frameRates).not.toContainEqual({ ideal: 15 });
+    expect(frameRates).not.toContainEqual({ ideal: 24 });
+    expect(frameRates[frameRates.length - 1]).toEqual({ ideal: 30 });
     expect(result.current.webcamDetail.phase).toBe("live");
   });
 });

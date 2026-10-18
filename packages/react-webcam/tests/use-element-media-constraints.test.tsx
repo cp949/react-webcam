@@ -114,3 +114,97 @@ describe("useElementMediaConstraints: element-size 재계산 기준", () => {
     expect(idealWidth(result.current)).toBe(640);
   });
 });
+
+describe("useElementMediaConstraints: 요소 크기가 필요 없는 옵션", () => {
+  /** 렌더 후 시간을 진행한다. */
+  async function advance(ms: number) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(ms);
+    });
+  }
+
+  const video = document.createElement("video");
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  it("size가 고정 크기이면 크기 알림과 debounce 없이 첫 constraints를 바로 만든다", () => {
+    const { result } = renderHook(() =>
+      useElementMediaConstraints(video, { audioEnabled: false, size: { width: 640, height: 480 } }),
+    );
+
+    expect(idealWidth(result.current)).toBe(640);
+  });
+
+  it("size가 없으면 크기 알림과 debounce 없이 첫 constraints를 바로 만든다", () => {
+    const { result } = renderHook(() => useElementMediaConstraints(video, { audioEnabled: false }));
+
+    expect(result.current).toBeDefined();
+    expect(idealWidth(result.current)).toBeUndefined();
+  });
+
+  it("첫 계산 이후 옵션이 바뀌면 100ms debounce 뒤에 새 constraints로 바뀐다", async () => {
+    const { result, rerender } = renderHook(
+      ({ opts }: { opts: WebcamOptions }) => useElementMediaConstraints(video, opts),
+      { initialProps: { opts: { audioEnabled: false } as WebcamOptions } },
+    );
+    const first = result.current;
+
+    rerender({ opts: { audioEnabled: false, facingMode: "environment" } });
+    await advance(99);
+    expect(result.current).toBe(first);
+
+    await advance(1);
+    const videoConstraints = result.current?.video as MediaTrackConstraints;
+    expect(videoConstraints.facingMode).toEqual({ ideal: "environment" });
+  });
+
+  it("옵션을 연속으로 바꾸면 마지막 옵션의 constraints만 만든다", async () => {
+    const seen: Array<MediaStreamConstraints | undefined> = [];
+    const { result, rerender } = renderHook(
+      ({ opts }: { opts: WebcamOptions }) => {
+        const constraints = useElementMediaConstraints(video, opts);
+        seen.push(constraints);
+        return constraints;
+      },
+      { initialProps: { opts: { audioEnabled: false } as WebcamOptions } },
+    );
+
+    rerender({ opts: { audioEnabled: false, frameRate: 15 } });
+    rerender({ opts: { audioEnabled: false, frameRate: 24 } });
+    rerender({ opts: { audioEnabled: false, frameRate: 30 } });
+    await advance(150);
+
+    const frameRates = seen.map((c) => (c?.video as MediaTrackConstraints | undefined)?.frameRate);
+    expect(frameRates).not.toContainEqual({ ideal: 15 });
+    expect(frameRates).not.toContainEqual({ ideal: 24 });
+    expect(frameRates[frameRates.length - 1]).toEqual({ ideal: 30 });
+    expect(result.current).toBe(seen[seen.length - 1]);
+  });
+
+  it("비디오 요소가 없으면 constraints가 없다", () => {
+    const { result } = renderHook(() =>
+      useElementMediaConstraints(undefined, { audioEnabled: false }),
+    );
+
+    expect(result.current).toBeUndefined();
+  });
+
+  it("element-size이면 크기를 알려도 100ms가 지나기 전에는 constraints가 없다", async () => {
+    const { result } = renderHook(() => useElementMediaConstraints(video, ELEMENT_SIZE_OPTIONS));
+
+    act(() => {
+      sizeListener.emit({ width: 640, height: 480 });
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(99);
+    });
+    expect(result.current).toBeUndefined();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+    expect(idealWidth(result.current)).toBe(640);
+  });
+});

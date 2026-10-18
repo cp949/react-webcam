@@ -294,8 +294,10 @@ describe("useWebcamController – DOM event flows", () => {
 
     const registeredEvents = addEventListenerSpy.mock.calls.map(([event]) => event);
     // 일반 모드에서는 디버그 전용 이벤트가 등록되지 않아야 한다.
+    // canplay는 프레임 준비 감지도 쓰므로 디버그 전용 이벤트로 확인한다.
     expect(registeredEvents).not.toContain("loadstart");
-    expect(registeredEvents).not.toContain("canplay");
+    expect(registeredEvents).not.toContain("canplaythrough");
+    expect(registeredEvents).not.toContain("stalled");
   });
 
   it("ResizeObserver callback triggers constraint recomputation", async () => {

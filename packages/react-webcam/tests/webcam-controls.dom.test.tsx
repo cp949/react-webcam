@@ -121,97 +121,44 @@ describe("AspectRatioButton – DOM interactions", () => {
 // ---------------------------------------------------------------------------
 
 describe("FacingModeButton – DOM interactions", () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  it("clicking the button opens a menu", async () => {
+  it("메뉴 없이 단일 토글 버튼만 렌더링한다", () => {
     const { container } = render(<FacingModeButton onChange={() => {}} />);
-    const btn = container.querySelector("button")!;
-    await act(async () => {
-      btn.click();
-    });
-    const items = container.querySelectorAll('[role="menuitem"]');
-    expect(items.length).toBeGreaterThan(0);
+    expect(container.querySelectorAll("button").length).toBe(1);
+    expect(container.querySelector('[role="menu"]')).toBeNull();
+    expect(container.querySelector("button")!.getAttribute("aria-haspopup")).toBeNull();
   });
 
-  it("메뉴는 버튼 오른쪽 끝에 맞춰 왼쪽으로 열려 오른쪽 경계를 넘지 않는다", async () => {
-    const { container } = render(<FacingModeButton onChange={() => {}} />);
-    const btn = container.querySelector("button")!;
-    await act(async () => {
-      btn.click();
-    });
-    const menu = container.querySelector('[role="menu"]') as HTMLElement;
-    expect(menu.style.right).toBe("0px");
-  });
-
-  it('selecting 전면 calls onChange with "user" and closes the menu', async () => {
+  it("방향이 없으면 전면으로 보고 누르면 environment를 전달한다", () => {
     const onChange = vi.fn();
     const { container } = render(<FacingModeButton onChange={onChange} />);
+    container.querySelector("button")!.click();
+    expect(onChange).toHaveBeenCalledExactlyOnceWith("environment");
+  });
+
+  it("user에서 누르면 environment를 전달한다", () => {
+    const onChange = vi.fn();
+    const { container } = render(<FacingModeButton facingMode='user' onChange={onChange} />);
+    container.querySelector("button")!.click();
+    expect(onChange).toHaveBeenCalledExactlyOnceWith("environment");
+  });
+
+  it("environment에서 누르면 user를 전달한다", () => {
+    const onChange = vi.fn();
+    const { container } = render(<FacingModeButton facingMode='environment' onChange={onChange} />);
+    container.querySelector("button")!.click();
+    expect(onChange).toHaveBeenCalledExactlyOnceWith("user");
+  });
+
+  it("현재 방향을 title과 aria-label에 표시한다", () => {
+    const { container, rerender } = render(
+      <FacingModeButton facingMode='user' onChange={() => {}} />,
+    );
     const btn = container.querySelector("button")!;
-    await act(async () => {
-      btn.click();
-    });
-    const itemFront = Array.from(container.querySelectorAll('[role="menuitem"]')).find(
-      (el) => el.textContent === "전면",
-    ) as HTMLElement;
-    expect(itemFront).toBeTruthy();
-    await act(async () => {
-      itemFront.click();
-      await vi.advanceTimersByTimeAsync(10);
-    });
-    expect(onChange).toHaveBeenCalledWith("user");
-    expect(container.querySelectorAll('[role="menuitem"]').length).toBe(0);
-  });
+    expect(btn.getAttribute("aria-label")).toBe("전면/후면 카메라: 전면");
 
-  it("closes the menu when focus moves outside", async () => {
-    const { container } = render(
-      <>
-        <FacingModeButton onChange={() => {}} />
-        <button type='button'>outside</button>
-      </>,
-    );
-
-    const btn = container.querySelector(".FacingModeButton-root button") as HTMLButtonElement;
-    const outside = Array.from(container.querySelectorAll("button")).find(
-      (element) => element !== btn,
-    )!;
-
-    await act(async () => {
-      btn.click();
-    });
-    expect(container.querySelectorAll('[role="menuitem"]').length).toBeGreaterThan(0);
-
-    await act(async () => {
-      outside.focus();
-      await Promise.resolve();
-    });
-
-    expect(container.querySelectorAll('[role="menuitem"]').length).toBe(0);
-  });
-
-  it("uses a unique menu id per instance", async () => {
-    const { container } = render(
-      <>
-        <FacingModeButton onChange={() => {}} />
-        <FacingModeButton onChange={() => {}} />
-      </>,
-    );
-
-    const buttons = Array.from(
-      container.querySelectorAll(".FacingModeButton-root button"),
-    ) as HTMLButtonElement[];
-
-    await act(async () => {
-      buttons[0]!.click();
-      buttons[1]!.click();
-    });
-
-    expect(buttons[0]!.getAttribute("aria-controls")).toBeTruthy();
-    expect(buttons[1]!.getAttribute("aria-controls")).toBeTruthy();
-    expect(buttons[0]!.getAttribute("aria-controls")).not.toBe(
-      buttons[1]!.getAttribute("aria-controls"),
-    );
+    rerender(<FacingModeButton facingMode='environment' onChange={() => {}} />);
+    expect(btn.getAttribute("aria-label")).toBe("전면/후면 카메라: 후면");
+    expect(btn.getAttribute("title")).toBe("전면/후면 카메라: 후면");
   });
 });
 
@@ -267,7 +214,6 @@ describe("SnapshotButton – DOM interactions", () => {
 
 describe.each([
   { name: "AspectRatioButton", Button: AspectRatioButton, rootClass: ".AspectRatioButton-root" },
-  { name: "FacingModeButton", Button: FacingModeButton, rootClass: ".FacingModeButton-root" },
 ])("$name – 메뉴 접근성", ({ Button, rootClass }) => {
   beforeEach(() => {
     vi.useFakeTimers();

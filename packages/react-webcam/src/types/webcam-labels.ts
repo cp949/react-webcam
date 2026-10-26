@@ -14,13 +14,13 @@ export type WebcamLabels = {
   /** Camera direction button `title` / `aria-label`. */
   cameraDirection?: string;
 
-  /** Camera direction menu label for the rear camera option. */
+  /** Rear camera name shown in the camera direction button `title` / `aria-label`. */
   facingModeBack?: string;
 
-  /** Camera direction menu label for the front camera option. */
+  /** Front camera name shown in the camera direction button `title` / `aria-label`. */
   facingModeFront?: string;
 
-  /** Camera direction menu label for the browser-default option. */
+  /** @deprecated The camera direction button no longer has a browser-default option. This label is not used. */
   facingModeDefault?: string;
 
   /** Aspect ratio button `title` / `aria-label`. */

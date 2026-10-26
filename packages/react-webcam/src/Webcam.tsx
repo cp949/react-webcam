@@ -544,11 +544,8 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
             <FacingModeButton
               className='Webcam-optionBtn'
               label={labels.cameraDirection}
-              menuLabels={{
-                back: labels.facingModeBack,
-                front: labels.facingModeFront,
-                default: labels.facingModeDefault,
-              }}
+              stateLabels={{ back: labels.facingModeBack, front: labels.facingModeFront }}
+              facingMode={webcamOptions.facingMode}
               onChange={(facingMode) => {
                 requestWebcamOptions((prev) => ({
                   ...prev,

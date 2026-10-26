@@ -44,11 +44,11 @@ describe("WebcamLabels: default Korean labels", () => {
     expect(btn.getAttribute("aria-label")).toBe("미러");
   });
 
-  it('FacingModeButton renders with default label "전면/후면 카메라" when no label prop is given', () => {
+  it('FacingModeButton renders with default label "전면/후면 카메라: 전면" when no label prop is given', () => {
     const { container } = render(<FacingModeButton onChange={() => {}} />);
     const btn = container.querySelector("button")!;
-    expect(btn.getAttribute("title")).toBe("전면/후면 카메라");
-    expect(btn.getAttribute("aria-label")).toBe("전면/후면 카메라");
+    expect(btn.getAttribute("title")).toBe("전면/후면 카메라: 전면");
+    expect(btn.getAttribute("aria-label")).toBe("전면/후면 카메라: 전면");
   });
 
   it('AspectRatioButton renders with default label "크기 비율" when no label prop is given', () => {
@@ -56,20 +56,6 @@ describe("WebcamLabels: default Korean labels", () => {
     const btn = container.querySelector("button")!;
     expect(btn.getAttribute("title")).toBe("크기 비율");
     expect(btn.getAttribute("aria-label")).toBe("크기 비율");
-  });
-
-  it("FacingModeButton menu shows default Korean items when no menuLabels given", async () => {
-    const { container } = render(<FacingModeButton onChange={() => {}} />);
-    const btn = container.querySelector("button")!;
-    await act(async () => {
-      btn.click();
-    });
-    const items = Array.from(container.querySelectorAll('[role="menuitem"]')).map(
-      (el) => el.textContent,
-    );
-    expect(items).toContain("후면");
-    expect(items).toContain("전면");
-    expect(items).toContain("기본");
   });
 
   it("AspectRatioButton menu shows default Korean auto label when no autoLabel given", async () => {
@@ -107,29 +93,22 @@ describe("WebcamLabels: custom labels override defaults", () => {
   it("FacingModeButton uses custom button label", () => {
     const { container } = render(<FacingModeButton onChange={() => {}} label='Switch Camera' />);
     const btn = container.querySelector("button")!;
-    expect(btn.getAttribute("title")).toBe("Switch Camera");
-    expect(btn.getAttribute("aria-label")).toBe("Switch Camera");
+    expect(btn.getAttribute("title")).toBe("Switch Camera: 전면");
+    expect(btn.getAttribute("aria-label")).toBe("Switch Camera: 전면");
   });
 
-  it("FacingModeButton uses custom menuLabels for menu items", async () => {
-    const { container } = render(
-      <FacingModeButton
-        onChange={() => {}}
-        menuLabels={{ back: "Rear", front: "Front", default: "Auto" }}
-      />,
+  it("FacingModeButton uses custom stateLabels for the current direction", () => {
+    const stateLabels = { back: "Rear", front: "Front" };
+    const { container, rerender } = render(
+      <FacingModeButton onChange={() => {}} stateLabels={stateLabels} />,
     );
     const btn = container.querySelector("button")!;
-    await act(async () => {
-      btn.click();
-    });
-    const items = Array.from(container.querySelectorAll('[role="menuitem"]')).map(
-      (el) => el.textContent,
+    expect(btn.getAttribute("aria-label")).toBe("전면/후면 카메라: Front");
+
+    rerender(
+      <FacingModeButton facingMode='environment' onChange={() => {}} stateLabels={stateLabels} />,
     );
-    expect(items).toContain("Rear");
-    expect(items).toContain("Front");
-    expect(items).toContain("Auto");
-    expect(items).not.toContain("후면");
-    expect(items).not.toContain("전면");
+    expect(btn.getAttribute("aria-label")).toBe("전면/후면 카메라: Rear");
   });
 
   it("AspectRatioButton uses custom button label", () => {

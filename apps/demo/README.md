@@ -20,7 +20,7 @@ pnpm --filter demo check-types  # 타입 체크
 
 - **Basic Usage** — 가장 단순한 Webcam 컴포넌트 사용법
 - **Common Controls** — facingMode, aspectRatio 등 자주 쓰는 옵션 실시간 조작
-- **Labels / Localization** — 전면/후면/기본 등 내장 UI 문구 다국어 적용
+- **Labels / Localization** — 전면/후면 등 내장 UI 문구 다국어 적용
 - **Controlled State** — controlled vs uncontrolled 상태 소유권 비교
 - **Ref Handle** — WebcamHandle을 통한 명령형 API (snapshotToCanvas 등)
 - **State Inspector** — onStateChange로 WebcamSnapshot 실시간 관찰

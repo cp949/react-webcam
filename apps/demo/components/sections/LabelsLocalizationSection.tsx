@@ -24,7 +24,6 @@ const LOCALE_LABELS: Record<"ko" | "en", WebcamLabels> = {
     cameraDirection: "전면/후면 카메라",
     facingModeBack: "후면",
     facingModeFront: "전면",
-    facingModeDefault: "기본",
     aspectRatio: "크기 비율",
     aspectRatioAuto: "자동",
   },
@@ -48,7 +47,7 @@ export default function LabelsLocalizationSection() {
         <Alert severity='info' variant='outlined'>
           <Typography variant='body2'>
             <code>labels</code> prop으로 내장 버튼과 popover 메뉴 문구를 서비스 번역값에 맞게 덮어쓸
-            수 있습니다. 아래 토글을 바꾸면 전면/후면/기본 라벨이 함께 바뀝니다.
+            수 있습니다. 아래 토글을 바꾸면 전면/후면 라벨이 함께 바뀝니다.
           </Typography>
         </Alert>
 
@@ -69,8 +68,7 @@ export default function LabelsLocalizationSection() {
             </ToggleButtonGroup>
 
             <Typography variant='body2' color='text.secondary'>
-              현재 카메라 방향 라벨: {labels.facingModeFront} / {labels.facingModeBack} /{" "}
-              {labels.facingModeDefault}
+              현재 카메라 방향 라벨: {labels.facingModeFront} / {labels.facingModeBack}
             </Typography>
 
             <Webcam

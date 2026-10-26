@@ -96,7 +96,6 @@ export default function LabelsExample() {
           cameraDirection: '전면/후면 카메라',
           facingModeBack: '후면',
           facingModeFront: '전면',
-          facingModeDefault: '기본',
           aspectRatio: '크기 비율',
           aspectRatioAuto: '자동',
         }

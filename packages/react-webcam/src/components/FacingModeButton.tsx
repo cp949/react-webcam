@@ -1,21 +1,17 @@
-/** 카메라 방향 선택 버튼 컴포넌트다. */
+/** 카메라 방향 토글 버튼 컴포넌트다. */
 
 import React from "react";
 import { CameraSwitchIcon } from "../icons/CameraSwitchIcon.js";
 import { classNames } from "../utils/class-names.js";
 import { IconButton } from "./primitives/IconButton.js";
-import { MenuPopup } from "./primitives/MenuPopup.js";
 
-/** 카메라 방향 버튼의 라벨 재정의 옵션이다. */
-type FacingModeMenuLabels = {
-  /** 후면 카메라 항목 라벨 */
+/** 카메라 방향 버튼의 현재 방향 라벨 재정의 옵션이다. */
+type FacingModeStateLabels = {
+  /** 후면 카메라 라벨 */
   back?: string;
 
-  /** 전면 카메라 항목 라벨 */
+  /** 전면 카메라 라벨 */
   front?: string;
-
-  /** 브라우저 기본값 항목 라벨 */
-  default?: string;
 };
 
 /** 카메라 방향 버튼이 받는 props다. */
@@ -26,76 +22,41 @@ type FacingModeButtonProps = {
   /** 루트 요소에 합칠 클래스 이름 */
   className?: string;
 
-  /** 선택된 방향을 부모로 전달하는 콜백 */
-  onChange: (mode: undefined | "user" | "environment") => void;
+  /** 현재 카메라 방향. `undefined`는 브라우저 기본 방향이며 전면으로 취급한다. */
+  facingMode?: "user" | "environment";
 
-  /** 버튼 title / aria-label. 기본값: "전면/후면 카메라" */
+  /** 토글 결과 방향을 부모로 전달하는 콜백 */
+  onChange: (mode: "user" | "environment") => void;
+
+  /** 버튼 title / aria-label 접두. 기본값: "전면/후면 카메라" */
   label?: string;
 
-  /** 메뉴 항목 라벨 재정의 */
-  menuLabels?: FacingModeMenuLabels;
+  /** 현재 방향 라벨 재정의 */
+  stateLabels?: FacingModeStateLabels;
 };
 
 /**
- * 전면·후면 카메라 전환 메뉴를 여는 버튼을 렌더링한다.
- * 선택 결과는 `onChange`로 전달하고, `undefined`는 브라우저 기본 방향을 뜻한다.
+ * 전면·후면 카메라를 번갈아 선택하는 토글 버튼을 렌더링한다.
+ * 누르면 현재와 반대 방향을 `onChange`로 전달한다.
  */
 export function FacingModeButton(props: FacingModeButtonProps) {
-  const { style, className, onChange, label = "전면/후면 카메라", menuLabels } = props;
-  const [menuOpen, setMenuOpen] = React.useState(false);
-  const buttonRef = React.useRef<HTMLButtonElement>(null);
-  // 접근성 속성 충돌을 막기 위해 인스턴스별 메뉴 id를 만든다.
-  const menuId = `facing-mode-menu-${React.useId().replace(/:/g, "")}`;
-
-  const handleCloseMenu = React.useCallback(() => {
-    setMenuOpen(false);
-  }, []);
-
-  // 라벨과 선택 콜백을 한 배열로 묶어 MenuPopup에 전달한다.
-  const menuItems = [
-    {
-      label: menuLabels?.back ?? "후면",
-      onClick: () => onChange("environment"),
-    },
-    { label: menuLabels?.front ?? "전면", onClick: () => onChange("user") },
-    {
-      label: menuLabels?.default ?? "기본",
-      onClick: () => onChange(undefined),
-    },
-  ];
+  const { style, className, facingMode, onChange, label = "전면/후면 카메라", stateLabels } = props;
+  const isRear = facingMode === "environment";
+  // 현재 방향을 이름에 넣어 스크린리더와 tooltip이 상태를 알려 주도록 한다.
+  const currentLabel = isRear ? (stateLabels?.back ?? "후면") : (stateLabels?.front ?? "전면");
+  const name = `${label}: ${currentLabel}`;
 
   return (
-    <div
-      className={classNames("FacingModeButton-root", className)}
-      style={{ position: "relative", ...style }}
-    >
+    <span className={classNames("FacingModeButton-root", className)} style={style}>
       <IconButton
-        ref={buttonRef}
         className='x_btn'
-        title={label}
-        aria-label={label}
-        aria-haspopup='menu'
-        aria-expanded={menuOpen}
-        aria-controls={menuId}
+        title={name}
+        aria-label={name}
         style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#fff" }}
-        onClick={() => setMenuOpen((prev) => !prev)}
-        onKeyDown={(e) => {
-          // 메뉴 버튼 패턴: 아래 화살표로 메뉴를 연다. 첫 항목 포커스는 MenuPopup이 맡는다.
-          if (e.key === "ArrowDown" && !menuOpen) {
-            e.preventDefault();
-            setMenuOpen(true);
-          }
-        }}
+        onClick={() => onChange(isRear ? "user" : "environment")}
       >
         <CameraSwitchIcon size='1.2rem' />
       </IconButton>
-      <MenuPopup
-        id={menuId}
-        open={menuOpen}
-        onClose={handleCloseMenu}
-        items={menuItems}
-        buttonRef={buttonRef}
-      />
-    </div>
+    </span>
   );
 }

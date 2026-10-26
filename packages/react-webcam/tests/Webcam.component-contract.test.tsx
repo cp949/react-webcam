@@ -7,7 +7,6 @@ import { act, render } from "@testing-library/react";
 import { createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AspectRatioButton } from "../src/components/AspectRatioButton.js";
-import { FacingModeButton } from "../src/components/FacingModeButton.js";
 import { stopStream } from "../src/utils/media-devices.js";
 import type { WebcamHandle } from "../src/Webcam.js";
 import { Webcam } from "../src/Webcam.js";
@@ -617,63 +616,11 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     expect(facingBtn).not.toBeNull();
   });
 
-  it("FacingModeButton을 클릭하면 드롭다운이 열린다", async () => {
-    render(<Webcam webcamOptions={{ audioEnabled: false }} controls={{ cameraDirection: true }} />);
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
-    });
-
-    const video = document.querySelector("video")!;
-    await markVideoReady(video);
-
-    const btn = document.querySelector(".FacingModeButton-root button") as HTMLButtonElement | null;
-    expect(btn).not.toBeNull();
-
-    await act(async () => {
-      btn!.click();
-    });
-
-    // 클릭 후 카메라 방향 목록을 담은 메뉴가 열려야 한다.
-    const menu = document.getElementById(btn!.getAttribute("aria-controls") ?? "");
-    expect(menu).not.toBeNull();
-  });
-
-  it("FacingModeButton 메뉴 항목을 클릭하면 올바른 facingMode로 onChange를 호출한다", async () => {
-    const onChange = vi.fn();
-    render(<FacingModeButton onChange={onChange} />);
-
-    const btn = document.querySelector(".FacingModeButton-root button") as HTMLButtonElement | null;
-    expect(btn).not.toBeNull();
-
-    // 메뉴를 연다.
-    await act(async () => {
-      btn!.click();
-    });
-
-    // `전면` 메뉴 항목을 클릭한다.
-    const menuItems = document.querySelectorAll('[role="menuitem"]');
-    const userItem = Array.from(menuItems).find((el) => el.textContent?.includes("전면")) as
-      | HTMLElement
-      | undefined;
-    expect(userItem).not.toBeUndefined();
-
-    await act(async () => {
-      userItem!.click();
-      // FacingModeButton은 setTimeout(0) 안에서 onChange를 호출한다.
-      await vi.runAllTimersAsync();
-    });
-
-    expect(onChange).toHaveBeenCalledWith("user");
-  });
-
-  it('FacingModeButton의 "기본" 항목은 브라우저 기본 선택으로 돌아가도록 deviceId를 초기화한다', async () => {
-    const ref = createRef<WebcamHandle>();
+  it("FacingModeButton을 누르면 후면과 전면을 번갈아 요청하고 deviceId를 초기화한다", async () => {
     const onWebcamOptionsChange = vi.fn();
 
     render(
       <Webcam
-        ref={ref}
         webcamOptions={{ audioEnabled: false, deviceId: "camera-1" }}
         onWebcamOptionsChange={onWebcamOptionsChange}
         controls={{ cameraDirection: true }}
@@ -689,27 +636,42 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
 
     const btn = document.querySelector(".FacingModeButton-root button") as HTMLButtonElement | null;
     expect(btn).not.toBeNull();
+    expect(document.querySelector('[role="menuitem"]')).toBeNull();
 
     await act(async () => {
       btn!.click();
     });
+    expect(onWebcamOptionsChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ facingMode: "environment", deviceId: undefined }),
+    );
+  });
 
-    const menuItems = document.querySelectorAll('[role="menuitem"]');
-    const defaultItem = Array.from(menuItems).find((el) => el.textContent?.includes("기본")) as
-      | HTMLElement
-      | undefined;
-    expect(defaultItem).not.toBeUndefined();
+  it("FacingModeButton은 webcamOptions.facingMode를 따라 현재 방향을 표시하고 반대로 토글한다", async () => {
+    const onWebcamOptionsChange = vi.fn();
+
+    render(
+      <Webcam
+        webcamOptions={{ audioEnabled: false, facingMode: "environment" }}
+        onWebcamOptionsChange={onWebcamOptionsChange}
+        controls={{ cameraDirection: true }}
+      />,
+    );
 
     await act(async () => {
-      defaultItem!.click();
-      await vi.runAllTimersAsync();
+      await vi.advanceTimersByTimeAsync(300);
     });
 
-    expect(onWebcamOptionsChange).toHaveBeenCalledWith(
-      expect.objectContaining({
-        facingMode: undefined,
-        deviceId: undefined,
-      }),
+    const video = document.querySelector("video")!;
+    await markVideoReady(video);
+
+    const btn = document.querySelector(".FacingModeButton-root button") as HTMLButtonElement;
+    expect(btn.getAttribute("aria-label")).toBe("전면/후면 카메라: 후면");
+
+    await act(async () => {
+      btn.click();
+    });
+    expect(onWebcamOptionsChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({ facingMode: "user", deviceId: undefined }),
     );
   });
 

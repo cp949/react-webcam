@@ -87,6 +87,7 @@ below) in addition to the props listed here.
 | `controls`              | `WebcamControls`                                                                                      | `{}`            | Chooses the built-in control buttons to show: `flip`, `cameraDirection`, `aspectRatio`, `snapshot`. Each defaults to `false`.                                                                            |
 | `onSnapshot`            | `(canvas: HTMLCanvasElement) => void`                                                                 | —               | Receives the captured frame (original resolution) when the built-in snapshot button is clicked. Requires `controls.snapshot`.                                                                            |
 | `debug`                 | `WebcamDebug`                                                                                         | `{}`            | Chooses the debug overlays to show: `videoSize` (video element size), `constraints` (active `MediaStreamConstraints`). Each defaults to `false`.                                                         |
+| `icons`                 | `WebcamIcons`                                                                                         | Built-in icons  | Replaces the icons of the built-in buttons: `flip`, `cameraDirection`, `aspectRatio`, `snapshot` (see Custom Icons below).                                                                               |
 | `labels`                | `WebcamLabels`                                                                                        | Korean defaults | Overrides for built-in button labels (see Labels And Localization below).                                                                                                                                |
 
 ### Migration To 3.0.0
@@ -722,6 +723,30 @@ To receive the captured frame when the built-in snapshot button is clicked, pass
   }}
 />
 ```
+
+## Custom Icons
+
+Pass React nodes to `icons` to replace the icon of a built-in button. A key you leave out
+keeps its default icon. The `title` and `aria-label` still come from `labels`.
+
+```tsx
+import { Webcam } from "@cp949/react-webcam";
+
+<Webcam
+  controls={{ flip: true, cameraDirection: true, aspectRatio: true, snapshot: true }}
+  icons={{
+    flip: <MirrorIcon />,
+    cameraDirection: <SwitchCameraIcon />,
+    aspectRatio: <CropIcon />,
+    snapshot: <ShutterIcon />,
+  }}
+/>;
+```
+
+- The node is rendered as it is inside the button. Size it yourself.
+- The default size is `1.2rem` for `flip`, `cameraDirection` and `aspectRatio`, and `2rem` for `snapshot`.
+- Use `currentColor` for strokes and fills to follow the button color and the `--webcam-*` variables.
+- The icon does not change with the state. For example, `flip` shows the same node whether or not the video is flipped.
 
 ## State Ownership, Controlled / Uncontrolled
 

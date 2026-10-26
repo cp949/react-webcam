@@ -14,6 +14,10 @@ export default function BasicExample() {
 }`,
 
   controls: `import { useState } from 'react';
+import AspectRatioIcon from '@mui/icons-material/AspectRatio';
+import CameraswitchIcon from '@mui/icons-material/Cameraswitch';
+import FlipIcon from '@mui/icons-material/Flip';
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { Webcam } from '@cp949/react-webcam';
 import type { WebcamOptions, WebcamProps } from '@cp949/react-webcam';
 
@@ -78,6 +82,16 @@ export default function ControlsExample() {
           controls={{ cameraDirection: true, aspectRatio: true }}
         />
       </div>
+
+      <Webcam
+        controls={{ flip: true, cameraDirection: true, aspectRatio: true, snapshot: true }}
+        icons={{
+          flip: <FlipIcon />,
+          cameraDirection: <CameraswitchIcon />,
+          aspectRatio: <AspectRatioIcon />,
+          snapshot: <PhotoCameraIcon fontSize='large' />,
+        }}
+      />
     </>
   );
 }`,

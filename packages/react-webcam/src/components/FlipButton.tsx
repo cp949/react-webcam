@@ -21,6 +21,9 @@ type FlipButtonProps = {
 
   /** 버튼 title / aria-label. 기본값: "미러" */
   label?: string;
+
+  /** 기본 아이콘 대신 보여 줄 아이콘 */
+  icon?: React.ReactNode;
 };
 
 /**
@@ -28,7 +31,7 @@ type FlipButtonProps = {
  * `flipped` 값에 따라 아이콘 강조색을 바꿔 현재 상태를 드러낸다.
  */
 export function FlipButton(props: FlipButtonProps) {
-  const { className, flipped = false, onChange, style, label = "미러" } = props;
+  const { className, flipped = false, onChange, style, label = "미러", icon } = props;
   return (
     <span
       className={classNames("FlipButton-root", className)}
@@ -44,7 +47,7 @@ export function FlipButton(props: FlipButtonProps) {
           onChange(!flipped);
         }}
       >
-        <FlipCameraIcon size='1.2rem' />
+        {icon ?? <FlipCameraIcon size='1.2rem' />}
       </IconButton>
     </span>
   );

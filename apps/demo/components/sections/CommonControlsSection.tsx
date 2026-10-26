@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { Webcam } from "@cp949/react-webcam";
 import type { WebcamOptions, WebcamProps } from "@cp949/react-webcam";
+import AspectRatioIcon from "@mui/icons-material/AspectRatio";
+import CameraswitchIcon from "@mui/icons-material/Cameraswitch";
+import FlipIcon from "@mui/icons-material/Flip";
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -257,6 +261,28 @@ export default function CommonControlsSection() {
             <Webcam
               webcamOptions={{ facingMode: lockedFacingMode, aspectRatio: 16 / 9 }}
               controls={{ cameraDirection: true, aspectRatio: true }}
+              style={{ width: "100%", height: "100%", borderRadius: 8 }}
+            />
+          </Box>
+        </Stack>
+      </ExampleCard>
+
+      <ExampleCard title='아이콘 교체'>
+        <Stack spacing={2}>
+          <Typography variant='body2' color='text.secondary'>
+            <code>icons</code> prop에 React 노드를 전달하면 내장 버튼의 아이콘을 바꿀 수 있습니다.
+            전달하지 않은 버튼은 기본 아이콘을 유지합니다. 아래 예제는 MUI 아이콘으로 네 버튼을 모두
+            교체합니다.
+          </Typography>
+          <Box sx={{ width: "100%", maxWidth: 420, height: 300 }}>
+            <Webcam
+              controls={{ flip: true, cameraDirection: true, aspectRatio: true, snapshot: true }}
+              icons={{
+                flip: <FlipIcon />,
+                cameraDirection: <CameraswitchIcon />,
+                aspectRatio: <AspectRatioIcon />,
+                snapshot: <PhotoCameraIcon fontSize='large' />,
+              }}
               style={{ width: "100%", height: "100%", borderRadius: 8 }}
             />
           </Box>

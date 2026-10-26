@@ -37,6 +37,26 @@ export type WebcamControls = {
   snapshot?: boolean;
 };
 
+/**
+ * `Webcam`이 내장하는 컨트롤 버튼의 아이콘 교체값이다.
+ * 빠진 항목은 기본 아이콘을 쓴다. 아이콘은 버튼 안에 그대로 렌더링한다.
+ * 색은 `currentColor`를 따르면 버튼 색과 맞는다. 기본 크기는 `flip`, `cameraDirection`,
+ * `aspectRatio`가 `1.2rem`, `snapshot`이 `2rem`이다.
+ */
+export type WebcamIcons = {
+  /** 좌우 반전 버튼 아이콘이다. */
+  flip?: React.ReactNode;
+
+  /** 카메라 방향 버튼 아이콘이다. */
+  cameraDirection?: React.ReactNode;
+
+  /** 화면 비율 버튼 아이콘이다. */
+  aspectRatio?: React.ReactNode;
+
+  /** 스냅샷 버튼 아이콘이다. */
+  snapshot?: React.ReactNode;
+};
+
 /** `Webcam`이 내장하는 디버그 오버레이의 표시 여부다. */
 export type WebcamDebug = {
   /** 비디오 크기 디버그 UI 표시 여부다. */
@@ -201,6 +221,12 @@ export interface WebcamProps {
   debug?: WebcamDebug;
 
   /**
+   * 내장 컨트롤 버튼의 아이콘을 교체한다.
+   * 빠진 항목은 기본 아이콘을 사용한다.
+   */
+  icons?: WebcamIcons;
+
+  /**
    * 내장 UI 라벨을 부분적으로 덮어쓸 때 사용한다.
    * 빠진 필드는 기본 한국어 라벨을 사용한다.
    */
@@ -256,6 +282,8 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     defaultWebcamOptions,
     onWebcamOptionsChange,
   } = props;
+
+  const { icons } = props;
 
   // 라벨을 기본값과 병합한다. 미설정 항목은 기본 한국어 값이 사용된다.
   const labels: Required<WebcamLabels> = {
@@ -537,6 +565,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
               className='Webcam-optionBtn'
               onChange={requestFlipped}
               label={labels.flip}
+              icon={icons?.flip}
             />
           )}
 
@@ -546,6 +575,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
               label={labels.cameraDirection}
               stateLabels={{ back: labels.facingModeBack, front: labels.facingModeFront }}
               facingMode={webcamOptions.facingMode}
+              icon={icons?.cameraDirection}
               onChange={(facingMode) => {
                 requestWebcamOptions((prev) => ({
                   ...prev,
@@ -561,6 +591,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
               className='Webcam-optionBtn'
               label={labels.aspectRatio}
               autoLabel={labels.aspectRatioAuto}
+              icon={icons?.aspectRatio}
               onChange={(aspectRatio) => {
                 requestWebcamOptions((prev) => ({
                   ...prev,
@@ -576,6 +607,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
       {showSnapshotButton && isLoaded && (
         <SnapshotButton
           label={labels.snapshot}
+          icon={icons?.snapshot}
           style={{
             position: "absolute",
             bottom: 8,

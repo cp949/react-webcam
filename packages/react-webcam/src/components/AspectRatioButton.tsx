@@ -32,6 +32,9 @@ type AspectRatioButtonProps = {
 
   /** 자동(비율 없음) 메뉴 항목 라벨. 기본값: "자동" */
   autoLabel?: string;
+
+  /** 기본 아이콘 대신 보여 줄 아이콘 */
+  icon?: React.ReactNode;
 };
 
 /**
@@ -39,7 +42,7 @@ type AspectRatioButtonProps = {
  * 비율을 선택하지 않은 상태는 `undefined`로 전달해 자동 비율을 뜻하게 한다.
  */
 export function AspectRatioButton(props: AspectRatioButtonProps) {
-  const { style, className, onChange, label = "크기 비율", autoLabel = "자동" } = props;
+  const { style, className, onChange, label = "크기 비율", autoLabel = "자동", icon } = props;
   const [menuOpen, setMenuOpen] = React.useState(false);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   // 접근성 속성 충돌을 막기 위해 인스턴스별 메뉴 id를 만든다.
@@ -81,7 +84,7 @@ export function AspectRatioButton(props: AspectRatioButtonProps) {
           }
         }}
       >
-        <AspectRatioIcon size='1.2rem' />
+        {icon ?? <AspectRatioIcon size='1.2rem' />}
       </IconButton>
       <MenuPopup
         id={menuId}

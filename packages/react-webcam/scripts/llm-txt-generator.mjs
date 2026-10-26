@@ -346,6 +346,7 @@ function renderExpandedWebcamProps() {
     "    controls?: WebcamControls;",
     "    onSnapshot?: (canvas: HTMLCanvasElement) => void;",
     "    debug?: WebcamDebug;",
+    "    icons?: WebcamIcons;",
     `    labels?: ${WEB_CAM_LABELS_INLINE.replace(/\n/g, "\n    ")};`,
     "    children?: React.ReactNode;",
     "}",

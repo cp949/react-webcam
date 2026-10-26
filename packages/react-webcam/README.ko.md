@@ -86,6 +86,7 @@ export function CameraView() {
 | `controls`              | `WebcamControls`                                                                                      | `{}`          | 표시할 내장 컨트롤 버튼을 고릅니다: `flip`, `cameraDirection`, `aspectRatio`, `snapshot`. 각 항목의 기본값은 `false`입니다.                                                                              |
 | `onSnapshot`            | `(canvas: HTMLCanvasElement) => void`                                                                 | —             | 내장 스냅샷 버튼을 누를 때 캡처한 프레임(원본 해상도)을 받습니다. `controls.snapshot`이 필요합니다.                                                                                                      |
 | `debug`                 | `WebcamDebug`                                                                                         | `{}`          | 표시할 디버그 오버레이를 고릅니다: `videoSize`(비디오 요소 크기), `constraints`(현재 적용된 `MediaStreamConstraints`). 각 항목의 기본값은 `false`입니다.                                                 |
+| `icons`                 | `WebcamIcons`                                                                                         | 내장 아이콘   | 내장 버튼의 아이콘을 교체합니다: `flip`, `cameraDirection`, `aspectRatio`, `snapshot` (아래 "아이콘 교체" 참고).                                                                                         |
 | `labels`                | `WebcamLabels`                                                                                        | 한국어 기본값 | 내장 버튼 라벨을 부분적으로 덮어씁니다(뒤의 라벨과 로컬라이제이션 절 참고).                                                                                                                              |
 
 ### 3.0.0 마이그레이션
@@ -703,6 +704,30 @@ import { Webcam, WEBCAM_LABELS_EN } from "@cp949/react-webcam";
   }}
 />
 ```
+
+## 아이콘 교체
+
+`icons`에 React 노드를 전달하면 내장 버튼의 아이콘을 바꿉니다. 지정하지 않은 항목은
+기본 아이콘을 유지합니다. `title`과 `aria-label`은 계속 `labels`를 따릅니다.
+
+```tsx
+import { Webcam } from "@cp949/react-webcam";
+
+<Webcam
+  controls={{ flip: true, cameraDirection: true, aspectRatio: true, snapshot: true }}
+  icons={{
+    flip: <MirrorIcon />,
+    cameraDirection: <SwitchCameraIcon />,
+    aspectRatio: <CropIcon />,
+    snapshot: <ShutterIcon />,
+  }}
+/>;
+```
+
+- 전달한 노드는 버튼 안에 그대로 렌더링합니다. 크기는 직접 지정합니다.
+- 기본 크기는 `flip`, `cameraDirection`, `aspectRatio`가 `1.2rem`, `snapshot`이 `2rem`입니다.
+- 선과 채움에 `currentColor`를 쓰면 버튼 색과 `--webcam-*` 변수를 따릅니다.
+- 아이콘은 상태에 따라 바뀌지 않습니다. 예를 들어 `flip`은 반전 여부와 관계없이 같은 노드를 보여 줍니다.
 
 ## 상태 소유권 - Controlled / Uncontrolled
 

@@ -33,6 +33,9 @@ type FacingModeButtonProps = {
 
   /** 현재 방향 라벨 재정의 */
   stateLabels?: FacingModeStateLabels;
+
+  /** 기본 아이콘 대신 보여 줄 아이콘 */
+  icon?: React.ReactNode;
 };
 
 /**
@@ -40,7 +43,15 @@ type FacingModeButtonProps = {
  * 누르면 현재와 반대 방향을 `onChange`로 전달한다.
  */
 export function FacingModeButton(props: FacingModeButtonProps) {
-  const { style, className, facingMode, onChange, label = "전면/후면 카메라", stateLabels } = props;
+  const {
+    style,
+    className,
+    facingMode,
+    onChange,
+    label = "전면/후면 카메라",
+    stateLabels,
+    icon,
+  } = props;
   const isRear = facingMode === "environment";
   // 현재 방향을 이름에 넣어 스크린리더와 tooltip이 상태를 알려 주도록 한다.
   const currentLabel = isRear ? (stateLabels?.back ?? "후면") : (stateLabels?.front ?? "전면");
@@ -55,7 +66,7 @@ export function FacingModeButton(props: FacingModeButtonProps) {
         style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#fff" }}
         onClick={() => onChange(isRear ? "user" : "environment")}
       >
-        <CameraSwitchIcon size='1.2rem' />
+        {icon ?? <CameraSwitchIcon size='1.2rem' />}
       </IconButton>
     </span>
   );

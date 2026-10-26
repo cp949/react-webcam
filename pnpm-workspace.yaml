@@ -6,7 +6,8 @@ packages:
 
 overrides:
   esbuild: ">=0.28.1"
-  vite: ">=8.0.16"
+  vite: ">=8.2.4"
+  undici: "^7.30.1"
   basic-ftp: ">=6.2.1"
   ip-address: ">=10.7.1"
   source-map-js: ">=1.2.2"

@@ -10,7 +10,8 @@
     "check-types": "next typegen && tsc --noEmit && tsc --noEmit -p tsconfig.vitest.json",
     "lint": "oxlint -c ../../.oxlintrc.json .",
     "lint:fix": "oxlint -c ../../.oxlintrc.json . --fix",
-    "format": "prettier --write ."
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check ."
   },
   "dependencies": {
     "@cp949/react-webcam": "workspace:*",

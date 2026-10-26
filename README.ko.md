@@ -86,7 +86,8 @@ pnpm readme:package:check
 자세한 순서와 복구 방법은 [릴리스 절차](./CLAUDE.md#릴리스-절차)를 참고한다.
 
 `pnpm lint`와 `pnpm lint:fix`는 루트 `.oxlintrc.json`으로 oxlint를 실행한다.
-`pnpm format`은 `prettier.config.mjs`로 Prettier를 실행해 파일을 덮어쓴다.
+`pnpm format`은 루트 `.oxfmtrc.json`으로 oxfmt를 실행해 파일을 덮어쓴다.
+`pnpm format:check`는 파일을 바꾸지 않고 같은 기준으로 검사만 한다.
 이 명령들은 해당 작업을 package script에 정의한 `apps/demo`와
 `packages/react-webcam`에 적용되며, 저장소의 모든 파일을 처리하지는 않는다.
 

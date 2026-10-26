@@ -43,6 +43,7 @@ pnpm build
 pnpm lint
 pnpm lint:fix
 pnpm format
+pnpm format:check
 pnpm check-types
 pnpm test
 pnpm readme:package
@@ -201,7 +202,7 @@ GitHub release 워크플로우는 `v*` 태그를 감지하고 `packages/react-we
 ## 코드 스타일과 구현 규칙
 
 - TypeScript strict 모드
-- oxlint로 린트, Prettier로 포매팅 수행 (설정: 루트 `.oxlintrc.json`, `prettier.config.mjs`)
+- oxlint로 린트, oxfmt로 포매팅 수행 (설정: 루트 `.oxlintrc.json`, `.oxfmtrc.json`)
 - `packages/react-webcam/scripts/*.mjs`에서 TypeScript 소스와 선언 파일은 `oxc-parser`로 파싱한다. Chrome 75 정적 검사에서 배포 JavaScript의 ES2019 구문은 `acorn`으로 검사한다.
 - import 경로에 `.js` 확장자 사용
 - 라이브러리 출력은 tsdown으로 빌드

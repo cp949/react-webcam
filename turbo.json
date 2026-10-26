@@ -16,6 +16,7 @@
     "format": {
       "cache": false
     },
+    "format:check": {},
     "check-types": {
       "dependsOn": ["^check-types"]
     },

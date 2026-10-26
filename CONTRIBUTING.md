@@ -11,17 +11,18 @@ English summary: install with `pnpm install`, run `pnpm test`, `pnpm check-types
 
 ## 명령
 
-| 명령                        | 용도                                                            |
-| --------------------------- | --------------------------------------------------------------- |
-| `pnpm dev`                  | 데모 앱 실행                                                    |
-| `pnpm build`                | 패키지와 데모 빌드                                              |
-| `pnpm test`                 | 패키지·데모 테스트                                              |
-| `pnpm test:demo-smoke`      | 데모 각 섹션의 실브라우저 진입 스모크. 빌드 포함, 로컬 전용     |
-| `pnpm check-types`          | 타입 검사                                                       |
-| `pnpm lint`                 | oxlint                                                          |
-| `pnpm format`               | Prettier. 무관한 파일을 바꿀 수 있어 변경한 파일만 지정해 쓴다. |
-| `pnpm readme:package`       | 패키지 README 생성                                              |
-| `pnpm readme:package:check` | 생성 README가 최신인지 확인                                     |
+| 명령                        | 용도                                                         |
+| --------------------------- | ------------------------------------------------------------ |
+| `pnpm dev`                  | 데모 앱 실행                                                 |
+| `pnpm build`                | 패키지와 데모 빌드                                           |
+| `pnpm test`                 | 패키지·데모 테스트                                           |
+| `pnpm test:demo-smoke`      | 데모 각 섹션의 실브라우저 진입 스모크. 빌드 포함, 로컬 전용  |
+| `pnpm check-types`          | 타입 검사                                                    |
+| `pnpm lint`                 | oxlint                                                       |
+| `pnpm format`               | oxfmt. 무관한 파일을 바꿀 수 있어 변경한 파일만 지정해 쓴다. |
+| `pnpm format:check`         | 포맷 검사만 수행(파일을 바꾸지 않음)                         |
+| `pnpm readme:package`       | 패키지 README 생성                                           |
+| `pnpm readme:package:check` | 생성 README가 최신인지 확인                                  |
 
 데모는 패키지의 `dist` 타입을 읽는다. 공개 API를 바꾼 뒤에는 `packages/react-webcam`에서 `pnpm build`를 먼저 실행한다.
 

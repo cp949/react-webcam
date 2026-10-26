@@ -87,7 +87,8 @@ It requires a clean `main` or `dev` branch and performs versioning, tagging, pus
 and npm publishing. See the [release procedure](./CLAUDE.md#릴리스-절차) (Korean).
 
 `pnpm lint` and `pnpm lint:fix` run oxlint with the root `.oxlintrc.json`.
-`pnpm format` runs Prettier with `prettier.config.mjs` and rewrites files.
+`pnpm format` runs oxfmt with the root `.oxfmtrc.json` and rewrites files.
+`pnpm format:check` runs the same check without rewriting files.
 These commands cover `apps/demo` and `packages/react-webcam`, whose package scripts
 define the corresponding tasks; they do not cover every file in the repository.
 

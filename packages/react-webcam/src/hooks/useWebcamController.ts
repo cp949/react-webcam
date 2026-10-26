@@ -111,9 +111,7 @@ export function useWebcamController(
   const videoElement = options.videoElement ?? internalVideoElement;
   const [requestKey, setRequestKey] = useState(0);
   const retry = useCallback(() => setRequestKey((key) => key + 1), []);
-  const [fitMode, setFitModeState] = useState<WebcamFitMode | undefined>(
-    undefined,
-  );
+  const [fitMode, setFitModeState] = useState<WebcamFitMode | undefined>(undefined);
   // 실제 비디오 해상도 — loadedmetadata / loadeddata 이후 useVideoElementBindings가 보고한다.
   const [videoSize, setVideoSize] = useState<{ width: number; height: number } | undefined>(
     undefined,
@@ -191,8 +189,7 @@ export function useWebcamController(
   });
   // 트랙이 muted인 동안은 프레임이 멈춰 있으므로 준비된 것으로 보지 않는다.
   const videoTrackMuted = useVideoTrackMuted(mediaStreamResult.mediaStream);
-  const isFrameReady =
-    !disabled && webcamDetail.phase === "live" && hasFrame && !videoTrackMuted;
+  const isFrameReady = !disabled && webcamDetail.phase === "live" && hasFrame && !videoTrackMuted;
 
   // ─── 탭 복귀 시 자동 복구 ──────────────────────────────────────────────────
   // 일부 모바일 브라우저는 백그라운드 탭의 트랙을 종료한다.

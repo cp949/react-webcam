@@ -4,7 +4,13 @@ type ClassNameDictionary = Record<string, unknown>;
 
 /** 중첩 배열과 조건부 클래스 이름 객체를 포함한 클래스 이름 입력값 */
 export type ClassNameValue =
-  ClassNameDictionary | ClassNameValue[] | boolean | null | number | string | undefined;
+  | ClassNameDictionary
+  | ClassNameValue[]
+  | boolean
+  | null
+  | number
+  | string
+  | undefined;
 
 function appendClassName(className: string, value: string): string {
   return className ? `${className} ${value}` : value;

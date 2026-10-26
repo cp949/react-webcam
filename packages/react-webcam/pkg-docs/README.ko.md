@@ -643,6 +643,7 @@ async function uploadSnapshot(canvas: HTMLCanvasElement) {
 | `--webcam-disabled-bg`   | `#f7f8fa` | `disabled`일 때 루트와 placeholder 배경 |
 | `--webcam-accent`        | `#1976d2` | 호버 시 스냅샷 버튼 색                  |
 | `--webcam-flip-active`   | `#ff7600` | 반전 켜짐일 때 미러 버튼 색             |
+| `--webcam-rear-active`   | `#ff7600` | 후면일 때 카메라 방향 버튼 색           |
 | `--webcam-menu-bg`       | `#fff`    | 팝업 메뉴 배경                          |
 | `--webcam-menu-fg`       | `#000`    | 팝업 메뉴 항목 글자색                   |
 | `--webcam-menu-hover-bg` | `#f5f5f5` | 호버 시 팝업 메뉴 항목 배경             |

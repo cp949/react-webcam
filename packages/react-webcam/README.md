@@ -670,6 +670,7 @@ set a variable. Set them on `Webcam` or any ancestor.
 | `--webcam-disabled-bg`   | `#f7f8fa` | Root and placeholder background while `disabled` |
 | `--webcam-accent`        | `#1976d2` | Snapshot button color on hover                   |
 | `--webcam-flip-active`   | `#ff7600` | Flip button color while flipped                  |
+| `--webcam-rear-active`   | `#ff7600` | Camera direction button color on the rear camera |
 | `--webcam-menu-bg`       | `#fff`    | Popup menu background                            |
 | `--webcam-menu-fg`       | `#000`    | Popup menu item text color                       |
 | `--webcam-menu-hover-bg` | `#f5f5f5` | Popup menu item background on hover              |

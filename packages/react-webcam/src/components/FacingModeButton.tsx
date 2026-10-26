@@ -41,6 +41,7 @@ type FacingModeButtonProps = {
 /**
  * 전면·후면 카메라를 번갈아 선택하는 토글 버튼을 렌더링한다.
  * 누르면 현재와 반대 방향을 `onChange`로 전달한다.
+ * 후면일 때는 아이콘 색을 활성색으로 바꿔 현재 방향을 드러낸다.
  */
 export function FacingModeButton(props: FacingModeButtonProps) {
   const {
@@ -58,12 +59,15 @@ export function FacingModeButton(props: FacingModeButtonProps) {
   const name = `${label}: ${currentLabel}`;
 
   return (
-    <span className={classNames("FacingModeButton-root", className)} style={style}>
+    <span
+      className={classNames("FacingModeButton-root", className)}
+      style={{ color: isRear ? "var(--webcam-rear-active, #ff7600)" : "#fff", ...style }}
+    >
       <IconButton
         className='x_btn'
         title={name}
         aria-label={name}
-        style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "#fff" }}
+        style={{ backgroundColor: "rgba(0,0,0,0.5)", color: "inherit" }}
         onClick={() => onChange(isRear ? "user" : "environment")}
       >
         {icon ?? <CameraSwitchIcon size='1.2rem' />}

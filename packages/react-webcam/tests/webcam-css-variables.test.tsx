@@ -4,6 +4,7 @@
  */
 import { fireEvent, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { FacingModeButton } from "../src/components/FacingModeButton.js";
 import { FlipButton } from "../src/components/FlipButton.js";
 import { MenuPopup } from "../src/components/primitives/MenuPopup.js";
 import { SnapshotButton } from "../src/components/SnapshotButton.js";
@@ -66,6 +67,17 @@ describe("공개 CSS 변수", () => {
     const { container } = render(<FlipButton flipped onChange={() => {}} />);
     const root = container.firstElementChild as HTMLElement;
     expect(root.style.color).toBe("var(--webcam-flip-active, #ff7600)");
+  });
+
+  it("--webcam-rear-active는 후면 선택 색의 기본값을 #ff7600으로 둔다", () => {
+    const { container, rerender } = render(
+      <FacingModeButton facingMode='user' onChange={() => {}} />,
+    );
+    const root = container.firstElementChild as HTMLElement;
+    expect(root.style.color).toBe("#fff");
+
+    rerender(<FacingModeButton facingMode='environment' onChange={() => {}} />);
+    expect(root.style.color).toBe("var(--webcam-rear-active, #ff7600)");
   });
 
   it("메뉴 변수는 배경·글자색·z-index·호버 배경의 기본값을 유지한다", () => {

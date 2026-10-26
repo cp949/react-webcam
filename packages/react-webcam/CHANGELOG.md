@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.1](https://github.com/cp949/react-webcam/compare/v3.0.0...v3.0.1) (2026-10-26)
+
+### Features
+
+* 내장 버튼 아이콘을 교체하는 icons prop 추가 ([d4b7683](https://github.com/cp949/react-webcam/commit/d4b768369e3098f9cf3b5f3914ee43bc7c9fb999))
+* 카메라 방향 버튼을 전면/후면 토글로 교체 ([43f9e7c](https://github.com/cp949/react-webcam/commit/43f9e7ce06b67527e0f682e057b8fad33fe2ebcc))
+* 후면 선택 시 카메라 방향 버튼 색 변경 ([c6d14f8](https://github.com/cp949/react-webcam/commit/c6d14f8f2266080a15b59035abb16f6ae5ddfc91))
+
 ## [3.0.0](https://github.com/cp949/react-webcam/compare/v2.0.0...v3.0.0) (2026-10-18)
 
 ### ⚠ BREAKING CHANGES

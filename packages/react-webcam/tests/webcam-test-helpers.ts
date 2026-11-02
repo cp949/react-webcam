@@ -45,6 +45,22 @@ export async function markVideoReady(
 }
 
 /**
+ * 메타데이터에 더해 디코딩된 프레임이 도착한 상태(readyState 2)를 만든다.
+ * 내장 버튼은 프레임이 준비된 뒤에만 표시되므로, 버튼을 검증하는 테스트가 사용한다.
+ */
+export async function markFrameReady(
+  video: HTMLVideoElement,
+  size: { width?: number; height?: number } = {},
+): Promise<void> {
+  Object.defineProperty(video, "readyState", { value: 2, configurable: true, writable: true });
+  await markVideoReady(video, size);
+  await act(async () => {
+    video.dispatchEvent(new Event("loadeddata"));
+    await Promise.resolve();
+  });
+}
+
+/**
  * 미리 videoWidth/videoHeight를 설정한 비디오 요소를 만든다.
  * 이벤트 없이 메타데이터 준비 상태를 흉내 내야 하는 surface 테스트에 쓴다.
  */

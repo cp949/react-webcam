@@ -5,7 +5,7 @@ import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Webcam, type WebcamIcons } from "../src/Webcam.js";
 import { createFakeMediaStream, mockGetUserMedia } from "./test-utils.js";
-import { advanceToStreamLoad, markVideoReady } from "./webcam-test-helpers.js";
+import { advanceToStreamLoad, markFrameReady } from "./webcam-test-helpers.js";
 
 // rootWidth가 즉시 잡히도록 useResizeObserver를 목 처리한다.
 vi.mock("../src/hooks/useResizeObserver.js", () => ({
@@ -38,7 +38,7 @@ describe("icons prop", () => {
       />,
     );
     await advanceToStreamLoad();
-    await markVideoReady(view.container.querySelector("video")!);
+    await markFrameReady(view.container.querySelector("video")!);
     return view;
   }
 

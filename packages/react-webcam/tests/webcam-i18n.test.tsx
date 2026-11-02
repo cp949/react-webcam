@@ -11,7 +11,7 @@ import { WEBCAM_LABELS_EN } from "../src/index.js";
 import { DEFAULT_WEBCAM_LABELS } from "../src/types/webcam-labels.js";
 import { Webcam } from "../src/Webcam.js";
 import { createFakeMediaStream, mockGetUserMedia } from "./test-utils.js";
-import { markVideoReady } from "./webcam-test-helpers.js";
+import { markFrameReady } from "./webcam-test-helpers.js";
 
 // ---------------------------------------------------------------------------
 // rootWidth가 즉시 800으로 잡히도록 useResizeObserver를 목 처리한다.
@@ -147,7 +147,7 @@ describe("WebcamLabels: custom labels override defaults", () => {
       await vi.advanceTimersByTimeAsync(300);
     });
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     const flipBtn = document.querySelector(".FlipButton-root button") as HTMLButtonElement;
     expect(flipBtn.getAttribute("title")).toBe("Mirror Image");
@@ -185,7 +185,7 @@ describe("WEBCAM_LABELS_EN: 영어 라벨 프리셋", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(300);
     });
-    await markVideoReady(document.querySelector("video")!);
+    await markFrameReady(document.querySelector("video")!);
 
     const flipBtn = document.querySelector(".FlipButton-root button") as HTMLButtonElement;
     expect(flipBtn.getAttribute("aria-label")).toBe("Mirror");

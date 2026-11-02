@@ -95,6 +95,11 @@ below) in addition to the props listed here.
 | `icons`                 | `WebcamIcons`                                                                                         | Built-in icons  | Replaces the icons of the built-in buttons: `flip`, `cameraDirection`, `aspectRatio`, `snapshot` (see Custom Icons below).                                                                               |
 | `labels`                | `WebcamLabels`                                                                                        | Korean defaults | Overrides for built-in button labels (see Labels And Localization below).                                                                                                                                |
 
+The built-in snapshot button appears once a decoded frame is ready, the same condition as
+`onFrameReadyChange`. It disappears while the video track is `muted` and returns after
+`unmute`. The other built-in buttons (`flip`, `cameraDirection`, `aspectRatio`) appear as
+soon as the video size is known and stay visible while the track is `muted`.
+
 ### Migration To 3.0.0
 
 The six `visible*` props are replaced by two objects. Update every use.

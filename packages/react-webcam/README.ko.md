@@ -90,6 +90,11 @@ export function CameraView() {
 | `icons`                 | `WebcamIcons`                                                                                         | 내장 아이콘   | 내장 버튼의 아이콘을 교체합니다: `flip`, `cameraDirection`, `aspectRatio`, `snapshot` (아래 "아이콘 교체" 참고).                                                                                         |
 | `labels`                | `WebcamLabels`                                                                                        | 한국어 기본값 | 내장 버튼 라벨을 부분적으로 덮어씁니다(뒤의 라벨과 로컬라이제이션 절 참고).                                                                                                                              |
 
+내장 스냅샷 버튼은 디코딩된 프레임이 준비된 뒤에 표시됩니다. `onFrameReadyChange`와 같은
+기준입니다. 비디오 트랙이 `muted`인 동안에는 사라졌다가 `unmute` 뒤에 돌아옵니다.
+다른 내장 버튼(`flip`, `cameraDirection`, `aspectRatio`)은 영상 크기가 확인되면 바로 표시되고
+트랙이 `muted`인 동안에도 유지됩니다.
+
 ### 3.0.0 마이그레이션
 
 `visible*` prop 6개를 객체 2개로 바꿨습니다. 사용처를 모두 고치세요.

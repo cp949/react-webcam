@@ -11,7 +11,7 @@ import { stopStream } from "../src/utils/media-devices.js";
 import type { WebcamHandle } from "../src/Webcam.js";
 import { Webcam } from "../src/Webcam.js";
 import { createFakeMediaStream, mockGetUserMedia } from "./test-utils.js";
-import { advanceToStreamLoad, markVideoReady } from "./webcam-test-helpers.js";
+import { advanceToStreamLoad, markFrameReady } from "./webcam-test-helpers.js";
 
 // ---------------------------------------------------------------------------
 // rootWidth가 즉시 800으로 잡히도록 useResizeObserver를 목 처리한다.
@@ -529,7 +529,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     // FlipButton이 실제 DOM에 나타나야 한다.
     const flipBtn = document.querySelector(".FlipButton-root");
@@ -542,7 +542,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(300);
     });
-    await markVideoReady(document.querySelector("video")!);
+    await markFrameReady(document.querySelector("video")!);
 
     expect(container.querySelector(".FlipButton-root")).toBeNull();
     expect(container.querySelector(".SnapshotButton-root")).toBeNull();
@@ -557,7 +557,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(300);
     });
-    await markVideoReady(document.querySelector("video")!);
+    await markFrameReady(document.querySelector("video")!);
 
     expect(container.querySelector(".FlipButton-root")).not.toBeNull();
     expect(container.querySelector(".SnapshotButton-root")).toBeNull();
@@ -586,7 +586,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
     expect(container.querySelector("video")!.style.transform).toBe("none");
 
     // FlipButton 내부 실제 버튼을 찾아 클릭한다.
@@ -610,7 +610,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     const facingBtn = document.querySelector(".FacingModeButton-root");
     expect(facingBtn).not.toBeNull();
@@ -632,7 +632,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     const btn = document.querySelector(".FacingModeButton-root button") as HTMLButtonElement | null;
     expect(btn).not.toBeNull();
@@ -662,7 +662,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     const btn = document.querySelector(".FacingModeButton-root button") as HTMLButtonElement;
     expect(btn.getAttribute("aria-label")).toBe("전면/후면 카메라: 후면");
@@ -715,7 +715,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     const arBtn = document.querySelector(".AspectRatioButton-root");
     expect(arBtn).not.toBeNull();
@@ -729,7 +729,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     const btn = document.querySelector(
       ".AspectRatioButton-root button",
@@ -752,7 +752,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     const snapBtn = document.querySelector(".SnapshotButton-root");
     expect(snapBtn).not.toBeNull();
@@ -779,7 +779,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     const snapBtn = document.querySelector(
       ".SnapshotButton-root button",
@@ -819,7 +819,7 @@ describe("Webcam 프레임워크 독립 공개 표면", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     expect(onSnapshot).not.toHaveBeenCalled();
 
@@ -889,7 +889,7 @@ describe("Webcam 제어 및 비제어 상태 소유권", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     expect(container.querySelector("video")!.style.transform).toBe("none");
 
@@ -922,7 +922,7 @@ describe("Webcam 제어 및 비제어 상태 소유권", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     expect(container.querySelector("video")!.style.transform).toBe("none");
 
@@ -955,7 +955,7 @@ describe("Webcam 제어 및 비제어 상태 소유권", () => {
     });
 
     const video = document.querySelector("video")!;
-    await markVideoReady(video);
+    await markFrameReady(video);
 
     expect(container.querySelector("video")!.style.transform).toBe("none");
 

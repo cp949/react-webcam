@@ -612,6 +612,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
       )}
 
       {/* ---- 버튼 UI ------------------------------------------------------- */}
+      {/* 옵션 버튼은 영상 크기가 확인되면 표시한다. 트랙 mute 중에도 방향·비율 재요청으로 복구할 수 있어야 한다. */}
       {isLoaded && hasOptionButtons && (
         <div
           style={{
@@ -669,7 +670,8 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
       )}
 
       {/* ---- 스냅샷 버튼 --------------------------------------------------- */}
-      {showSnapshotButton && isLoaded && (
+      {/* 스냅샷 버튼은 프레임이 준비된 뒤에만 표시한다. */}
+      {showSnapshotButton && isFrameReady && (
         <SnapshotButton
           label={labels.snapshot}
           icon={icons?.snapshot}

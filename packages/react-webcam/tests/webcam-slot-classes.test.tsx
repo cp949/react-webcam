@@ -6,7 +6,7 @@ import { render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Webcam } from "../src/Webcam.js";
 import { createFakeMediaStream, mockGetUserMedia } from "./test-utils.js";
-import { advanceToStreamLoad, markVideoReady } from "./webcam-test-helpers.js";
+import { advanceToStreamLoad, markFrameReady } from "./webcam-test-helpers.js";
 
 // ---------------------------------------------------------------------------
 // rootWidth가 즉시 800으로 잡히도록 useResizeObserver를 목 처리한다.
@@ -37,7 +37,7 @@ describe("슬롯 클래스 이름 계약", () => {
     );
     await advanceToStreamLoad();
     // 내장 버튼은 첫 프레임이 준비된 뒤에 나타난다.
-    await markVideoReady(view.container.querySelector("video")!);
+    await markFrameReady(view.container.querySelector("video")!);
     return view;
   }
 

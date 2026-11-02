@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.1.0](https://github.com/cp949/react-webcam/compare/v3.0.1...v3.1.0) (2026-11-02)
+
+### Features
+
+* SnapshotOptions에 aspectRatio 중앙 크롭 추가 ([d1e3f69](https://github.com/cp949/react-webcam/commit/d1e3f69d1f0a2042d5b4f060069c0656478db7e0))
+* SnapshotOptions에 flipped 오버라이드 추가 ([0dffcd1](https://github.com/cp949/react-webcam/commit/0dffcd1bacb8694bb9caba525b1c4469ac78cf54))
+* WebcamHandle에 getVideoElement 추가 ([5458efb](https://github.com/cp949/react-webcam/commit/5458efbb2a26000c787ffb63c59ecf956296e80a))
+* Webcam에 onFrameReadyChange prop과 WebcamHandle.isFrameReady 추가 ([ac90cde](https://github.com/cp949/react-webcam/commit/ac90cde600f4aa004bc93271a2b89c1b62a37fc9))
+
+### Bug Fixes
+
+* 내장 스냅샷 버튼을 프레임이 준비된 뒤에 표시 ([7487e95](https://github.com/cp949/react-webcam/commit/7487e95e2bf4e98d03b25fc7a3302ee74fb9e350))
+
 ## [3.0.1](https://github.com/cp949/react-webcam/compare/v3.0.0...v3.0.1) (2026-10-26)
 
 ### Features

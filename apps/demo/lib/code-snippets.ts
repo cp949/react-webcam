@@ -210,7 +210,8 @@ export default function RefHandleExample() {
 
   const handleSnapshot = () => {
     // flipped를 생략하면 미리보기 방향을 따른다. false를 넘기면 정방향으로 저장한다.
-    const canvas = ref.current?.snapshotToCanvas({ flipped: false });
+    // aspectRatio를 넘기면 원본 가운데를 그 비율(너비/높이)로 잘라 낸다.
+    const canvas = ref.current?.snapshotToCanvas({ flipped: false, aspectRatio: 1 });
     if (canvas) {
       // canvas를 이미지로 변환 또는 표시
       document.body.appendChild(canvas);

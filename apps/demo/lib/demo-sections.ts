@@ -44,6 +44,7 @@ export const DEMO_SECTIONS: DemoSection[] = [
       "isFrameReady",
       "getVideoElement",
       "flipped",
+      "aspectRatio",
       "setFlipped",
       "setWebcamOptions",
     ],

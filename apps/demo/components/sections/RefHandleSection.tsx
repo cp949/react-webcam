@@ -22,6 +22,17 @@ import { StateLogCard } from "../shared/StateLogCard";
 /** 저장 이미지의 방향 선택값이다. "follow"는 미리보기를 따르고 나머지는 `flipped` 옵션으로 덮어쓴다. */
 type SaveDirection = "follow" | "upright" | "mirrored";
 
+/** 크롭 비율 선택값이다. "none"은 크롭하지 않는다. */
+type CropRatio = "none" | "1:1" | "4:3" | "16:9";
+
+/** 선택값을 `snapshotToCanvas`의 `aspectRatio` 옵션(너비/높이)으로 바꾼다. 크롭하지 않으면 생략한다. */
+function toAspectRatioOption(ratio: CropRatio): number | undefined {
+  if (ratio === "1:1") return 1;
+  if (ratio === "4:3") return 4 / 3;
+  if (ratio === "16:9") return 16 / 9;
+  return undefined;
+}
+
 /** 상태 로그에 표시할 저장 방향의 한글 라벨이다. */
 const SAVE_DIRECTION_LABELS: Record<SaveDirection, string> = {
   follow: "미리보기 따름",
@@ -36,7 +47,7 @@ function toFlippedOption(direction: SaveDirection): boolean | undefined {
   return undefined;
 }
 
-/** ref handle을 통한 명령형 제어 — snapshotToCanvas, isFrameReady, getVideoElement, setFlipped, setWebcamOptions 사용법을 시연하는 섹션 */
+/** ref handle을 통한 명령형 제어 — snapshotToCanvas(flipped, aspectRatio), isFrameReady, getVideoElement, setFlipped, setWebcamOptions 사용법을 시연하는 섹션 */
 export default function RefHandleSection() {
   const webcamRef = useRef<WebcamHandle>(null);
   const [snapshotUrl, setSnapshotUrl] = useState<string | null>(null);
@@ -44,15 +55,24 @@ export default function RefHandleSection() {
   const [frameReady, setFrameReady] = useState(false);
   const [videoInfo, setVideoInfo] = useState<string>("없음");
   const [saveDirection, setSaveDirection] = useState<SaveDirection>("follow");
+  const [cropRatio, setCropRatio] = useState<CropRatio>("none");
+  const [snapshotSize, setSnapshotSize] = useState<string>("없음");
 
   const section = DEMO_SECTIONS.find((s) => s.id === "ref-handle")!;
 
   const handleSnapshot = () => {
     // flipped를 생략하면 미리보기 방향을 따르고, 지정하면 저장 이미지만 덮어쓴다.
-    const canvas = webcamRef.current?.snapshotToCanvas({ flipped: toFlippedOption(saveDirection) });
+    // aspectRatio를 지정하면 원본 가운데를 그 비율로 잘라 낸다.
+    const canvas = webcamRef.current?.snapshotToCanvas({
+      flipped: toFlippedOption(saveDirection),
+      aspectRatio: toAspectRatioOption(cropRatio),
+    });
     if (canvas) {
       setSnapshotUrl(canvas.toDataURL("image/png"));
-      setLastAction(`스냅샷 찍음 (저장 방향: ${SAVE_DIRECTION_LABELS[saveDirection]})`);
+      setSnapshotSize(`${canvas.width}x${canvas.height}`);
+      setLastAction(
+        `스냅샷 찍음 (저장 방향: ${SAVE_DIRECTION_LABELS[saveDirection]}, 크롭 비율: ${cropRatio === "none" ? "없음" : cropRatio})`,
+      );
     } else {
       setLastAction("웹캠이 준비되지 않았습니다");
     }
@@ -124,6 +144,22 @@ export default function RefHandleSection() {
             <ToggleButton value='mirrored'>반전</ToggleButton>
           </ToggleButtonGroup>
         </Stack>
+        <Stack direction='row' spacing={1} sx={{ mt: 2, alignItems: "center", flexWrap: "wrap" }}>
+          <Typography variant='caption'>크롭 비율</Typography>
+          <ToggleButtonGroup
+            exclusive
+            size='small'
+            value={cropRatio}
+            onChange={(_, value: CropRatio | null) => {
+              if (value) setCropRatio(value);
+            }}
+          >
+            <ToggleButton value='none'>없음</ToggleButton>
+            <ToggleButton value='1:1'>1:1</ToggleButton>
+            <ToggleButton value='4:3'>4:3</ToggleButton>
+            <ToggleButton value='16:9'>16:9</ToggleButton>
+          </ToggleButtonGroup>
+        </Stack>
         <Stack direction='row' spacing={1} sx={{ mt: 2, flexWrap: "wrap" }}>
           <Button variant='outlined' size='small' disabled={!frameReady} onClick={handleSnapshot}>
             스냅샷
@@ -171,6 +207,8 @@ export default function RefHandleSection() {
           lastAction,
           frameReady,
           saveDirection: SAVE_DIRECTION_LABELS[saveDirection],
+          cropRatio: cropRatio === "none" ? "없음" : cropRatio,
+          snapshotSize,
           videoInfo,
           snapshotCaptured: snapshotUrl !== null,
         }}

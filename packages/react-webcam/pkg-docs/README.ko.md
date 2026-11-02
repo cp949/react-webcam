@@ -490,6 +490,18 @@ export function CameraWithSnapshot() {
 > 결과를 저장하지 말고 필요할 때마다 호출하세요.
 > `MediaStream`은 handle에서 노출하지 않습니다. `onStateChange`의 `detail.mediaStream`으로 읽으세요.
 
+### `snapshotToCanvas(options)` 옵션
+
+| 옵션                 | 타입                                            | 기본값              | 설명                                                                              |
+| -------------------- | ----------------------------------------------- | ------------------- | --------------------------------------------------------------------------------- |
+| `imageSmoothEnabled` | `boolean`                                       | `true`              | 대상 캔버스의 `imageSmoothingEnabled`를 설정합니다.                               |
+| `canvas`             | `HTMLCanvasElement`                             | 새 캔버스           | 새로 만들지 않고 이 캔버스에 그립니다. `width`와 `height`는 결과 크기로 바뀝니다. |
+| `sizeConstraints`    | `{ maxWidth: number } \| { maxHeight: number }` | 원본 해상도         | 비율을 유지하며 축소합니다. 한도보다 작은 프레임은 확대하지 않습니다.             |
+| `flipped`            | `boolean`                                       | 현재 `flipped` 상태 | 결과 이미지의 좌우 반전을 덮어씁니다. 생략하면 미리보기와 같은 방향입니다.        |
+
+내장 스냅샷 버튼은 옵션 없이 `snapshotToCanvas()`를 호출하므로 현재 `flipped` 상태를 따르고
+원본 해상도를 유지합니다.
+
 ## 디바이스 목록 조회
 
 사용 가능한 장치 목록은 `Webcam` 컴포넌트에서 제공하지 않습니다.
@@ -660,6 +672,22 @@ async function uploadSnapshot(canvas: HTMLCanvasElement) {
     uploadSnapshot(canvas).catch(console.error);
   }}
 />;
+```
+
+### 거울 미리보기, 정방향 저장
+
+거울 미리보기가 쓰기 편하지만, 저장한 이미지의 글자나 문서는 정방향이어야 합니다.
+`flipped: false`를 넘기면 미리보기는 반전한 채로 정방향 이미지를 저장합니다.
+
+```tsx
+const webcamRef = useRef<WebcamHandle>(null);
+
+<Webcam ref={webcamRef} defaultFlipped />;
+
+function capture() {
+  // 미리보기는 반전 상태를 유지하고, 저장 캔버스는 반전하지 않는다.
+  return webcamRef.current?.snapshotToCanvas({ flipped: false });
+}
 ```
 
 ## 스타일링

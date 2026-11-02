@@ -102,6 +102,40 @@ describe("snapshotToCanvas – flip", () => {
 });
 
 // ---------------------------------------------------------------------------
+// 반전 오버라이드
+// ---------------------------------------------------------------------------
+
+describe("snapshotToCanvas – flipped 오버라이드", () => {
+  it("현재 상태가 반전이어도 flipped: false면 translate/scale을 호출하지 않는다", () => {
+    const video = makeVideo(640, 480);
+    const { canvas, ctx } = makeCanvas();
+    snapshotToCanvas(video, true, { canvas, flipped: false });
+    expect(ctx.translate).not.toHaveBeenCalled();
+    expect(ctx.scale).not.toHaveBeenCalled();
+    expect(ctx.drawImage).toHaveBeenCalledWith(video, 0, 0, 640, 480);
+  });
+
+  it("현재 상태가 정방향이어도 flipped: true면 반전한다", () => {
+    const video = makeVideo(640, 480);
+    const { canvas, ctx } = makeCanvas();
+    snapshotToCanvas(video, false, { canvas, flipped: true });
+    expect(ctx.translate).toHaveBeenCalledWith(640, 0);
+    expect(ctx.scale).toHaveBeenCalledWith(-1, 1);
+  });
+
+  it("flipped를 생략하면 현재 상태를 따른다", () => {
+    const video = makeVideo(640, 480);
+    const flippedCase = makeCanvas();
+    snapshotToCanvas(video, true, { canvas: flippedCase.canvas });
+    expect(flippedCase.ctx.scale).toHaveBeenCalledWith(-1, 1);
+
+    const plainCase = makeCanvas();
+    snapshotToCanvas(video, false, { canvas: plainCase.canvas });
+    expect(plainCase.ctx.scale).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
 // 크기 제한
 // ---------------------------------------------------------------------------
 

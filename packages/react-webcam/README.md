@@ -521,6 +521,18 @@ export function CameraWithSnapshot() {
 > time instead of storing the result. `MediaStream` is not exposed from the
 > handle. Read it from `detail.mediaStream` in `onStateChange`.
 
+### `snapshotToCanvas(options)` Options
+
+| Option               | Type                                            | Default                 | Description                                                                                          |
+| -------------------- | ----------------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------- |
+| `imageSmoothEnabled` | `boolean`                                       | `true`                  | Sets `imageSmoothingEnabled` on the destination canvas.                                              |
+| `canvas`             | `HTMLCanvasElement`                             | New canvas              | Draws into this canvas instead of creating one. Its `width` and `height` are set to the result size. |
+| `sizeConstraints`    | `{ maxWidth: number } \| { maxHeight: number }` | Original resolution     | Shrinks the image while keeping its aspect ratio. It never enlarges a frame smaller than the limit.  |
+| `flipped`            | `boolean`                                       | Current `flipped` state | Overrides the horizontal flip of the result. Omit it to match the preview.                           |
+
+The built-in snapshot button calls `snapshotToCanvas()` without options, so it follows the
+current `flipped` state and keeps the original resolution.
+
 ## List Media Devices
 
 Use the public utilities when you need device lists before rendering.
@@ -691,6 +703,22 @@ async function uploadSnapshot(canvas: HTMLCanvasElement) {
     uploadSnapshot(canvas).catch(console.error);
   }}
 />;
+```
+
+### Mirror Preview, Upright Saved Image
+
+A mirrored preview is easier to use, but text and documents in a saved image should read
+normally. Pass `flipped: false` to save an upright image while the preview stays mirrored.
+
+```tsx
+const webcamRef = useRef<WebcamHandle>(null);
+
+<Webcam ref={webcamRef} defaultFlipped />;
+
+function capture() {
+  // The preview stays mirrored, and the saved canvas is not flipped.
+  return webcamRef.current?.snapshotToCanvas({ flipped: false });
+}
 ```
 
 ## Styling

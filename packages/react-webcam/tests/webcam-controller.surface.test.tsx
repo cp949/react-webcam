@@ -92,6 +92,31 @@ describe("useWebcamController – controller surface", () => {
     expect(mockCtx.drawImage).toHaveBeenCalledWith(videoEl, 0, 0, 640, 480);
   });
 
+  it("snapshotToCanvas의 flipped 옵션이 현재 반전 상태를 덮어쓴다", () => {
+    const { result } = renderHook(() => useWebcamController());
+    const videoEl = createControllerVideoElement({ width: 640, height: 480 });
+    act(() => {
+      result.current.setVideoElement(videoEl);
+      result.current.setFlipped(true);
+    });
+
+    const canvas = document.createElement("canvas");
+    const mockCtx = {
+      setTransform: vi.fn(),
+      imageSmoothingEnabled: true,
+      drawImage: vi.fn(),
+      translate: vi.fn(),
+      scale: vi.fn(),
+    };
+    vi.spyOn(canvas, "getContext").mockReturnValue(mockCtx as unknown as CanvasRenderingContext2D);
+
+    result.current.snapshotToCanvas({ canvas, flipped: false });
+    expect(mockCtx.scale).not.toHaveBeenCalled();
+
+    result.current.snapshotToCanvas({ canvas });
+    expect(mockCtx.scale).toHaveBeenCalledWith(-1, 1);
+  });
+
   it("isLoaded is false initially and becomes true after stream is acquired", async () => {
     const fakeStream = createFakeMediaStream();
     mockGetUserMedia(fakeStream);

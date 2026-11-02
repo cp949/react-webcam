@@ -6,7 +6,7 @@ import type { SnapshotOptions } from "../types/webcam-controller.js";
  * - 비디오 해상도가 0이면 null을 반환한다.
  * - canvas context를 얻을 수 없으면 null을 반환한다.
  * - `sizeConstraints`가 지정되면 비율을 유지하며 축소한다.
- * - `flipped`가 true이면 좌우 반전을 적용한다.
+ * - 반전 여부는 `options.flipped`가 있으면 그 값을, 없으면 `flipped` 인자를 따른다.
  */
 export function snapshotToCanvas(
   video: HTMLVideoElement,
@@ -38,7 +38,9 @@ export function snapshotToCanvas(
   canvas.height = h;
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.imageSmoothingEnabled = options?.imageSmoothEnabled ?? true;
-  if (flipped) {
+  // 옵션이 현재 반전 상태보다 우선한다.
+  const shouldFlip = options?.flipped ?? flipped;
+  if (shouldFlip) {
     ctx.translate(w, 0);
     ctx.scale(-1, 1);
   }

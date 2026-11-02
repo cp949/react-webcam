@@ -11,6 +11,13 @@ export type SnapshotOptions = {
 
   /** Maximum size constraint applied to the captured image. */
   sizeConstraints?: { maxWidth: number } | { maxHeight: number };
+
+  /**
+   * 결과 이미지의 좌우 반전 여부다.
+   * 생략하면 현재 `flipped` 상태(미리보기와 같은 방향)를 따른다.
+   * 거울 미리보기에서 정방향 이미지를 저장하려면 `false`를 넘긴다.
+   */
+  flipped?: boolean;
 };
 
 /**

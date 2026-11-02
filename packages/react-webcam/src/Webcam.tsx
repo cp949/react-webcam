@@ -77,7 +77,10 @@ export type WebcamDebug = {
  * ```
  */
 export type WebcamHandle = {
-  /** 현재 프레임을 캔버스로 캡처한다. 아직 준비 전이면 `null`을 반환한다. */
+  /**
+   * 현재 프레임을 캔버스로 캡처한다. 아직 준비 전이면 `null`을 반환한다.
+   * `options.flipped`를 생략하면 현재 반전 상태를 따르고, 지정하면 그 값으로 덮어쓴다.
+   */
   snapshotToCanvas: (options?: SnapshotOptions) => HTMLCanvasElement | null;
 
   /**

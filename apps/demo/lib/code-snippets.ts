@@ -199,25 +199,39 @@ export default function DeviceSelectionExample() {
   );
 }`,
 
-  "ref-handle": `import { useRef } from 'react';
+  "ref-handle": `import { useRef, useState } from 'react';
 import { Webcam } from '@cp949/react-webcam';
 import type { WebcamHandle } from '@cp949/react-webcam';
 
 export default function RefHandleExample() {
   const ref = useRef<WebcamHandle>(null);
+  // live여도 프레임 도착은 보장되지 않는다. 촬영 UI는 프레임 준비 후에 연다.
+  const [ready, setReady] = useState(false);
 
   const handleSnapshot = () => {
-    const canvas = ref.current?.snapshotToCanvas();
+    // flipped를 생략하면 미리보기 방향을 따른다. false를 넘기면 정방향으로 저장한다.
+    const canvas = ref.current?.snapshotToCanvas({ flipped: false });
     if (canvas) {
       // canvas를 이미지로 변환 또는 표시
       document.body.appendChild(canvas);
     }
   };
 
+  const handleVideoInfo = () => {
+    // 읽기 용도로만 쓰고 저장하지 않는다. 요소가 없으면 null이다.
+    const video = ref.current?.getVideoElement();
+    console.log(video?.videoWidth, video?.videoHeight, video?.readyState);
+    // 핸들의 isFrameReady()는 호출 시점의 현재 값이다.
+    console.log(ref.current?.isFrameReady());
+  };
+
   return (
     <>
-      <Webcam ref={ref} />
-      <button onClick={handleSnapshot}>스냅샷 찍기</button>
+      <Webcam ref={ref} defaultFlipped onFrameReadyChange={setReady} />
+      <button disabled={!ready} onClick={handleSnapshot}>
+        스냅샷 찍기
+      </button>
+      <button onClick={handleVideoInfo}>video 정보</button>
       <button onClick={() => ref.current?.setFlipped(true)}>
         좌우 반전
       </button>

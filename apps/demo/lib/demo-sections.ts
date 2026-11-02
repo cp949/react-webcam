@@ -37,7 +37,16 @@ export const DEMO_SECTIONS: DemoSection[] = [
     id: "ref-handle",
     title: "Ref Handle",
     description: "명령형 API 직접 호출",
-    keywords: ["WebcamHandle", "snapshotToCanvas", "setFlipped", "setWebcamOptions"],
+    keywords: [
+      "WebcamHandle",
+      "snapshotToCanvas",
+      "onFrameReadyChange",
+      "isFrameReady",
+      "getVideoElement",
+      "flipped",
+      "setFlipped",
+      "setWebcamOptions",
+    ],
   },
   {
     id: "snapshot",

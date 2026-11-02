@@ -7,6 +7,9 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardHeader from "@mui/material/CardHeader";
+import Chip from "@mui/material/Chip";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { CODE_SNIPPETS } from "../../lib/code-snippets";
@@ -16,19 +19,40 @@ import { ExampleCard } from "../shared/ExampleCard";
 import { SectionIntroCard } from "../shared/SectionIntroCard";
 import { StateLogCard } from "../shared/StateLogCard";
 
-/** ref handle을 통한 명령형 제어 — snapshotToCanvas, setFlipped, setWebcamOptions 사용법을 시연하는 섹션 */
+/** 저장 이미지의 방향 선택값이다. "follow"는 미리보기를 따르고 나머지는 `flipped` 옵션으로 덮어쓴다. */
+type SaveDirection = "follow" | "upright" | "mirrored";
+
+/** 상태 로그에 표시할 저장 방향의 한글 라벨이다. */
+const SAVE_DIRECTION_LABELS: Record<SaveDirection, string> = {
+  follow: "미리보기 따름",
+  upright: "정방향",
+  mirrored: "반전",
+};
+
+/** 선택값을 `snapshotToCanvas`의 `flipped` 옵션으로 바꾼다. 미리보기를 따르면 생략한다. */
+function toFlippedOption(direction: SaveDirection): boolean | undefined {
+  if (direction === "upright") return false;
+  if (direction === "mirrored") return true;
+  return undefined;
+}
+
+/** ref handle을 통한 명령형 제어 — snapshotToCanvas, isFrameReady, getVideoElement, setFlipped, setWebcamOptions 사용법을 시연하는 섹션 */
 export default function RefHandleSection() {
   const webcamRef = useRef<WebcamHandle>(null);
   const [snapshotUrl, setSnapshotUrl] = useState<string | null>(null);
   const [lastAction, setLastAction] = useState<string>("없음");
+  const [frameReady, setFrameReady] = useState(false);
+  const [videoInfo, setVideoInfo] = useState<string>("없음");
+  const [saveDirection, setSaveDirection] = useState<SaveDirection>("follow");
 
   const section = DEMO_SECTIONS.find((s) => s.id === "ref-handle")!;
 
   const handleSnapshot = () => {
-    const canvas = webcamRef.current?.snapshotToCanvas();
+    // flipped를 생략하면 미리보기 방향을 따르고, 지정하면 저장 이미지만 덮어쓴다.
+    const canvas = webcamRef.current?.snapshotToCanvas({ flipped: toFlippedOption(saveDirection) });
     if (canvas) {
       setSnapshotUrl(canvas.toDataURL("image/png"));
-      setLastAction("스냅샷 찍음");
+      setLastAction(`스냅샷 찍음 (저장 방향: ${SAVE_DIRECTION_LABELS[saveDirection]})`);
     } else {
       setLastAction("웹캠이 준비되지 않았습니다");
     }
@@ -37,6 +61,22 @@ export default function RefHandleSection() {
   const handleFlip = () => {
     webcamRef.current?.setFlipped((v) => !v);
     setLastAction("좌우 반전 토글");
+  };
+
+  const handleVideoInfo = () => {
+    // getVideoElement()는 읽기 용도다. 저장하지 않고 필요할 때마다 호출한다.
+    const video = webcamRef.current?.getVideoElement();
+    if (video) {
+      // 콜백으로 받은 frameReady와 핸들이 지금 돌려주는 값을 나란히 보여 준다.
+      const handleReady = webcamRef.current?.isFrameReady();
+      setVideoInfo(
+        `${video.videoWidth}x${video.videoHeight}, readyState ${video.readyState}, isFrameReady() ${String(handleReady)}`,
+      );
+      setLastAction("video 정보 조회");
+    } else {
+      setVideoInfo("video 요소 없음 (null)");
+      setLastAction("video 요소가 없습니다");
+    }
   };
 
   const handleBackCamera = () => {
@@ -60,10 +100,36 @@ export default function RefHandleSection() {
 
       {/* 2. 라이브 예제 + 명령형 제어 */}
       <ExampleCard title='라이브 예제 + 명령형 제어'>
-        <Webcam ref={webcamRef} controls={{ flip: true }} />
+        <Webcam ref={webcamRef} controls={{ flip: true }} onFrameReadyChange={setFrameReady} />
+        <Stack direction='row' spacing={1} sx={{ mt: 2, alignItems: "center" }}>
+          <Chip
+            size='small'
+            label={frameReady ? "프레임 준비됨" : "프레임 대기 중"}
+            color={frameReady ? "success" : "default"}
+          />
+          <Typography variant='caption'>onFrameReadyChange: {String(frameReady)}</Typography>
+        </Stack>
+        <Stack direction='row' spacing={1} sx={{ mt: 2, alignItems: "center", flexWrap: "wrap" }}>
+          <Typography variant='caption'>저장 방향</Typography>
+          <ToggleButtonGroup
+            exclusive
+            size='small'
+            value={saveDirection}
+            onChange={(_, value: SaveDirection | null) => {
+              if (value) setSaveDirection(value);
+            }}
+          >
+            <ToggleButton value='follow'>미리보기 따름</ToggleButton>
+            <ToggleButton value='upright'>정방향</ToggleButton>
+            <ToggleButton value='mirrored'>반전</ToggleButton>
+          </ToggleButtonGroup>
+        </Stack>
         <Stack direction='row' spacing={1} sx={{ mt: 2, flexWrap: "wrap" }}>
-          <Button variant='outlined' size='small' onClick={handleSnapshot}>
+          <Button variant='outlined' size='small' disabled={!frameReady} onClick={handleSnapshot}>
             스냅샷
+          </Button>
+          <Button variant='outlined' size='small' onClick={handleVideoInfo}>
+            video 정보
           </Button>
           <Button variant='outlined' size='small' onClick={handleFlip}>
             좌우 반전
@@ -101,7 +167,13 @@ export default function RefHandleSection() {
       {/* 4. 상태 로그 */}
       <StateLogCard
         title='API 호출 결과'
-        data={{ lastAction, snapshotCaptured: snapshotUrl !== null }}
+        data={{
+          lastAction,
+          frameReady,
+          saveDirection: SAVE_DIRECTION_LABELS[saveDirection],
+          videoInfo,
+          snapshotCaptured: snapshotUrl !== null,
+        }}
       />
 
       {/* 5. 코드 블록 */}

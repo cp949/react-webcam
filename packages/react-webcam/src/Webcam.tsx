@@ -81,6 +81,16 @@ export type WebcamHandle = {
   snapshotToCanvas: (options?: SnapshotOptions) => HTMLCanvasElement | null;
 
   /**
+   * 지금 프레임을 캡처할 수 있는지 반환한다. `onFrameReadyChange`가 다루는 현재 값이다.
+   *
+   * - `true`: phase가 `live`이고 `readyState >= 2`이며 영상 크기가 양수이고 비디오 트랙이 `muted`가 아니다.
+   * - `pausePlayback()`은 이 값을 바꾸지 않는다. 일시 정지한 프레임도 캡처할 수 있다.
+   * - `true`여도 `snapshotToCanvas`가 `null`을 돌려줄 수 있다(예: 2D context 생성 실패).
+   * - 호출 시점의 값이며 구독하지 않는다. 변경을 따라가려면 `onFrameReadyChange`를 쓴다.
+   */
+  isFrameReady: () => boolean;
+
+  /**
    * 현재 webcam detail을 반환한다.
    *
    * - `onStateChange`로 받는 값과 같다.
@@ -164,6 +174,17 @@ export interface WebcamProps {
 
   /** 외부에 공개된 webcam detail이 바뀔 때마다 호출한다. */
   onStateChange?: (state: WebcamDetail) => void;
+
+  /**
+   * 현재 스트림의 디코딩된 프레임을 쓸 수 있는지가 바뀔 때 호출한다.
+   *
+   * - `true`: phase가 `live`이고 `readyState >= 2`이며 영상 크기가 양수이고 비디오 트랙이 `muted`가 아니다.
+   * - 처음 값은 `false`이며, 처음 `false`로는 호출하지 않는다.
+   * - 스트림 교체, `disabled`, 트랙 `mute`, 오류 phase로 바뀌어 직전 값이 `true`였다면 `false`로 호출한다.
+   * - `phase`가 `live`여도 프레임 도착은 보장되지 않는다. 촬영 UI는 이 값으로 연다.
+   * - 언마운트 시에는 호출하지 않는다.
+   */
+  onFrameReadyChange?: (ready: boolean) => void;
 
   /**
    * 비디오의 원본 크기와 부모 박스 크기가 다를 때 맞춤 방식을 제어한다.
@@ -300,6 +321,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     videoSize,
     constraints,
     isLoaded,
+    isFrameReady,
     setVideoElement,
     setFitMode,
     setFlipped,
@@ -339,6 +361,7 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
     ref,
     () => ({
       snapshotToCanvas: (options) => latestRef.current.ctrl.snapshotToCanvas(options),
+      isFrameReady: () => latestRef.current.ctrl.isFrameReady,
       getDetail: () => latestRef.current.ctrl.webcamDetail,
       getPlayingVideoDeviceId: () => latestRef.current.ctrl.getPlayingVideoDeviceId(),
       getPlayingAudioDeviceId: () => latestRef.current.ctrl.getPlayingAudioDeviceId(),
@@ -358,6 +381,17 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   useEffect(() => {
     onStateChangeRef.current?.(webcamDetail);
   }, [webcamDetail]);
+
+  // 프레임 준비 여부가 바뀔 때만 통지한다. 처음 값은 false이므로 첫 false는 통지하지 않는다.
+  // onStateChange effect 뒤에 두어 같은 commit에서는 live 통지가 먼저 나가게 한다.
+  const onFrameReadyChangeRef = useRef(props.onFrameReadyChange);
+  onFrameReadyChangeRef.current = props.onFrameReadyChange;
+  const notifiedFrameReadyRef = useRef(false);
+  useEffect(() => {
+    if (notifiedFrameReadyRef.current === isFrameReady) return;
+    notifiedFrameReadyRef.current = isFrameReady;
+    onFrameReadyChangeRef.current?.(isFrameReady);
+  }, [isFrameReady]);
 
   // fitMode는 제어 및 비제어 여부와 관계없이 항상 동기화한다.
   useEffect(() => {

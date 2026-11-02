@@ -58,6 +58,27 @@ describe("Webcam ref 핸들 안정성", () => {
     expect(cached.getDetail().phase).toBe("live");
   });
 
+  it("마운트 직후 캐시한 핸들의 isFrameReady는 최신 값을 돌려준다", async () => {
+    const ref = createRef<WebcamHandle>();
+    render(<Webcam ref={ref} webcamOptions={{ audioEnabled: false }} />);
+    const cached = ref.current!;
+    expect(cached.isFrameReady()).toBe(false);
+
+    await advanceToStreamLoad();
+    const video = document.querySelector("video")!;
+    Object.defineProperties(video, {
+      videoWidth: { value: 1280, configurable: true, writable: true },
+      videoHeight: { value: 720, configurable: true, writable: true },
+      readyState: { value: 2, configurable: true, writable: true },
+    });
+    await act(async () => {
+      video.dispatchEvent(new Event("loadeddata"));
+      await Promise.resolve();
+    });
+
+    expect(cached.isFrameReady()).toBe(true);
+  });
+
   it("마운트 직후 캐시한 핸들의 resumePlayback은 현재 비디오 요소와 스트림으로 재생을 요청한다", async () => {
     const ref = createRef<WebcamHandle>();
     render(<Webcam ref={ref} webcamOptions={{ audioEnabled: false }} />);

@@ -81,6 +81,7 @@ below) in addition to the props listed here.
 | `autoRecover`           | `boolean`                                                                                             | `false`         | Requests the stream once when the tab becomes visible again after a `track-ended` error (see Custom Error Fallback below).                                                                               |
 | `errorFallback`         | `React.ReactNode \| ((detail: WebcamErrorDetail, helpers: { retry: () => void }) => React.ReactNode)` | —               | Custom UI for the `denied` / `unavailable` / `unsupported` / `insecure` / `error` phases. Does not cover `playback-error`.                                                                               |
 | `onStateChange`         | `(state: WebcamDetail) => void`                                                                       | —               | Called whenever `WebcamDetail` changes (see Observe Runtime State below).                                                                                                                                |
+| `onFrameReadyChange`    | `(ready: boolean) => void`                                                                            | —               | Called when a decoded frame becomes available or unavailable (see Observe Runtime State below).                                                                                                          |
 | `fitMode`               | `"unset" \| "fill" \| "cover" \| "contain"`                                                           | `"unset"`       | How the video fills its box when `webcamOptions.aspectRatio` is not set.                                                                                                                                 |
 | `flipped`               | `boolean`                                                                                             | —               | Horizontal flip value for controlled mode. Use with `onFlippedChange` so the parent updates the state (see `flipped` below).                                                                             |
 | `onFlippedChange`       | `(value: boolean) => void`                                                                            | —               | Use with `flipped`. Called when a flip change is requested.                                                                                                                                              |
@@ -375,6 +376,38 @@ If only the audio track ends (for example, the microphone is unplugged), the pha
 and the video keeps playing. `detail.audioEnded` becomes `true`. A video track ending still
 moves to `error` with `track-ended`.
 
+### Open Capture UI With `onFrameReadyChange`
+
+`live` does not guarantee that a decoded frame has arrived. Enable capture UI from
+`onFrameReadyChange` instead of `detail.phase`.
+
+- `true`: the phase is `live`, `readyState >= 2`, the video size is positive, and the
+  video track is not `muted`.
+- The initial value is `false`, and the callback is not called for it.
+- It is called with `false` when stream replacement (`retry`, option changes), `disabled`,
+  track `mute`, or an error phase turns a previous `true` into `false`. It is not called on unmount.
+- `pausePlayback()` keeps the value `true`. A paused frame can still be captured.
+- `ref.current.isFrameReady()` returns the current value at the time of the call.
+
+```tsx
+import { useRef, useState } from "react";
+import { Webcam, type WebcamHandle } from "@cp949/react-webcam";
+
+export function CaptureView() {
+  const webcamRef = useRef<WebcamHandle>(null);
+  const [ready, setReady] = useState(false);
+
+  return (
+    <div style={{ width: 640, height: "auto" }}>
+      <Webcam ref={webcamRef} onFrameReadyChange={setReady} />
+      <button type='button' disabled={!ready} onClick={() => webcamRef.current?.snapshotToCanvas()}>
+        Take snapshot
+      </button>
+    </div>
+  );
+}
+```
+
 ### State Flow
 
 ```text
@@ -460,6 +493,7 @@ export function CameraWithSnapshot() {
 | Method                       | Description                                                              |
 | ---------------------------- | ------------------------------------------------------------------------ |
 | `snapshotToCanvas(options?)` | Returns the current frame as `HTMLCanvasElement`, or `null` before ready |
+| `isFrameReady()`             | Returns whether a frame can be captured now (current value)              |
 | `getDetail()`                | Returns the current `WebcamDetail`, same value as `onStateChange`        |
 | `getPlayingVideoDeviceId()`  | Returns the current video track device ID                                |
 | `getPlayingAudioDeviceId()`  | Returns the current audio track device ID                                |

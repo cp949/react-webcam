@@ -72,6 +72,7 @@ export function CameraView() {
 | `autoRecover`           | `boolean`                                                                                             | `false`       | `track-ended` 오류 뒤 탭이 다시 보일 때 스트림을 한 번 다시 요청합니다(뒤의 커스텀 오류 fallback 절 참고).                                                                                               |
 | `errorFallback`         | `React.ReactNode \| ((detail: WebcamErrorDetail, helpers: { retry: () => void }) => React.ReactNode)` | —             | `denied` / `unavailable` / `unsupported` / `insecure` / `error` 상태의 커스텀 UI입니다. `playback-error`는 포함하지 않습니다.                                                                            |
 | `onStateChange`         | `(state: WebcamDetail) => void`                                                                       | —             | `WebcamDetail`이 바뀔 때마다 호출됩니다(뒤의 상태 변화 감지 절 참고).                                                                                                                                    |
+| `onFrameReadyChange`    | `(ready: boolean) => void`                                                                            | —             | 디코딩된 프레임을 쓸 수 있는지가 바뀔 때 호출됩니다(뒤의 상태 변화 감지 절 참고).                                                                                                                        |
 | `fitMode`               | `"unset" \| "fill" \| "cover" \| "contain"`                                                           | `"unset"`     | `webcamOptions.aspectRatio`가 없을 때 비디오를 박스에 맞추는 방식입니다.                                                                                                                                 |
 | `flipped`               | `boolean`                                                                                             | —             | Controlled 모드의 좌우 반전 값입니다. `onFlippedChange`와 함께 사용하여 부모가 상태를 갱신합니다(뒤의 `flipped` 절 참고).                                                                                |
 | `onFlippedChange`       | `(value: boolean) => void`                                                                            | —             | `flipped`와 함께 사용합니다. 반전 변경이 요청될 때 호출됩니다.                                                                                                                                           |
@@ -353,6 +354,36 @@ export function CameraView() {
 오디오 트랙만 종료되면(예: 마이크를 뽑음) `phase`는 `live`로 유지되고 영상은 계속 재생된다.
 `detail.audioEnded`가 `true`가 된다. 비디오 트랙이 종료되면 기존처럼 `track-ended` 오류로 전환된다.
 
+### 촬영 UI 열기 - `onFrameReadyChange`
+
+`live`는 디코딩된 프레임이 도착했다는 뜻이 아닙니다. 촬영 UI는 `detail.phase` 대신
+`onFrameReadyChange`로 엽니다.
+
+- `true`: phase가 `live`이고 `readyState >= 2`이며 영상 크기가 양수이고 비디오 트랙이 `muted`가 아닙니다.
+- 처음 값은 `false`이며, 이 값으로는 호출하지 않습니다.
+- 스트림 교체(`retry`, 옵션 변경), `disabled`, 트랙 `mute`, 오류 phase로 바뀌어 직전 값이 `true`였다면 `false`로 호출합니다. 언마운트 시에는 호출하지 않습니다.
+- `pausePlayback()`은 값을 `true`로 유지합니다. 일시 정지한 프레임도 캡처할 수 있습니다.
+- `ref.current.isFrameReady()`는 호출 시점의 현재 값을 반환합니다.
+
+```tsx
+import { useRef, useState } from "react";
+import { Webcam, type WebcamHandle } from "@cp949/react-webcam";
+
+export function CaptureView() {
+  const webcamRef = useRef<WebcamHandle>(null);
+  const [ready, setReady] = useState(false);
+
+  return (
+    <div style={{ width: 640, height: "auto" }}>
+      <Webcam ref={webcamRef} onFrameReadyChange={setReady} />
+      <button type='button' disabled={!ready} onClick={() => webcamRef.current?.snapshotToCanvas()}>
+        스냅샷 찍기
+      </button>
+    </div>
+  );
+}
+```
+
 ### 상태 흐름
 
 ```text
@@ -434,17 +465,18 @@ export function CameraWithSnapshot() {
 
 ### `WebcamHandle` API
 
-| 메서드                       | 설명                                                         |
-| ---------------------------- | ------------------------------------------------------------ |
-| `snapshotToCanvas(options?)` | 현재 프레임을 `HTMLCanvasElement`로 반환. 준비 전이면 `null` |
-| `getDetail()`                | 현재 `WebcamDetail`을 반환. `onStateChange`로 받는 값과 같다 |
-| `getPlayingVideoDeviceId()`  | 재생 중인 비디오 트랙의 디바이스 ID                          |
-| `getPlayingAudioDeviceId()`  | 재생 중인 오디오 트랙의 디바이스 ID                          |
-| `setFlipped(value)`          | 좌우 반전 상태 변경                                          |
-| `setWebcamOptions(updater)`  | 카메라 옵션 갱신                                             |
-| `pausePlayback()`            | video 재생을 일시 정지한다. 카메라 스트림은 유지된다         |
-| `resumePlayback()`           | 일시 정지된 video 재생을 재개한다                            |
-| `retry()`                    | 같은 옵션으로 카메라 스트림을 다시 요청한다                  |
+| 메서드                       | 설명                                                                       |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| `snapshotToCanvas(options?)` | 현재 프레임을 `HTMLCanvasElement`로 반환. 준비 전이면 `null`               |
+| `isFrameReady()`             | 지금 프레임을 캡처할 수 있는지 반환. `onFrameReadyChange`가 다루는 현재 값 |
+| `getDetail()`                | 현재 `WebcamDetail`을 반환. `onStateChange`로 받는 값과 같다               |
+| `getPlayingVideoDeviceId()`  | 재생 중인 비디오 트랙의 디바이스 ID                                        |
+| `getPlayingAudioDeviceId()`  | 재생 중인 오디오 트랙의 디바이스 ID                                        |
+| `setFlipped(value)`          | 좌우 반전 상태 변경                                                        |
+| `setWebcamOptions(updater)`  | 카메라 옵션 갱신                                                           |
+| `pausePlayback()`            | video 재생을 일시 정지한다. 카메라 스트림은 유지된다                       |
+| `resumePlayback()`           | 일시 정지된 video 재생을 재개한다                                          |
+| `retry()`                    | 같은 옵션으로 카메라 스트림을 다시 요청한다                                |
 
 > `pausePlayback()`과 `resumePlayback()`은 `video.pause()` / `video.play()`만 호출합니다. 카메라 하드웨어를 끄거나 `MediaStreamTrack`을 stop하지 않습니다. 카메라 LED는 계속 켜져 있으며, track-ended 이벤트 감지도 계속 작동합니다. `pausePlayback()`은 `onStateChange`를 발생시키지 않지만, `resumePlayback()`은 실패 시 `playback-error`를 publish할 수 있습니다.
 

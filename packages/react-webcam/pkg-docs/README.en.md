@@ -384,6 +384,7 @@ moves to `error` with `track-ended`.
   track `mute`, or an error phase turns a previous `true` into `false`. It is not called on unmount.
 - `pausePlayback()` keeps the value `true`. A paused frame can still be captured.
 - `ref.current.isFrameReady()` returns the current value at the time of the call.
+- After unmount, `isFrameReady()` on a cached handle returns `false`.
 
 ```tsx
 import { useRef, useState } from "react";
@@ -486,18 +487,19 @@ export function CameraWithSnapshot() {
 
 ### `WebcamHandle` API
 
-| Method                       | Description                                                              |
-| ---------------------------- | ------------------------------------------------------------------------ |
-| `snapshotToCanvas(options?)` | Returns the current frame as `HTMLCanvasElement`, or `null` before ready |
-| `isFrameReady()`             | Returns whether a frame can be captured now (current value)              |
-| `getDetail()`                | Returns the current `WebcamDetail`, same value as `onStateChange`        |
-| `getPlayingVideoDeviceId()`  | Returns the current video track device ID                                |
-| `getPlayingAudioDeviceId()`  | Returns the current audio track device ID                                |
-| `setFlipped(value)`          | Updates the horizontal flip state                                        |
-| `setWebcamOptions(updater)`  | Updates webcam options                                                   |
-| `pausePlayback()`            | Pauses only video playback, while keeping the camera stream alive        |
-| `resumePlayback()`           | Resumes paused video playback                                            |
-| `retry()`                    | Requests the camera stream again with the same options                   |
+| Method                       | Description                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------- |
+| `snapshotToCanvas(options?)` | Returns the current frame as `HTMLCanvasElement`, or `null` before ready              |
+| `isFrameReady()`             | Returns whether a frame can be captured now (current value)                           |
+| `getDetail()`                | Returns the current `WebcamDetail`, same value as `onStateChange`                     |
+| `getVideoElement()`          | Returns the rendered `HTMLVideoElement`, or `null` when there is none (read-only use) |
+| `getPlayingVideoDeviceId()`  | Returns the current video track device ID                                             |
+| `getPlayingAudioDeviceId()`  | Returns the current audio track device ID                                             |
+| `setFlipped(value)`          | Updates the horizontal flip state                                                     |
+| `setWebcamOptions(updater)`  | Updates webcam options                                                                |
+| `pausePlayback()`            | Pauses only video playback, while keeping the camera stream alive                     |
+| `resumePlayback()`           | Resumes paused video playback                                                         |
+| `retry()`                    | Requests the camera stream again with the same options                                |
 
 > `pausePlayback()` and `resumePlayback()` only call `video.pause()` and
 > `video.play()`. They do not stop the camera hardware or stop any
@@ -505,8 +507,15 @@ export function CameraWithSnapshot() {
 > still runs. `pausePlayback()` does not emit `onStateChange`, while
 > `resumePlayback()` can publish `playback-error` on failure.
 
-> `HTMLVideoElement` and `MediaStream` are not exposed directly from the
-> handle. Read stream information from `WebcamDetail` inside `onStateChange`.
+> `getVideoElement()` exposes the `<video>` for reading only: `drawImage`,
+> `videoWidth`, and event subscription. Do not change `srcObject`,
+> `style.transform`, or `style.objectFit`, and do not call `play()` or `pause()`
+> on it. Use `pausePlayback()` and `resumePlayback()` for playback control.
+> It returns `null` before the first size measurement, while `disabled`, and
+> after unmount. The element stays the same across `retry` and option changes,
+> but it can be recreated when `disabled` is turned off, so call the method each
+> time instead of storing the result. `MediaStream` is not exposed from the
+> handle. Read it from `detail.mediaStream` in `onStateChange`.
 
 ## List Media Devices
 

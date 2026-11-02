@@ -86,6 +86,7 @@ export type WebcamHandle = {
    * - `true`: phase가 `live`이고 `readyState >= 2`이며 영상 크기가 양수이고 비디오 트랙이 `muted`가 아니다.
    * - `pausePlayback()`은 이 값을 바꾸지 않는다. 일시 정지한 프레임도 캡처할 수 있다.
    * - `true`여도 `snapshotToCanvas`가 `null`을 돌려줄 수 있다(예: 2D context 생성 실패).
+   * - 언마운트 뒤에는 캐시한 핸들도 `false`를 반환한다.
    * - 호출 시점의 값이며 구독하지 않는다. 변경을 따라가려면 `onFrameReadyChange`를 쓴다.
    */
   isFrameReady: () => boolean;
@@ -98,6 +99,19 @@ export type WebcamHandle = {
    * - 호출 시점의 값이며 구독하지 않는다. 변경을 따라가려면 `onStateChange`를 쓴다.
    */
   getDetail: () => WebcamDetail;
+
+  /**
+   * `Webcam`이 렌더링한 `<video>` 요소를 반환한다. 없으면 `null`이다.
+   *
+   * - `null`인 경우: 마운트 직후 첫 크기 측정 전, `disabled`, 언마운트 후.
+   * - `onStateChange`에서 phase가 `idle`이 아니면 `null`이 아니다.
+   * - 스트림 교체(`retry`, 옵션 변경) 중에는 같은 요소를 유지하고 `srcObject`만 바뀐다.
+   * - `disabled` 해제 등으로 요소가 다시 만들어질 수 있으므로 저장해 두지 말고 필요할 때 다시 호출한다.
+   * - 읽기 용도로 쓴다(`drawImage`, `videoWidth`, 이벤트 구독).
+   *   `srcObject`, `style.transform`, `style.objectFit`을 바꾸거나 `play()`/`pause()`를 직접 호출하지 않는다.
+   *   재생 제어는 `pausePlayback`/`resumePlayback`을 쓴다.
+   */
+  getVideoElement: () => HTMLVideoElement | null;
 
   /** 현재 재생 중인 비디오 트랙의 장치 ID다. */
   getPlayingVideoDeviceId: () => string | undefined;
@@ -357,12 +371,25 @@ export const Webcam = React.forwardRef<WebcamHandle, WebcamProps>(function Webca
   // 메서드는 호출 시점에 latestRef에서 최신 값을 읽는다.
   const latestRef = useRef({ ctrl, requestFlipped, requestWebcamOptions });
   latestRef.current = { ctrl, requestFlipped, requestWebcamOptions };
+  // effect 본문에서 true로 두어 StrictMode의 cleanup 이중 실행 뒤에도 true로 남게 한다.
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
   useImperativeHandle(
     ref,
     () => ({
       snapshotToCanvas: (options) => latestRef.current.ctrl.snapshotToCanvas(options),
-      isFrameReady: () => latestRef.current.ctrl.isFrameReady,
+      // 언마운트 뒤에는 re-render가 없어 마지막 값이 남으므로 마운트 여부를 함께 본다.
+      isFrameReady: () => mountedRef.current && latestRef.current.ctrl.isFrameReady,
       getDetail: () => latestRef.current.ctrl.webcamDetail,
+      // 언마운트 때 ref 콜백이 null을 넘겨도 re-render가 없어 ctrl에는 이전 요소가 남는다.
+      // 캐시된 핸들이 분리된 요소를 돌려주지 않도록 마운트 여부를 함께 본다.
+      getVideoElement: () =>
+        mountedRef.current ? (latestRef.current.ctrl.videoElement ?? null) : null,
       getPlayingVideoDeviceId: () => latestRef.current.ctrl.getPlayingVideoDeviceId(),
       getPlayingAudioDeviceId: () => latestRef.current.ctrl.getPlayingAudioDeviceId(),
       setFlipped: (value) => latestRef.current.requestFlipped(value),

@@ -368,6 +368,7 @@ export function CameraView() {
 - 스트림 교체(`retry`, 옵션 변경), `disabled`, 트랙 `mute`, 오류 phase로 바뀌어 직전 값이 `true`였다면 `false`로 호출합니다. 언마운트 시에는 호출하지 않습니다.
 - `pausePlayback()`은 값을 `true`로 유지합니다. 일시 정지한 프레임도 캡처할 수 있습니다.
 - `ref.current.isFrameReady()`는 호출 시점의 현재 값을 반환합니다.
+- 언마운트 뒤에는 캐시한 핸들의 `isFrameReady()`가 `false`를 반환합니다.
 
 ```tsx
 import { useRef, useState } from "react";
@@ -474,6 +475,7 @@ export function CameraWithSnapshot() {
 | `snapshotToCanvas(options?)` | 현재 프레임을 `HTMLCanvasElement`로 반환. 준비 전이면 `null`               |
 | `isFrameReady()`             | 지금 프레임을 캡처할 수 있는지 반환. `onFrameReadyChange`가 다루는 현재 값 |
 | `getDetail()`                | 현재 `WebcamDetail`을 반환. `onStateChange`로 받는 값과 같다               |
+| `getVideoElement()`          | 렌더된 `HTMLVideoElement`를 반환. 없으면 `null` (읽기 전용으로 사용)       |
 | `getPlayingVideoDeviceId()`  | 재생 중인 비디오 트랙의 디바이스 ID                                        |
 | `getPlayingAudioDeviceId()`  | 재생 중인 오디오 트랙의 디바이스 ID                                        |
 | `setFlipped(value)`          | 좌우 반전 상태 변경                                                        |
@@ -484,8 +486,13 @@ export function CameraWithSnapshot() {
 
 > `pausePlayback()`과 `resumePlayback()`은 `video.pause()` / `video.play()`만 호출합니다. 카메라 하드웨어를 끄거나 `MediaStreamTrack`을 stop하지 않습니다. 카메라 LED는 계속 켜져 있으며, track-ended 이벤트 감지도 계속 작동합니다. `pausePlayback()`은 `onStateChange`를 발생시키지 않지만, `resumePlayback()`은 실패 시 `playback-error`를 publish할 수 있습니다.
 
-> `HTMLVideoElement`와 `MediaStream` 객체는 handle에서 직접 노출하지 않습니다.
-> 스트림 정보가 필요하면 `onStateChange`의 `WebcamDetail`을 통해 읽으세요.
+> `getVideoElement()`는 `<video>`를 읽기 용도(`drawImage`, `videoWidth`, 이벤트 구독)로만 노출합니다.
+> `srcObject`, `style.transform`, `style.objectFit`을 바꾸거나 `play()` / `pause()`를 직접 호출하지 마세요.
+> 재생 제어는 `pausePlayback()` / `resumePlayback()`을 사용합니다.
+> 첫 크기 측정 전, `disabled`일 때, 언마운트 뒤에는 `null`을 반환합니다.
+> `retry`와 옵션 변경 중에는 같은 요소를 유지하지만 `disabled`를 해제하면 요소가 다시 만들어질 수 있으므로,
+> 결과를 저장하지 말고 필요할 때마다 호출하세요.
+> `MediaStream`은 handle에서 노출하지 않습니다. `onStateChange`의 `detail.mediaStream`으로 읽으세요.
 
 ## 디바이스 목록 조회
 

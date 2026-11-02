@@ -227,6 +227,19 @@ describe("Webcam onFrameReadyChange / isFrameReady", () => {
     expect(onFrameReadyChange).not.toHaveBeenCalled();
   });
 
+  it("언마운트 뒤에는 캐시한 핸들의 isFrameReady가 false다", async () => {
+    const ref = createRef<WebcamHandle>();
+    const { unmount } = render(<Webcam ref={ref} webcamOptions={{ audioEnabled: false }} />);
+    const cached = ref.current!;
+    await advanceToStreamLoad();
+    await deliverFrame(document.querySelector("video")!);
+    expect(cached.isFrameReady()).toBe(true);
+
+    unmount();
+
+    expect(cached.isFrameReady()).toBe(false);
+  });
+
   it("StrictMode에서도 false 호출 없이 true가 한 번만 온다", async () => {
     const onFrameReadyChange = vi.fn();
     render(
@@ -240,5 +253,18 @@ describe("Webcam onFrameReadyChange / isFrameReady", () => {
     await deliverFrame(document.querySelector("video")!);
 
     expect(onFrameReadyChange.mock.calls).toEqual([[true]]);
+  });
+
+  it("StrictMode에서도 핸들의 isFrameReady가 true를 돌려준다", async () => {
+    const ref = createRef<WebcamHandle>();
+    render(
+      <StrictMode>
+        <Webcam ref={ref} webcamOptions={{ audioEnabled: false }} />
+      </StrictMode>,
+    );
+    await advanceToStreamLoad();
+    await deliverFrame(document.querySelector("video")!);
+
+    expect(ref.current!.isFrameReady()).toBe(true);
   });
 });

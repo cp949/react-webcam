@@ -492,12 +492,16 @@ export function CameraWithSnapshot() {
 
 ### `snapshotToCanvas(options)` 옵션
 
-| 옵션                 | 타입                                            | 기본값              | 설명                                                                              |
-| -------------------- | ----------------------------------------------- | ------------------- | --------------------------------------------------------------------------------- |
-| `imageSmoothEnabled` | `boolean`                                       | `true`              | 대상 캔버스의 `imageSmoothingEnabled`를 설정합니다.                               |
-| `canvas`             | `HTMLCanvasElement`                             | 새 캔버스           | 새로 만들지 않고 이 캔버스에 그립니다. `width`와 `height`는 결과 크기로 바뀝니다. |
-| `sizeConstraints`    | `{ maxWidth: number } \| { maxHeight: number }` | 원본 해상도         | 비율을 유지하며 축소합니다. 한도보다 작은 프레임은 확대하지 않습니다.             |
-| `flipped`            | `boolean`                                       | 현재 `flipped` 상태 | 결과 이미지의 좌우 반전을 덮어씁니다. 생략하면 미리보기와 같은 방향입니다.        |
+| 옵션                 | 타입                                            | 기본값              | 설명                                                                                        |
+| -------------------- | ----------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------- |
+| `imageSmoothEnabled` | `boolean`                                       | `true`              | 대상 캔버스의 `imageSmoothingEnabled`를 설정합니다.                                         |
+| `canvas`             | `HTMLCanvasElement`                             | 새 캔버스           | 새로 만들지 않고 이 캔버스에 그립니다. `width`와 `height`는 결과 크기로 바뀝니다.           |
+| `sizeConstraints`    | `{ maxWidth: number } \| { maxHeight: number }` | 원본 해상도         | 비율을 유지하며 축소합니다. 한도보다 작은 프레임은 확대하지 않습니다.                       |
+| `flipped`            | `boolean`                                       | 현재 `flipped` 상태 | 결과 이미지의 좌우 반전을 덮어씁니다. 생략하면 미리보기와 같은 방향입니다.                  |
+| `aspectRatio`        | `number`                                        | 원본 프레임 비율    | 프레임 가운데를 이 비율(너비/높이)로 잘라 냅니다. `0` 이하, `NaN`, `Infinity`는 무시합니다. |
+
+처리 순서는 크롭(`aspectRatio`), 축소(`sizeConstraints`, 잘라 낸 크기에 적용), 반전입니다.
+재사용하는 `canvas`는 결과 크기로 바뀝니다.
 
 내장 스냅샷 버튼은 옵션 없이 `snapshotToCanvas()`를 호출하므로 현재 `flipped` 상태를 따르고
 원본 해상도를 유지합니다.

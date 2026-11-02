@@ -18,6 +18,14 @@ export type SnapshotOptions = {
    * 거울 미리보기에서 정방향 이미지를 저장하려면 `false`를 넘긴다.
    */
   flipped?: boolean;
+
+  /**
+   * 원본 프레임 가운데를 이 비율(너비/높이)로 잘라 낸다.
+   * 미리보기 컨테이너 비율이 이 값과 같고 `fitMode: "cover"`이며 `object-position`이 기본값일 때는 미리보기와 같은 영역이다.
+   * 0 이하, `NaN`, `Infinity`는 무시한다.
+   * `sizeConstraints`는 잘라 낸 크기에 적용한다. 처리 순서는 크롭, 축소, 반전이다.
+   */
+  aspectRatio?: number;
 };
 
 /**

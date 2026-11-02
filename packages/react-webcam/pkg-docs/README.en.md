@@ -519,12 +519,16 @@ export function CameraWithSnapshot() {
 
 ### `snapshotToCanvas(options)` Options
 
-| Option               | Type                                            | Default                 | Description                                                                                          |
-| -------------------- | ----------------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------- |
-| `imageSmoothEnabled` | `boolean`                                       | `true`                  | Sets `imageSmoothingEnabled` on the destination canvas.                                              |
-| `canvas`             | `HTMLCanvasElement`                             | New canvas              | Draws into this canvas instead of creating one. Its `width` and `height` are set to the result size. |
-| `sizeConstraints`    | `{ maxWidth: number } \| { maxHeight: number }` | Original resolution     | Shrinks the image while keeping its aspect ratio. It never enlarges a frame smaller than the limit.  |
-| `flipped`            | `boolean`                                       | Current `flipped` state | Overrides the horizontal flip of the result. Omit it to match the preview.                           |
+| Option               | Type                                            | Default                 | Description                                                                                                     |
+| -------------------- | ----------------------------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `imageSmoothEnabled` | `boolean`                                       | `true`                  | Sets `imageSmoothingEnabled` on the destination canvas.                                                         |
+| `canvas`             | `HTMLCanvasElement`                             | New canvas              | Draws into this canvas instead of creating one. Its `width` and `height` are set to the result size.            |
+| `sizeConstraints`    | `{ maxWidth: number } \| { maxHeight: number }` | Original resolution     | Shrinks the image while keeping its aspect ratio. It never enlarges a frame smaller than the limit.             |
+| `flipped`            | `boolean`                                       | Current `flipped` state | Overrides the horizontal flip of the result. Omit it to match the preview.                                      |
+| `aspectRatio`        | `number`                                        | Original frame ratio    | Crops the center of the frame to this ratio (width / height). `0`, negative, `NaN`, and `Infinity` are ignored. |
+
+Processing order: crop (`aspectRatio`), shrink (`sizeConstraints`, applied to the cropped
+size), then flip. A reused `canvas` is resized to the result size.
 
 The built-in snapshot button calls `snapshotToCanvas()` without options, so it follows the
 current `flipped` state and keeps the original resolution.

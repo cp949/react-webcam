@@ -158,6 +158,131 @@ describe("snapshotToCanvas – sizeConstraints", () => {
 });
 
 // ---------------------------------------------------------------------------
+// 가운데 크롭
+// ---------------------------------------------------------------------------
+
+describe("snapshotToCanvas – aspectRatio 가운데 크롭", () => {
+  it("16:9 원본에 1:1을 지정하면 좌우를 잘라 낸다", () => {
+    const video = makeVideo(1280, 720);
+    const { canvas, ctx } = makeCanvas();
+    snapshotToCanvas(video, false, { canvas, aspectRatio: 1 });
+    expect(ctx.drawImage).toHaveBeenCalledWith(video, 280, 0, 720, 720, 0, 0, 720, 720);
+    expect(canvas.width).toBe(720);
+    expect(canvas.height).toBe(720);
+  });
+
+  it("4:3 원본에 16:9를 지정하면 위아래를 잘라 낸다", () => {
+    const video = makeVideo(640, 480);
+    const { canvas, ctx } = makeCanvas();
+    snapshotToCanvas(video, false, { canvas, aspectRatio: 16 / 9 });
+    // sh = round(640 / (16/9)) = 360, sy = round((480 - 360) / 2) = 60
+    expect(ctx.drawImage).toHaveBeenCalledWith(video, 0, 60, 640, 360, 0, 0, 640, 360);
+    expect(canvas.width).toBe(640);
+    expect(canvas.height).toBe(360);
+  });
+
+  it("크롭 뒤 크기에 sizeConstraints를 적용한다", () => {
+    const video = makeVideo(1280, 720);
+    const { canvas, ctx } = makeCanvas();
+    snapshotToCanvas(video, false, {
+      canvas,
+      aspectRatio: 1,
+      sizeConstraints: { maxWidth: 360 },
+    });
+    expect(ctx.drawImage).toHaveBeenCalledWith(video, 280, 0, 720, 720, 0, 0, 360, 360);
+    expect(canvas.width).toBe(360);
+    expect(canvas.height).toBe(360);
+  });
+
+  it("크롭 결과가 sizeConstraints보다 작으면 축소하지 않는다", () => {
+    const video = makeVideo(1280, 720);
+    const { canvas } = makeCanvas();
+    // 원본 폭 1280은 한도 800을 넘지만 크롭 뒤 폭 720은 넘지 않는다.
+    snapshotToCanvas(video, false, { canvas, aspectRatio: 1, sizeConstraints: { maxWidth: 800 } });
+    expect(canvas.width).toBe(720);
+    expect(canvas.height).toBe(720);
+  });
+
+  it("원본과 같은 비율이면 기존 5인자 drawImage를 쓴다", () => {
+    const video = makeVideo(640, 480);
+    const { canvas, ctx } = makeCanvas();
+    snapshotToCanvas(video, false, { canvas, aspectRatio: 4 / 3 });
+    expect(ctx.drawImage).toHaveBeenCalledWith(video, 0, 0, 640, 480);
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+    "aspectRatio %s는 무시한다",
+    (aspectRatio) => {
+      const video = makeVideo(640, 480);
+      const { canvas, ctx } = makeCanvas();
+      snapshotToCanvas(video, false, { canvas, aspectRatio });
+      expect(ctx.drawImage).toHaveBeenCalledWith(video, 0, 0, 640, 480);
+      expect(canvas.width).toBe(640);
+      expect(canvas.height).toBe(480);
+    },
+  );
+
+  it("극단적인 비율에서도 잘라 낸 변은 최소 1이다", () => {
+    const video = makeVideo(1280, 720);
+    const { canvas, ctx } = makeCanvas();
+    snapshotToCanvas(video, false, { canvas, aspectRatio: 0.0001 });
+    // sw = max(1, round(720 * 0.0001)) = 1
+    expect(ctx.drawImage).toHaveBeenCalledWith(video, 640, 0, 1, 720, 0, 0, 1, 720);
+    expect(canvas.width).toBe(1);
+  });
+
+  it("세로 방향으로 극단적인 비율이어도 잘라 낸 높이는 최소 1이다", () => {
+    const video = makeVideo(640, 480);
+    const { canvas, ctx } = makeCanvas();
+    snapshotToCanvas(video, false, { canvas, aspectRatio: 10000 });
+    // sh = max(1, round(640 / 10000)) = 1, sy = round((480 - 1) / 2) = 240
+    expect(ctx.drawImage).toHaveBeenCalledWith(video, 0, 240, 640, 1, 0, 0, 640, 1);
+    expect(canvas.height).toBe(1);
+  });
+
+  it("세로 크롭 뒤 높이에 maxHeight를 적용한다", () => {
+    const video = makeVideo(640, 480);
+    const { canvas, ctx } = makeCanvas();
+    snapshotToCanvas(video, false, {
+      canvas,
+      aspectRatio: 16 / 9,
+      sizeConstraints: { maxHeight: 180 },
+    });
+    // 크롭 640x360 → maxHeight 180이면 320x180
+    expect(ctx.drawImage).toHaveBeenCalledWith(video, 0, 60, 640, 360, 0, 0, 320, 180);
+    expect(canvas.width).toBe(320);
+    expect(canvas.height).toBe(180);
+  });
+
+  it("남는 폭이 홀수면 왼쪽 여백이 1px 크다", () => {
+    const video = makeVideo(1281, 720);
+    const { canvas, ctx } = makeCanvas();
+    snapshotToCanvas(video, false, { canvas, aspectRatio: 1 });
+    // 남는 폭 561 → sx = round(280.5) = 281, 오른쪽 여백은 280
+    expect(ctx.drawImage).toHaveBeenCalledWith(video, 281, 0, 720, 720, 0, 0, 720, 720);
+  });
+
+  it("재사용 캔버스의 크기가 결과 크기로 바뀐다", () => {
+    const video = makeVideo(1280, 720);
+    const { canvas } = makeCanvas();
+    canvas.width = 50;
+    canvas.height = 50;
+    snapshotToCanvas(video, false, { canvas, aspectRatio: 1 });
+    expect(canvas.width).toBe(720);
+    expect(canvas.height).toBe(720);
+  });
+
+  it("크롭과 반전을 함께 쓰면 translate가 출력 폭 기준이다", () => {
+    const video = makeVideo(1280, 720);
+    const { canvas, ctx } = makeCanvas();
+    snapshotToCanvas(video, true, { canvas, aspectRatio: 1 });
+    expect(ctx.translate).toHaveBeenCalledWith(720, 0);
+    expect(ctx.scale).toHaveBeenCalledWith(-1, 1);
+    expect(ctx.drawImage).toHaveBeenCalledWith(video, 280, 0, 720, 720, 0, 0, 720, 720);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // 이미지 스무딩 옵션
 // ---------------------------------------------------------------------------
 
